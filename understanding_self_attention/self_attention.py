@@ -265,7 +265,7 @@ class QKVtoAttentionScore(Scene):
         q1_target_pos = k2_squares.get_center() + UP*2
         self.play(
             q1_squares.animate.move_to(q1_target_pos),
-            q1_label.animate.next_to(q1_target_pos, LEFT, buff=0.3),
+            q1_label.animate.next_to(q1_target_pos, LEFT*4, buff=0.3),
             rect_q1.animate.move_to(q1_target_pos)
         )
         
@@ -288,3 +288,72 @@ class QKVtoAttentionScore(Scene):
         score_num1 = MathTex("92", font_size=36).move_to(LEFT)
         score_num2 = MathTex("80", font_size=36).move_to(RIGHT)
         self.play(ReplacementTransform(score1, score_num1), ReplacementTransform(score2, score_num2))
+
+        # After showing score numbers
+        dv = MathTex("\\sqrt{D_v}", font_size=36)
+        dv1 = dv.copy().next_to(score_num1, DOWN + UP*0.25)
+        dv2 = dv.copy().next_to(score_num2, DOWN + UP*0.25)
+
+        self.play(Write(dv1), Write(dv2))
+        self.wait(1)
+
+        # Transform into actual values
+        div_val1 = MathTex("11.5", font_size=36).move_to(dv1)
+        div_val2 = MathTex("10", font_size=36).move_to(dv2)
+
+        score_1_group = VGroup(score_num1, dv1)
+        score_2_group = VGroup(score_num2, dv2)
+
+        self.play(
+            ReplacementTransform(score_1_group, div_val1),
+            ReplacementTransform(score_2_group, div_val2)
+        )
+        self.wait(1)
+
+        # Create Softmax boxes
+        softmax_box1 = VGroup(
+            Text("Softmax", font_size=24),
+            SurroundingRectangle(VGroup(score_num1, div_val1), buff=0.3)
+        )
+        softmax_box2 = VGroup(
+            Text("Softmax", font_size=24),
+            SurroundingRectangle(VGroup(score_num2, div_val2), buff=0.3)
+        )
+        softmax_box1[0].next_to(softmax_box1[1], UP, buff=0.1)
+        softmax_box2[0].next_to(softmax_box2[1], UP, buff=0.1)
+
+        self.play(Create(softmax_box1), Create(softmax_box2))
+        self.wait(1)
+
+        # Fade out right score
+        self.play(
+            FadeOut(score_num2),
+            FadeOut(div_val2),
+            FadeOut(softmax_box2)
+        )
+        self.wait(1)
+
+        # Move left score to center
+        self.play(
+            div_val1.animate.move_to(ORIGIN),
+            softmax_box1.animate.move_to(ORIGIN + UP*0.25)
+        )
+        self.wait(1)
+
+        # First show the general Softmax equation
+        general_softmax = MathTex(
+            "Softmax(x_i) = \\frac{e^{x_i}}{\\sum_{j=1}^n e^{x_j}}",
+            font_size=36
+        ).next_to(softmax_box1, DOWN, buff=1)
+
+        self.play(Write(general_softmax))
+        self.wait(1)
+
+        # Then transform into the specific equation
+        final_eq = MathTex(
+            "Softmax(\\frac{score_1}{\\sqrt{D_v}}) = \\frac{e^{92/8}}{e^{92/8} + e^{80/8}} = 0.82",
+            font_size=36
+        ).next_to(softmax_box1, DOWN, buff=1)
+
+        self.play(ReplacementTransform(general_softmax, final_eq))
+        self.wait(2)
