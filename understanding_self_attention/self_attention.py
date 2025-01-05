@@ -942,8 +942,8 @@ class TextToMatrix(Scene):
 
         # Move Q matrix to the left
         self.play(
-            q_matrix.animate.shift(LEFT*8),
-            v_label.animate.shift(LEFT*8)
+            q_matrix.animate.shift(LEFT*6),
+            v_label.animate.shift(LEFT*6)
         )
 
         # Create K matrix
@@ -954,16 +954,14 @@ class TextToMatrix(Scene):
         # Create V matrix
         v_matrix = q_matrix.copy()
         v_matrix.next_to(k_matrix, RIGHT, buff=1)
-        v_label_final = MathTex("V", font_size=36).next_to(v_matrix, UP, buff=0.3)
+        v_label_final = MathTex("Q", font_size=36).next_to(v_matrix, UP, buff=0.3)
 
         # Show K and V matrices
         self.play(
-            FadeOut(v_label),  # Remove old V label
             FadeIn(k_matrix),
             FadeIn(k_label),
             FadeIn(v_matrix),
             FadeIn(v_label_final),
-            Write(MathTex("Q", font_size=36).next_to(q_matrix, UP, buff=0.3))
         )
 
         self.wait(2)
