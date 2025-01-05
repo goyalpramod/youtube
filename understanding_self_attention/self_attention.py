@@ -126,8 +126,47 @@ class TextToAttentionScore(Scene):
         q_vector = VGroup(*[Square(side_length=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
         q_vector.next_to(equals_sign, RIGHT, buff=0.5)
         q_label = MathTex("q_1", font_size=24).next_to(q_vector, UP, buff=0.3)
+        k_label = MathTex("k_1", font_size=24).next_to(q_vector, UP, buff=0.3)
+        v_label = MathTex("v_1", font_size=24).next_to(q_vector, UP, buff=0.3)
         
         self.play(Write(mult_symbol), Write(equals_sign))
         self.play(Create(q_vector), Write(q_label))
         
+        # For visualization of all columns
+        column_boxes = []
+        for i in range(3):  # assuming 3 columns
+            column = VGroup(*[row[i] for row in w_q])
+            box = SurroundingRectangle(column, buff=0)
+            column_boxes.append(box)
+
+        self.wait(1)
+        framebox_x1 = SurroundingRectangle(x1_squares[:], buff = 0)
+        framebox1 = SurroundingRectangle(column_boxes[0], buff = 0)
+        framebox2 = SurroundingRectangle(q_vector[0], buff = 0)
+        framebox3 = SurroundingRectangle(column_boxes[1], buff = 0)
+        framebox4 = SurroundingRectangle(q_vector[1], buff = 0)
+        framebox5 = SurroundingRectangle(column_boxes[2], buff = 0)
+        framebox6 = SurroundingRectangle(q_vector[2], buff = 0)
+        self.play(
+            Create(framebox_x1),
+            Create(framebox1),
+            Create(framebox2),
+        )
+        self.wait()
+        self.play(
+            ReplacementTransform(framebox1,framebox3),
+            ReplacementTransform(framebox2,framebox4),
+        )
+        self.wait()
+        self.play(
+            ReplacementTransform(framebox3,framebox5),
+            ReplacementTransform(framebox4,framebox6),
+        )
+        self.wait()
+        self.play(FadeOut(framebox5), FadeOut(framebox6), FadeOut(framebox_x1)) 
+        
         self.wait(2)
+        self.play(FadeOut(w_q_label), FadeOut(q_label))
+        self.play(FadeIn(w_k_label.next_to(w_q, UP)), FadeIn(k_label))
+        self.play(FadeOut(w_k_label), FadeOut(k_label))
+        self.play(FadeIn(w_v_label.next_to(w_q, UP)), FadeIn(v_label))
