@@ -470,3 +470,10 @@ class QKVtoAttentionScore(Scene):
             ReplacementTransform(group_1, final_z1_group),
         )
         self.wait(2)
+        # Create the text "Attention value for 'Self'"
+        attention_text = Text("Attention value for 'Self'", font_size=36)
+        attention_text.move_to(UP*2)  # Position it above the vectors
+
+        # Animate the text
+        self.play(Write(attention_text))
+        self.wait(1)
