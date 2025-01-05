@@ -356,4 +356,117 @@ class QKVtoAttentionScore(Scene):
         ).next_to(softmax_box1, DOWN, buff=1)
 
         self.play(ReplacementTransform(general_softmax, final_eq))
+        # After the final equation, let's organize the values and vectors
+        self.wait(1)
+
+        # Move 0.82 to center
+        softmax_val1 = MathTex("0.82", font_size=36).move_to(ORIGIN)
+        self.play(
+            FadeOut(softmax_box1),
+            FadeOut(div_val1),
+            ReplacementTransform(final_eq, softmax_val1)
+        )
+        self.wait(1)
+
+        # Create v1 and v2 vectors
+        v1_squares = VGroup(*[Square(side_length=0.5, fill_color="#FFDAB9", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+        v2_squares = VGroup(*[Square(side_length=0.5, fill_color="#FFDAB9", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+
+        v1_label = MathTex("v_1", font_size=36)
+        v2_label = MathTex("v_2", font_size=36)
+
+        # Position v1 to the left of 0.82 and v2 to the right
+        v1_group = VGroup(v1_label, v1_squares).arrange(RIGHT, buff=0.3)
+        v2_group = VGroup(v2_label, v2_squares).arrange(RIGHT, buff=0.3)
+
+        # Position the groups horizontally
+        v1_group.next_to(softmax_val1, LEFT, buff=1)
+        v2_group.next_to(softmax_val1, RIGHT, buff=1)
+
+        self.play(
+            Create(v1_squares), Write(v1_label),
+            Create(v2_squares), Write(v2_label)
+        )
+        self.wait(1)
+
+        # Create multiplication symbols
+        times1 = MathTex("\\times", font_size=36).next_to(v1_squares, RIGHT, buff=0.3)
+        times2 = MathTex("\\times", font_size=36).next_to(v2_squares, RIGHT, buff=0.3)
+
+        # Position 0.18 to the right of v2
+        softmax_val2 = MathTex("0.18", font_size=36).next_to(v2_group, RIGHT * 3, buff=0.3)
+
+
+        # Create surrounding rectangles for multiplication visualization
+        rect_val1 = SurroundingRectangle(softmax_val1, buff=0.1, color=BLUE)
+        rect_v1 = SurroundingRectangle(v1_squares, buff=0.1, color=BLUE)
+        rect_val2 = SurroundingRectangle(softmax_val2, buff=0.1, color=BLUE)
+        rect_v2 = SurroundingRectangle(v2_squares, buff=0.1, color=BLUE)
+
+        # Show first multiplication
+        self.play(Create(rect_val1))
+        self.play(Write(times1))
+        self.play(ReplacementTransform(rect_val1.copy(), rect_v1))
+        self.wait(1)
+
+        # Show second multiplication
+        self.play(
+            Write(softmax_val2),
+            Write(times2)
+        )
+        self.play(Create(rect_val2))
+        self.play(ReplacementTransform(rect_val2.copy(), rect_v2))
+        self.wait(1)
+
+        # Create result vectors z1 and z2
+        z1_squares = VGroup(*[Square(side_length=0.5, fill_color="#FFDAB9", fill_opacity=0.45) for _ in range(3)]).arrange(RIGHT, buff=0)
+        z2_squares = VGroup(*[Square(side_length=0.5, fill_color="#FFDAB9", fill_opacity=0.15) for _ in range(3)]).arrange(RIGHT, buff=0)
+
+        z1_label = MathTex("v_1", font_size=36)
+        z2_label = MathTex("v_2", font_size=36)
+
+        # Position z1 and z2 below v1 and v2
+        z1_group = VGroup(z1_label, z1_squares).arrange(RIGHT, buff=0.3).next_to(v1_group, DOWN*2)
+        z2_group = VGroup(z2_label, z2_squares).arrange(RIGHT, buff=0.3).next_to(v2_group, DOWN*2)
+
+        # Show resulting vectors
+        self.play(
+            Create(z1_squares), Write(z1_label),
+            Create(z2_squares), Write(z2_label)
+        )
+        self.wait(1)
+
+        # Add plus symbol between z1 and z2 for final sum
+        plus = MathTex("+", font_size=36).move_to(
+            (z1_squares.get_center() + z2_squares.get_center()) / 2
+        )
+        self.play(Write(plus))
+
+        # Create final sum rectangle
+        sum_rect = SurroundingRectangle(VGroup(z1_squares, plus, z2_squares), buff=0.2, color=GREEN)
+        self.play(Create(sum_rect))
+        self.wait(2)
+
+        final_z1_squares = VGroup(*[Square(side_length=0.5, fill_color="#90EE90", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+        final_z1_label = MathTex("z_1", font_size=36)
+        final_z1_group = VGroup(final_z1_label, final_z1_squares).arrange(RIGHT, buff=0.3).move_to(ORIGIN)
+
+        self.play(
+        FadeOut(v1_group),
+        FadeOut(v2_group),
+        FadeOut(rect_val1),
+        FadeOut(rect_v1),
+        FadeOut(rect_val2),
+        FadeOut(rect_v2),
+        FadeOut(softmax_val1),
+        FadeOut(softmax_val2),
+        FadeOut(times1),
+        FadeOut(times2),
+        )
+        self.wait(2)
+        group_1 = VGroup(z1_squares, z1_label, z2_squares, z2_label, plus, sum_rect)
+        
+        self.play(
+            ReplacementTransform(group_1, final_z1_group),
+        )
         self.wait(2)
