@@ -965,3 +965,145 @@ class TextToMatrix(Scene):
         )
 
         self.wait(2)
+        self.play(
+            FadeOut(q_matrix),
+            FadeOut(v_label)
+        )
+
+        # Move K and V matrices closer for multiplication
+        self.play(
+            k_matrix.animate.shift(LEFT*2),
+            k_label.animate.shift(LEFT*2),
+            v_matrix.animate.shift(LEFT*2),
+            v_label_final.animate.shift(LEFT*2)
+        )
+
+        
+
+        self.play(
+            FadeOut(k_label),
+            FadeOut(v_label_final),
+        )
+        k_transpose_label = MathTex("K^T", font_size=36).next_to(k_matrix, UP, buff=0.3)
+        self.play(
+            FadeIn(v_label_final.next_to(k_matrix, UP, buff=0.3)),
+            FadeIn(k_label.next_to(v_matrix, UP, buff=0.3)),
+        )
+        v_matrix_transpose = v_matrix.copy().rotate(PI/2).next_to(k_matrix, RIGHT*3.5, buff=0.3)
+        self.play(
+            FadeOut(k_label),
+            FadeOut(v_matrix),
+        )
+
+        self.wait(0.5)
+
+        self.play(
+            FadeIn(k_transpose_label.next_to(v_matrix_transpose, UP, buff=0.3)),
+            FadeIn(v_matrix_transpose),
+        )
+        # After your matrix animations (keeping k_matrix and v_matrix_transpose in their positions)
+
+        # First, let's create a VGroup with the existing matrices to help with positioning
+        matrix_group = VGroup(k_matrix, v_matrix_transpose)
+
+        # Create multiplication symbol between matrices
+        mult_symbol = MathTex("\\times", font_size=36)
+        mult_symbol.move_to(
+            (k_matrix.get_right() + v_matrix_transpose.get_left())/2
+        )
+
+        # Calculate the width needed for the division line
+        total_width = matrix_group.get_width()  # Add some padding
+        division_line = Line(LEFT*total_width/2, RIGHT*total_width/2, color=WHITE)
+        division_line.next_to(matrix_group.get_center(), DOWN*2, buff=0.5)
+
+        # Create and position root_dk
+        root_dk = MathTex("\\sqrt{d_k}", font_size=48)
+        root_dk.next_to(division_line, DOWN, buff=0.3)
+
+        # Create appropriately sized parentheses
+        total_height = matrix_group.get_height() + division_line.get_height() + 1.5
+        left_paren = MathTex("(", font_size=120).scale(total_height/2)
+        right_paren = MathTex(")", font_size=120).scale(total_height/2)
+
+        # Position parentheses to encompass matrices and division
+        left_edge = matrix_group.get_left() + LEFT*0.5
+        right_edge = matrix_group.get_right() + RIGHT*0.5 
+
+        left_paren.next_to(left_edge, LEFT + DOWN*0.25, buff=0.2)
+        right_paren.next_to(right_edge, RIGHT + DOWN*0.25, buff=0.2)
+
+
+        # Create and position softmax
+        softmax = Text("softmax", font_size=36, weight=BOLD)
+        softmax.next_to(left_paren, LEFT, buff=0.3)
+
+        # Animate everything smoothly
+        self.play(
+            Write(mult_symbol),
+            run_time=1
+        )
+
+        self.play(
+            Create(division_line),
+            Write(root_dk),
+            run_time=1.5
+        )
+
+        self.play(
+            Create(left_paren),
+            Create(right_paren),
+            run_time=1
+        )
+
+        self.play(
+            Write(softmax),
+            run_time=1
+        )
+
+        self.wait(2)
+
+        # After your last self.wait(2)
+
+        # Create V matrix with same dimensions as before
+        v_final_matrix = v_matrix.copy()  # Using the original v_matrix dimensions
+        v_final_matrix.next_to(right_paren, RIGHT, buff=1)
+        v_label_new = MathTex("V", font_size=36).next_to(v_final_matrix, UP, buff=0.3)
+
+        # Create multiplication symbol for V
+        mult_symbol_v = MathTex("\\times", font_size=36)
+        mult_symbol_v.next_to(right_paren, RIGHT, buff=0.5)
+
+        # Show V matrix and multiplication symbol
+        self.play(
+            FadeIn(v_final_matrix),
+            FadeIn(v_label_new),
+            Write(mult_symbol_v),
+            run_time=1
+        )
+
+        # Create equals sign
+        equals_sign = MathTex("=", font_size=36)
+        equals_sign.next_to(v_final_matrix, RIGHT, buff=0.5)
+
+        # Create Z matrix (should be same dimensions as Q)
+        z_matrix = q_matrix.copy()  # Using the dimensions from your q_matrix
+        z_matrix.next_to(ORIGIN + LEFT, buff=0.5)
+        z_label = MathTex("Z", font_size=36).next_to(z_matrix, UP, buff=0.3)
+
+        self.wait(1)
+
+        group_everything = VGroup(
+            matrix_group, mult_symbol, division_line, root_dk,
+            left_paren, right_paren, softmax, v_final_matrix,
+            v_label_new, mult_symbol_v, equals_sign, k_transpose_label, v_label_final
+        )
+
+        group_z_matrix = VGroup(z_matrix, z_label)
+
+        # Show equals sign and Z matrix
+        self.play(
+            ReplacementTransform(group_everything, group_z_matrix),
+        )
+
+        self.wait(2)
