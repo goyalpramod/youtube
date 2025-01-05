@@ -477,3 +477,289 @@ class QKVtoAttentionScore(Scene):
         # Animate the text
         self.play(Write(attention_text))
         self.wait(1)
+
+class QKVtoAttentionScore2(Scene):
+    def construct(self):
+        # Step 1: Create x1 and x2 vectors (unchanged)
+        x1_squares = VGroup(*[Square(side_length=0.5, fill_color=YELLOW, fill_opacity=0.5) for _ in range(4)]).arrange(RIGHT, buff=0)
+        x2_squares = VGroup(*[Square(side_length=0.5, fill_color=YELLOW, fill_opacity=0.5) for _ in range(4)]).arrange(RIGHT, buff=0)
+        
+        # Position x1 and x2 horizontally (unchanged)
+        x1_squares.move_to(LEFT*3 + UP*2)
+        x2_squares.move_to(RIGHT*3 + UP*2)
+        
+        # Add x labels (unchanged)
+        x1_label = MathTex("x_1", font_size=36).next_to(x1_squares, LEFT, buff=0.3)
+        x2_label = MathTex("x_2", font_size=36).next_to(x2_squares, LEFT, buff=0.3)
+        
+        # Create vectors for word 2 (since this is AttentionScore2)
+        q2_squares = VGroup(*[Square(side_length=0.5, fill_color="#FFB6C1", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+        k2_squares = VGroup(*[Square(side_length=0.5, fill_color="#E6E6FA", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+        v2_squares = VGroup(*[Square(side_length=0.5, fill_color="#FFDAB9", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+        
+        # Position vectors for word 2 vertically under x2
+        q2_squares.next_to(x2_squares, DOWN, buff=1)
+        k2_squares.next_to(q2_squares, DOWN, buff=1)
+        v2_squares.next_to(k2_squares, DOWN, buff=1)
+        
+        # Add labels for word 2 vectors
+        q2_label = MathTex("q_2", font_size=36).next_to(q2_squares, LEFT, buff=0.3)
+        k2_label = MathTex("k_2", font_size=36).next_to(k2_squares, LEFT, buff=0.3)
+        v2_label = MathTex("v_2", font_size=36).next_to(v2_squares, LEFT, buff=0.3)
+        
+        # Create vectors for word 1
+        q1_squares = VGroup(*[Square(side_length=0.5, fill_color="#FFB6C1", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+        k1_squares = VGroup(*[Square(side_length=0.5, fill_color="#E6E6FA", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+        v1_squares = VGroup(*[Square(side_length=0.5, fill_color="#FFDAB9", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+        
+        # Position vectors for word 1 vertically under x1
+        q1_squares.next_to(x1_squares, DOWN, buff=1)
+        k1_squares.next_to(q1_squares, DOWN, buff=1)
+        v1_squares.next_to(k1_squares, DOWN, buff=1)
+        
+        # Add labels for word 1 vectors
+        q1_label = MathTex("q_1", font_size=36).next_to(q1_squares, LEFT, buff=0.3)
+        k1_label = MathTex("k_1", font_size=36).next_to(k1_squares, LEFT, buff=0.3)
+        v1_label = MathTex("v_1", font_size=36).next_to(v1_squares, LEFT, buff=0.3)
+        
+        # First show x vectors
+        self.play(
+            Create(x1_squares), Write(x1_label),
+            Create(x2_squares), Write(x2_label)
+        )
+        
+        # Then show all q, k, v vectors
+        self.play(
+            Create(q2_squares), Write(q2_label),
+            Create(k2_squares), Write(k2_label),
+            Create(v2_squares), Write(v2_label),
+            Create(q1_squares), Write(q1_label),
+            Create(k1_squares), Write(k1_label),
+            Create(v1_squares), Write(v1_label)
+        )
+
+        # Fade out unnecessary elements
+        self.play(
+            FadeOut(x1_squares), FadeOut(x2_squares),
+            FadeOut(x1_label), FadeOut(x2_label),
+            FadeOut(v1_label), FadeOut(v2_label),
+            FadeOut(q1_label), FadeOut(v1_squares),
+            FadeOut(v2_squares), FadeOut(q1_squares)
+        )
+
+        # Should be rect_q2 instead of rect_q1
+        rect_q2 = SurroundingRectangle(q2_squares, buff=0.1, color=BLUE)
+        rect_k1 = SurroundingRectangle(k1_squares, buff=0.1, color=BLUE)
+        rect_k2 = SurroundingRectangle(k2_squares, buff=0.1, color=BLUE)
+
+        # Position scores (unchanged)
+        score1 = MathTex("score_1", font_size=36)
+        score2 = MathTex("score_2", font_size=36)
+        score1.next_to(k1_squares, DOWN, buff=1)
+        score2.next_to(k2_squares, DOWN, buff=1)
+
+        # First multiplication animation (q2 · k1)
+        self.play(Create(rect_q2))
+        self.play(ReplacementTransform(rect_q2.copy(), rect_k1))
+        self.play(Write(score1))
+
+        # Move q2 instead of q1 to multiply with k2
+        q2_target_pos = k2_squares.get_center() + UP*2
+        self.play(
+            q2_squares.animate.move_to(q2_target_pos),
+            q2_label.animate.next_to(q2_target_pos, LEFT*4, buff=0.3),
+            rect_q2.animate.move_to(q2_target_pos)
+        )
+
+        # Second multiplication animation (q2 · k2)
+        self.play(ReplacementTransform(rect_q2.copy(), rect_k2))
+        self.play(Write(score2))
+
+        # Fade out with correct references
+        self.play(
+            *[FadeOut(mob) for mob in [
+                q2_squares, k1_squares, k2_squares,
+                q2_label, k1_label, k2_label,
+                rect_q2, rect_k1, rect_k2,
+            ]]
+        )
+
+        score_num1 = MathTex("76", font_size=36).move_to(LEFT)
+        score_num2 = MathTex("98", font_size=36).move_to(RIGHT)
+        self.play(ReplacementTransform(score1, score_num1), ReplacementTransform(score2, score_num2))
+
+        # After showing score numbers
+        dv = MathTex("\\sqrt{D_v}", font_size=36)
+        dv1 = dv.copy().next_to(score_num1, DOWN + UP*0.25)
+        dv2 = dv.copy().next_to(score_num2, DOWN + UP*0.25)
+
+        self.play(Write(dv1), Write(dv2))
+
+        # Transform into actual values
+        div_val1 = MathTex("9.5", font_size=36).move_to(dv1)
+        div_val2 = MathTex("12.25", font_size=36).move_to(dv2)
+
+        score_1_group = VGroup(score_num1, dv1)
+        score_2_group = VGroup(score_num2, dv2)
+
+        self.play(
+            ReplacementTransform(score_1_group, div_val1),
+            ReplacementTransform(score_2_group, div_val2)
+        )
+
+        # Create Softmax boxes
+        softmax_box1 = VGroup(
+            Text("Softmax", font_size=24),
+            SurroundingRectangle(VGroup(score_num1, div_val1), buff=0.3)
+        )
+        softmax_box2 = VGroup(
+            Text("Softmax", font_size=24),
+            SurroundingRectangle(VGroup(score_num2, div_val2), buff=0.3)
+        )
+        softmax_box1[0].next_to(softmax_box1[1], UP, buff=0.1)
+        softmax_box2[0].next_to(softmax_box2[1], UP, buff=0.1)
+
+        self.play(Create(softmax_box1), Create(softmax_box2))
+
+        # Fade out right score
+        self.play(
+            FadeOut(score_num2),
+            FadeOut(div_val2),
+            FadeOut(softmax_box2)
+        )
+
+        # Move left score to center
+        self.play(
+            div_val1.animate.move_to(ORIGIN),
+            softmax_box1.animate.move_to(ORIGIN + UP*0.25)
+        )
+
+        # First show the general Softmax equation
+        general_softmax = MathTex(
+            "Softmax(x_i) = \\frac{e^{x_i}}{\\sum_{j=1}^n e^{x_j}}",
+            font_size=36
+        ).next_to(softmax_box1, DOWN, buff=1)
+
+        self.play(Write(general_softmax))
+
+        # Then transform into the specific equation
+        final_eq = MathTex(
+            "Softmax(\\frac{score_1}{\\sqrt{D_v}}) = \\frac{e^{92/8}}{e^{92/8} + e^{80/8}} = 0.82",
+            font_size=36
+        ).next_to(softmax_box1, DOWN, buff=1)
+
+        self.play(ReplacementTransform(general_softmax, final_eq))
+        # After the final equation, let's organize the values and vectors
+
+        softmax_val1 = MathTex("0.06", font_size=36).move_to(ORIGIN)
+        self.play(
+            FadeOut(softmax_box1),
+            FadeOut(div_val1),
+            ReplacementTransform(final_eq, softmax_val1)
+        )
+
+        # Create v1 and v2 vectors
+        v1_squares = VGroup(*[Square(side_length=0.5, fill_color="#FFDAB9", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+        v2_squares = VGroup(*[Square(side_length=0.5, fill_color="#FFDAB9", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+
+        v1_label = MathTex("v_1", font_size=36)
+        v2_label = MathTex("v_2", font_size=36)
+
+        # Position v1 to the left of 0.82 and v2 to the right
+        v1_group = VGroup(v1_label, v1_squares).arrange(RIGHT, buff=0.3)
+        v2_group = VGroup(v2_label, v2_squares).arrange(RIGHT, buff=0.3)
+
+        # Position the groups horizontally
+        v1_group.next_to(softmax_val1, LEFT, buff=1)
+        v2_group.next_to(softmax_val1, RIGHT, buff=1)
+
+        self.play(
+            Create(v1_squares), Write(v1_label),
+            Create(v2_squares), Write(v2_label)
+        )
+
+        # Create multiplication symbols
+        times1 = MathTex("\\times", font_size=36).next_to(v1_squares, RIGHT, buff=0.3)
+        times2 = MathTex("\\times", font_size=36).next_to(v2_squares, RIGHT, buff=0.3)
+
+
+        softmax_val2 = MathTex("0.94", font_size=36).next_to(v2_group, RIGHT * 3, buff=0.3)
+
+
+        # Create surrounding rectangles for multiplication visualization
+        rect_val1 = SurroundingRectangle(softmax_val1, buff=0.1, color=BLUE)
+        rect_v1 = SurroundingRectangle(v1_squares, buff=0.1, color=BLUE)
+        rect_val2 = SurroundingRectangle(softmax_val2, buff=0.1, color=BLUE)
+        rect_v2 = SurroundingRectangle(v2_squares, buff=0.1, color=BLUE)
+
+        # Show first multiplication
+        self.play(Create(rect_val1))
+        self.play(Write(times1))
+        self.play(ReplacementTransform(rect_val1.copy(), rect_v1))
+
+        # Show second multiplication
+        self.play(
+            Write(softmax_val2),
+            Write(times2)
+        )
+        self.play(Create(rect_val2))
+        self.play(ReplacementTransform(rect_val2.copy(), rect_v2))
+
+        # Create result vectors z1 and z2
+        z1_squares = VGroup(*[Square(side_length=0.5, fill_color="#FFDAB9", fill_opacity=0.45) for _ in range(3)]).arrange(RIGHT, buff=0)
+        z2_squares = VGroup(*[Square(side_length=0.5, fill_color="#FFDAB9", fill_opacity=0.15) for _ in range(3)]).arrange(RIGHT, buff=0)
+
+        z1_label = MathTex("v_1", font_size=36)
+        z2_label = MathTex("v_2", font_size=36)
+
+        # Position z1 and z2 below v1 and v2
+        z1_group = VGroup(z1_label, z1_squares).arrange(RIGHT, buff=0.3).next_to(v1_group, DOWN*2)
+        z2_group = VGroup(z2_label, z2_squares).arrange(RIGHT, buff=0.3).next_to(v2_group, DOWN*2)
+
+        # Show resulting vectors
+        self.play(
+            Create(z1_squares), Write(z1_label),
+            Create(z2_squares), Write(z2_label)
+        )
+
+        # Add plus symbol between z1 and z2 for final sum
+        plus = MathTex("+", font_size=36).move_to(
+            (z1_squares.get_center() + z2_squares.get_center()) / 2
+        )
+        self.play(Write(plus))
+
+        # Create final sum rectangle
+        sum_rect = SurroundingRectangle(VGroup(z1_squares, plus, z2_squares), buff=0.2, color=GREEN)
+        self.play(Create(sum_rect))
+
+        final_z1_squares = VGroup(*[Square(side_length=0.5, fill_color="#90EE90", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+        final_z1_label = MathTex("z_2", font_size=36)
+        final_z1_group = VGroup(final_z1_label, final_z1_squares).arrange(RIGHT, buff=0.3).move_to(ORIGIN)
+
+        self.play(
+        FadeOut(v1_group),
+        FadeOut(v2_group),
+        FadeOut(rect_val1),
+        FadeOut(rect_v1),
+        FadeOut(rect_val2),
+        FadeOut(rect_v2),
+        FadeOut(softmax_val1),
+        FadeOut(softmax_val2),
+        FadeOut(times1),
+        FadeOut(times2),
+        )
+        group_1 = VGroup(z1_squares, z1_label, z2_squares, z2_label, plus, sum_rect)
+        
+        self.play(
+            ReplacementTransform(group_1, final_z1_group),
+        )
+        # Create the text "Attention value for 'Self'"
+        attention_text = Text("Attention value for 'Attention'", font_size=36)
+        attention_text.move_to(UP*2)  # Position it above the vectors
+
+        # Animate the text
+        self.play(Write(attention_text))
+    
+class MatrixToAttention(Scene):
+    def construct(self):
+        pass
