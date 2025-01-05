@@ -759,7 +759,185 @@ class QKVtoAttentionScore2(Scene):
 
         # Animate the text
         self.play(Write(attention_text))
-    
-class MatrixToAttention(Scene):
+
+class TextToMatrix(Scene):
     def construct(self):
-        pass
+        # Initial text setup
+        word1 = Text("Self")
+        word2 = Text("Attention").next_to(word1, RIGHT, buff=0.2)
+        text_group = VGroup(word1, word2)
+        text_group.move_to(ORIGIN)
+        
+        # Write the words and move them up
+        self.play(Write(text_group), run_time=2)
+        self.wait(0.5)
+        self.play(text_group.animate.shift(UP*2))
+        self.play(
+            word1.animate.shift(LEFT*2),
+            word2.animate.shift(RIGHT*2)
+        )
+        
+        # Create x1 and x2 vectors (4×1 matrices)
+        x1_squares = VGroup(*[Square(side_length=0.5) for _ in range(4)]).arrange(RIGHT, buff=0)
+        x2_squares = VGroup(*[Square(side_length=0.5) for _ in range(4)]).arrange(RIGHT, buff=0)
+        
+        # Position vectors under words
+        x1_squares.next_to(word1, DOWN, buff=0.5)
+        x2_squares.next_to(word2, DOWN, buff=0.5)
+        
+        # Add x1, x2 labels
+        x1_label = MathTex("x_1", font_size=36).next_to(x1_squares, LEFT, buff=0.3)
+        x2_label = MathTex("x_2", font_size=36).next_to(x2_squares, LEFT, buff=0.3)
+        
+        # Show vectors and labels
+        self.play(
+            Create(x1_squares),
+            Create(x2_squares),
+            Write(x1_label),
+            Write(x2_label)
+        )
+        self.wait(0.5)
+        
+        # Group vectors into matrix X
+        matrix_X = VGroup(x1_squares, x2_squares)
+        x_label = MathTex("X", font_size=36)
+        
+        # Move vectors together to form matrix
+        self.play(
+            x2_squares.animate.next_to(x1_squares, DOWN, buff=0),
+            FadeOut(x1_label),
+            FadeOut(x2_label),
+            FadeOut(word1),
+            FadeOut(word2)
+        )
+        
+        # Add X label
+        x_label.next_to(matrix_X, LEFT, buff=0.3)
+        self.play(Write(x_label))
+        
+        # Create weight matrices (4×3)
+        def create_weight_matrix():
+            return VGroup(*[
+                VGroup(*[Square(side_length=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+                for _ in range(4)
+            ]).arrange(DOWN, buff=0)
+        
+        w_q = create_weight_matrix()
+        w_k = create_weight_matrix()
+        w_v = create_weight_matrix()
+        
+        # Position weight matrices
+        w_q.move_to(RIGHT*4 + UP*2)
+        w_k.move_to(w_q.get_center() + DOWN*2.5)
+        w_v.move_to(w_k.get_center() + DOWN*2.5)
+        
+        # Add matrix labels
+        w_q_label = MathTex("W_Q", font_size=36).next_to(w_q, LEFT, buff=0.5)
+        w_k_label = MathTex("W_K", font_size=36).next_to(w_k, LEFT, buff=0.5)
+        w_v_label = MathTex("W_V", font_size=36).next_to(w_v, LEFT, buff=0.5)
+        
+        # Show weight matrices
+        self.play(
+            FadeIn(w_q), Write(w_q_label),
+            FadeIn(w_k), Write(w_k_label),
+            FadeIn(w_v), Write(w_v_label)
+        )
+        
+        # Setup multiplication scene
+        self.play(
+            FadeOut(w_k), FadeOut(w_k_label),
+            FadeOut(w_v), FadeOut(w_v_label)
+        )
+        
+        # Position for multiplication
+        self.play(
+            matrix_X.animate.move_to(LEFT*2 + UP*0.5),
+            x_label.animate.move_to(LEFT*2 + UP*1.5),
+            w_q.animate.move_to(RIGHT),
+            w_q_label.animate.move_to(UP*1.5 + RIGHT)
+        )
+        
+        # Add multiplication symbols
+        mult_symbol = MathTex("\\times", font_size=36).next_to(matrix_X, RIGHT, buff=0.5)
+        equals_sign = MathTex("=", font_size=36).next_to(w_q, RIGHT, buff=0.5)
+        
+        # Create result matrix Q (2×3)
+        q_matrix = VGroup(*[
+            VGroup(*[Square(side_length=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+            for _ in range(2)
+        ]).arrange(DOWN, buff=0)
+        
+        q_matrix.next_to(equals_sign, RIGHT, buff=0.5)
+        q_label = MathTex("Q", font_size=36).next_to(q_matrix, UP, buff=0.3)
+        
+        self.play(Write(mult_symbol), Write(equals_sign))
+        self.play(Create(q_matrix), Write(q_label))
+        
+        # Highlight multiplication process
+        # For each row in X (2 rows)
+        for i in range(2):
+            x_row = matrix_X[i]  # Get current row of X
+            # For each column in W_Q (3 columns)
+            for j in range(3):
+                # Highlight current row from X
+                input_box = SurroundingRectangle(x_row, buff=0, color=YELLOW)
+                
+                # Highlight current column from W_Q
+                w_q_column = VGroup(*[row[j] for row in w_q])
+                column_box = SurroundingRectangle(w_q_column, buff=0, color=YELLOW)
+                
+                # Highlight corresponding element in Q
+                result_element = q_matrix[i][j]
+                result_box = SurroundingRectangle(result_element, buff=0, color=YELLOW)
+                
+                # Show the dot product operation
+                self.play(
+                    Create(input_box),
+                    Create(column_box),
+                    Create(result_box)
+                )
+                self.wait(0.5)
+                self.play(
+                    FadeOut(input_box),
+                    FadeOut(column_box),
+                    FadeOut(result_box)
+                )
+        # Show K and V calculations
+        self.wait(1)
+        
+        # Switch to K
+        self.play(
+            FadeOut(w_q_label),
+            FadeOut(q_label)
+        )
+        k_label = MathTex("K", font_size=36).next_to(q_matrix, UP, buff=0.3)
+        w_k_label_new = w_k_label.copy().next_to(w_q, UP)
+        self.play(
+            FadeIn(w_k_label_new),
+            FadeIn(k_label)
+        )
+        
+        # Switch to V
+        self.wait(1)
+        self.play(
+            FadeOut(w_k_label_new),
+            FadeOut(k_label)
+        )
+        v_label = MathTex("V", font_size=36).next_to(q_matrix, UP, buff=0.3)
+        w_v_label_new = w_v_label.copy().next_to(w_q, UP)
+        self.play(
+            FadeIn(w_v_label_new),
+            FadeIn(v_label)
+        )
+        
+        self.wait(1)
+        
+        # Final cleanup
+        self.play(
+            FadeOut(VGroup(
+                matrix_X, x_label, w_q, w_v_label_new,
+                mult_symbol, equals_sign, q_matrix, v_label
+            ))
+        )
+        
+        self.wait(2)
