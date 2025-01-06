@@ -1257,3 +1257,15 @@ class TextToMatrix(Scene):
         )
 
         self.wait(2)
+
+        self.play(
+            FadeOut(VGroup(
+                all_z_matrices, all_z_labels, wo_matrix, wo_label, mult_symbol_wo,
+                equals_sign, text1
+            ))
+        )
+        self.wait(1)
+        self.play(
+            final_z.animate.move_to(ORIGIN),
+            final_z_label.animate.move_to(ORIGIN + UP)
+        )
