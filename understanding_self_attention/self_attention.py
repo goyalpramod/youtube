@@ -1148,3 +1148,71 @@ class TextToMatrix(Scene):
             )
 
         self.wait(2)
+        # After creating all Z matrices
+        # First create a horizontal group of Z matrices with proper sizing
+        all_z_matrices = VGroup(z_matrix, *z_matrices)
+        all_z_labels = VGroup(z1_label, *z_labels)
+        self.play(
+            all_z_matrices.animate.arrange(RIGHT, buff=0),
+            all_z_labels.animate.arrange(RIGHT, buff=1.2).next_to(all_z_matrices, UP, buff=0.2),
+        )
+
+        self.play(
+            all_z_matrices. animate.move_to(ORIGIN + LEFT*2.75),
+            all_z_labels.animate.move_to(ORIGIN + UP*0.85 + LEFT*2.75),
+        )
+
+
+        # Create WO matrix with smaller squares
+        def create_wo_matrix():
+            return VGroup(*[
+                VGroup(*[Square(side_length=0.5) for _ in range(4)]).arrange(RIGHT, buff=0)
+                for _ in range(12)
+            ]).arrange(DOWN, buff=0)
+
+        wo_matrix = create_wo_matrix()
+
+        # Position WO matrix to the right with proper spacing
+        wo_matrix.next_to(all_z_matrices, RIGHT, buff=1)
+
+        # Create multiplication symbol
+        mult_symbol_wo = MathTex("\\times", font_size=36)
+        mult_symbol_wo.move_to(
+            (all_z_matrices.get_right() + wo_matrix.get_left())/2
+        )
+
+        # Create final Z matrix (2×4 dimension)
+        final_z = VGroup(*[
+            VGroup(*[Square(side_length=0.5) for _ in range(4)]).arrange(RIGHT, buff=0)
+            for _ in range(2)
+        ]).arrange(DOWN, buff=0)
+
+        # Create equals sign and position final Z
+        equals_sign = MathTex("=", font_size=36)
+        equals_sign.next_to(wo_matrix, RIGHT, buff=0.5)
+        final_z.next_to(equals_sign, RIGHT, buff=0.5)
+        final_z_label = MathTex("Z", font_size=36).next_to(final_z, UP, buff=0.3)
+
+        # Add text with better positioning
+        text1 = Text("Join all the attention heads results", font_size=30)
+        text1.next_to(all_z_matrices, UP, buff=1.5)
+        wo_label = MathTex("W^O", font_size=36).next_to(wo_matrix, UP, buff=0.3)
+
+        # Animate everything
+        self.play(
+            Write(text1)
+        )
+
+        self.play(
+            FadeIn(wo_matrix),
+            FadeIn(wo_label),
+            Write(mult_symbol_wo)
+        )
+
+        self.play(
+            Write(equals_sign),
+            FadeIn(final_z),
+            FadeIn(final_z_label)
+        )
+
+        self.wait(2)
