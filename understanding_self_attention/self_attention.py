@@ -21,11 +21,21 @@ class TextWhyDoesAttentionWork(Scene):
         # Move this text up and below show some quick animations of writing the Q, K, V
         self.play(FadeOut(text))
 
-class YoutubeThumbnail(Scene):
+class YoutubeThumbnailWithUnderline(Scene):
     def construct(self):
-        text1 = Text("Understanding")
-        text2 = Text("Self Attention").next_to(text1, DOWN, buff=0.2)
+        text1 = Text("Understanding", font_size=72)
+        line1 = Line(LEFT*3, RIGHT*3, color=WHITE).next_to(text1, DOWN, buff=0.2)
+        text2 = Text("Self Attention", font_size=72).next_to(text1, DOWN*1.5, buff=0.2)
+        line2 = Line(LEFT*3, RIGHT*3, color=WHITE).next_to(text2, DOWN, buff=0.2)
+        self.play(Write(text1), Write(text2), Create(line1), Create(line2))
+        self.wait(2)
+
+class YoutubeThumbnailWithoutUnderline(Scene):
+    def construct(self):
+        text1 = Text("Understanding", font_size=72)
+        text2 = Text("Self Attention", font_size=72).next_to(text1, DOWN*1.5, buff=0.2)
         self.play(Write(text1), Write(text2))
+        self.wait(2)
 
 class TextToQKV(Scene):
     def construct(self):
