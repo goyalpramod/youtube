@@ -152,13 +152,13 @@ class TextToQKV(Scene):
             column_boxes.append(box)
 
         self.wait(1)
-        framebox_x1 = SurroundingRectangle(x1_squares[:], buff = 0)
-        framebox1 = SurroundingRectangle(column_boxes[0], buff = 0)
-        framebox2 = SurroundingRectangle(q_vector[0], buff = 0)
-        framebox3 = SurroundingRectangle(column_boxes[1], buff = 0)
-        framebox4 = SurroundingRectangle(q_vector[1], buff = 0)
-        framebox5 = SurroundingRectangle(column_boxes[2], buff = 0)
-        framebox6 = SurroundingRectangle(q_vector[2], buff = 0)
+        framebox_x1 = SurroundingRectangle(x1_squares[:], buff = 0, color=RED)
+        framebox1 = SurroundingRectangle(column_boxes[0], buff = 0, color=RED)
+        framebox2 = SurroundingRectangle(q_vector[0], buff = 0, color=RED)
+        framebox3 = SurroundingRectangle(column_boxes[1], buff = 0, color=RED)
+        framebox4 = SurroundingRectangle(q_vector[1], buff = 0, color=RED)
+        framebox5 = SurroundingRectangle(column_boxes[2], buff = 0, color=RED)
+        framebox6 = SurroundingRectangle(q_vector[2], buff = 0, color=RED)
         self.play(
             Create(framebox_x1),
             Create(framebox1),
@@ -431,8 +431,8 @@ class QKVtoAttentionScore(Scene):
         self.wait(1)
 
         # Create result vectors z1 and z2
-        z1_squares = VGroup(*[Square(side_length=0.5, fill_color="#FFDAB9", fill_opacity=0.45) for _ in range(3)]).arrange(RIGHT, buff=0)
-        z2_squares = VGroup(*[Square(side_length=0.5, fill_color="#FFDAB9", fill_opacity=0.15) for _ in range(3)]).arrange(RIGHT, buff=0)
+        z1_squares = VGroup(*[Square(side_length=0.5, fill_color=GREEN, fill_opacity=0.45) for _ in range(3)]).arrange(RIGHT, buff=0)
+        z2_squares = VGroup(*[Square(side_length=0.5, fill_color=GREEN, fill_opacity=0.15) for _ in range(3)]).arrange(RIGHT, buff=0)
 
         z1_label = MathTex("v_1", font_size=36)
         z2_label = MathTex("v_2", font_size=36)
@@ -718,8 +718,8 @@ class QKVtoAttentionScore2(Scene):
         self.play(ReplacementTransform(rect_val2.copy(), rect_v2))
 
         # Create result vectors z1 and z2
-        z1_squares = VGroup(*[Square(side_length=0.5, fill_color="#FFDAB9", fill_opacity=0.45) for _ in range(3)]).arrange(RIGHT, buff=0)
-        z2_squares = VGroup(*[Square(side_length=0.5, fill_color="#FFDAB9", fill_opacity=0.15) for _ in range(3)]).arrange(RIGHT, buff=0)
+        z1_squares = VGroup(*[Square(side_length=0.5, fill_color=GREEN, fill_opacity=0.45) for _ in range(3)]).arrange(RIGHT, buff=0)
+        z2_squares = VGroup(*[Square(side_length=0.5, fill_color=GREEN, fill_opacity=0.15) for _ in range(3)]).arrange(RIGHT, buff=0)
 
         z1_label = MathTex("v_1", font_size=36)
         z2_label = MathTex("v_2", font_size=36)
@@ -744,7 +744,7 @@ class QKVtoAttentionScore2(Scene):
         sum_rect = SurroundingRectangle(VGroup(z1_squares, plus, z2_squares), buff=0.2, color=GREEN)
         self.play(Create(sum_rect))
 
-        final_z1_squares = VGroup(*[Square(side_length=0.5, fill_color="#90EE90", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+        final_z1_squares = VGroup(*[Square(side_length=0.5, fill_color=GREEN, fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
         final_z1_label = MathTex("z_2", font_size=36)
         final_z1_group = VGroup(final_z1_label, final_z1_squares).arrange(RIGHT, buff=0.3).move_to(ORIGIN)
 
@@ -909,15 +909,15 @@ class TextToMatrix(Scene):
             # For each column in W_Q (3 columns)
             for j in range(3):
                 # Highlight current row from X
-                input_box = SurroundingRectangle(x_row, buff=0, color=YELLOW)
+                input_box = SurroundingRectangle(x_row, buff=0, color=RED)
                 
                 # Highlight current column from W_Q
                 w_q_column = VGroup(*[row[j] for row in w_q])
-                column_box = SurroundingRectangle(w_q_column, buff=0, color=YELLOW)
+                column_box = SurroundingRectangle(w_q_column, buff=0, color=RED)
                 
                 # Highlight corresponding element in Q
                 result_element = q_matrix[i][j]
-                result_box = SurroundingRectangle(result_element, buff=0, color=YELLOW)
+                result_box = SurroundingRectangle(result_element, buff=0, color=RED)
                 
                 # Show the dot product operation
                 self.play(
@@ -1107,7 +1107,7 @@ class TextToMatrix(Scene):
 
         # Create Z matrix (should be same dimensions as Q)
         z_matrix = VGroup(*[
-            VGroup(*[Square(side_length=0.5, fill_color="#FFDAB9", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+            VGroup(*[Square(side_length=0.5, fill_color=GREEN, fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
             for _ in range(2)
         ]).arrange(DOWN, buff=0)  # Using the dimensions from your q_matrix
         z_matrix.next_to(ORIGIN + LEFT, buff=0.5)
@@ -1189,7 +1189,7 @@ class TextToMatrix(Scene):
         # Create WO matrix with smaller squares
         def create_wo_matrix():
             return VGroup(*[
-                VGroup(*[Square(side_length=0.5, fill_color="GREEN", fill_opacity=0.5) for _ in range(4)]).arrange(RIGHT, buff=0)
+                VGroup(*[Square(side_length=0.5, fill_color=BLUE, fill_opacity=0.5) for _ in range(4)]).arrange(RIGHT, buff=0)
                 for _ in range(12)
             ]).arrange(DOWN, buff=0)
 
@@ -1206,7 +1206,7 @@ class TextToMatrix(Scene):
 
         # Create final Z matrix (2×4 dimension)
         final_z = VGroup(*[
-            VGroup(*[Square(side_length=0.5, fill_color="#FFDAB9", fill_opacity=0.5) for _ in range(4)]).arrange(RIGHT, buff=0)
+            VGroup(*[Square(side_length=0.5, fill_color=GREEN, fill_opacity=0.5) for _ in range(4)]).arrange(RIGHT, buff=0)
             for _ in range(2)
         ]).arrange(DOWN, buff=0)
 
