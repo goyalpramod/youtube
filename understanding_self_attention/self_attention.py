@@ -38,8 +38,8 @@ class TextToQKV(Scene):
         )
         
         # Step 1: Create and position x1 and x2 boxes
-        x1_squares = VGroup(*[Square(side_length=0.5) for _ in range(4)]).arrange(RIGHT, buff=0)
-        x2_squares = VGroup(*[Square(side_length=0.5) for _ in range(4)]).arrange(RIGHT, buff=0)
+        x1_squares = VGroup(*[Square(side_length=0.5, fill_color=YELLOW, fill_opacity=0.5) for _ in range(4)]).arrange(RIGHT, buff=0)
+        x2_squares = VGroup(*[Square(side_length=0.5, fill_color=YELLOW, fill_opacity=0.5) for _ in range(4)]).arrange(RIGHT, buff=0)
         
         # Align them directly under the words
         x1_squares.next_to(delicious, DOWN, buff=0.5)
@@ -68,15 +68,20 @@ class TextToQKV(Scene):
         
         # Step 3: Create weight matrices with proper spacing
         matrix_size = 4
-        single_matrix = VGroup(*[
-            VGroup(*[Square(side_length=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+        w_q = VGroup(*[
+            VGroup(*[Square(side_length=0.5, fill_color="#FFB6C1", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
             for _ in range(matrix_size)
         ]).arrange(DOWN*0.25, buff=0)
         
-        # Create three identical matrices
-        w_q = single_matrix.copy()
-        w_k = single_matrix.copy()
-        w_v = single_matrix.copy()
+        w_k = VGroup(*[
+            VGroup(*[Square(side_length=0.5, fill_color="#E6E6FA", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+            for _ in range(matrix_size)
+        ]).arrange(DOWN*0.25, buff=0)
+        
+        w_v = VGroup(*[
+            VGroup(*[Square(side_length=0.5, fill_color="#FFDAB9", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+            for _ in range(matrix_size)
+        ]).arrange(DOWN*0.25, buff=0)
         
         # Step 4: Position matrices with clear spacing
         # Start with W_Q at top right
@@ -118,13 +123,20 @@ class TextToQKV(Scene):
             w_q_label.animate.move_to(UP*1.5 + RIGHT)
         )
         
+        w_k.move_to(w_q.get_center()) 
+        w_v.move_to(w_q.get_center()) 
+
         # Add multiplication and equals signs
         mult_symbol = MathTex("\\times", font_size=36).next_to(x1_squares, RIGHT, buff=0.5)
         equals_sign = MathTex("=", font_size=36).next_to(w_q, RIGHT, buff=0.5)
         
         # Create result vector
-        q_vector = VGroup(*[Square(side_length=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+        q_vector = VGroup(*[Square(side_length=0.5, fill_color="#FFB6C1", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+        k_vector = VGroup(*[Square(side_length=0.5, fill_color="#E6E6FA", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+        v_vector = VGroup(*[Square(side_length=0.5, fill_color="#FFDAB9", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
         q_vector.next_to(equals_sign, RIGHT, buff=0.5)
+        k_vector.next_to(equals_sign, RIGHT, buff=0.5)
+        v_vector.next_to(equals_sign, RIGHT, buff=0.5)
         q_label = MathTex("q_1", font_size=36).next_to(q_vector, UP, buff=0.3)
         k_label = MathTex("k_1", font_size=36).next_to(q_vector, UP, buff=0.3)
         v_label = MathTex("v_1", font_size=36).next_to(q_vector, UP, buff=0.3)
@@ -166,11 +178,11 @@ class TextToQKV(Scene):
         self.play(FadeOut(framebox5), FadeOut(framebox6), FadeOut(framebox_x1)) 
         
         self.wait(1)
-        self.play(FadeOut(w_q_label), FadeOut(q_label))
-        self.play(FadeIn(w_k_label.next_to(w_q, UP)), FadeIn(k_label))
-        self.play(FadeOut(w_k_label), FadeOut(k_label))
-        self.play(FadeIn(w_v_label.next_to(w_q, UP)), FadeIn(v_label))
-        self.play(FadeOut(w_v_label), FadeOut(v_label), FadeOut(q_vector), FadeOut(mult_symbol), FadeOut(equals_sign), FadeOut(x1_group), FadeOut(w_q))
+        self.play(FadeOut(w_q_label), FadeOut(q_label), FadeOut(q_vector), FadeOut(w_q))
+        self.play(FadeIn(w_k_label.next_to(w_q, UP)), FadeIn(k_label), FadeIn(k_vector), FadeIn(w_k))
+        self.play(FadeOut(w_k_label), FadeOut(k_label), FadeOut(k_vector), FadeOut(w_k))
+        self.play(FadeIn(w_v_label.next_to(w_q, UP)), FadeIn(v_label), FadeIn(v_vector), FadeIn(w_v))
+        self.play(FadeOut(w_v_label), FadeOut(v_label), FadeOut(mult_symbol), FadeOut(equals_sign), FadeOut(x1_group), FadeOut(v_vector), FadeOut(w_v))
         self.wait(2)
 
 class QKVtoAttentionScore(Scene):
@@ -778,8 +790,8 @@ class TextToMatrix(Scene):
         )
         
         # Create x1 and x2 vectors (4×1 matrices)
-        x1_squares = VGroup(*[Square(side_length=0.5) for _ in range(4)]).arrange(RIGHT, buff=0)
-        x2_squares = VGroup(*[Square(side_length=0.5) for _ in range(4)]).arrange(RIGHT, buff=0)
+        x1_squares = VGroup(*[Square(side_length=0.5,fill_color=YELLOW, fill_opacity=0.5) for _ in range(4)]).arrange(RIGHT, buff=0)
+        x2_squares = VGroup(*[Square(side_length=0.5,fill_color=YELLOW, fill_opacity=0.5) for _ in range(4)]).arrange(RIGHT, buff=0)
         
         # Position vectors under words
         x1_squares.next_to(word1, DOWN, buff=0.5)
@@ -815,16 +827,20 @@ class TextToMatrix(Scene):
         x_label.next_to(matrix_X, LEFT, buff=0.3)
         self.play(Write(x_label))
         
-        # Create weight matrices (4×3)
-        def create_weight_matrix():
-            return VGroup(*[
-                VGroup(*[Square(side_length=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+        
+        
+        w_q = VGroup(*[
+                VGroup(*[Square(side_length=0.5,fill_color="#FFB6C1", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
                 for _ in range(4)
             ]).arrange(DOWN, buff=0)
-        
-        w_q = create_weight_matrix()
-        w_k = create_weight_matrix()
-        w_v = create_weight_matrix()
+        w_k = VGroup(*[
+                VGroup(*[Square(side_length=0.5,fill_color="#E6E6FA", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+                for _ in range(4)
+            ]).arrange(DOWN, buff=0)
+        w_v = VGroup(*[
+                VGroup(*[Square(side_length=0.5,fill_color="#FFDAB9", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+                for _ in range(4)
+            ]).arrange(DOWN, buff=0)
         
         # Position weight matrices
         w_q.move_to(RIGHT*4 + UP*2)
@@ -863,7 +879,7 @@ class TextToMatrix(Scene):
         
         # Create result matrix Q (2×3)
         q_matrix = VGroup(*[
-            VGroup(*[Square(side_length=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+            VGroup(*[Square(side_length=0.5, fill_color="#FFB6C1") for _ in range(3)]).arrange(RIGHT, buff=0)
             for _ in range(2)
         ]).arrange(DOWN, buff=0)
         
