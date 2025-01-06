@@ -303,18 +303,23 @@ class QKVtoAttentionScore(Scene):
 
         # After showing score numbers
         dv = MathTex("\\sqrt{D_v}", font_size=36)
+
         dv1 = dv.copy().next_to(score_num1, DOWN + UP*0.25)
         dv2 = dv.copy().next_to(score_num2, DOWN + UP*0.25)
+        division_line1 = Line(LEFT*0.4, RIGHT*0.4, color=WHITE)
+        division_line2 = Line(LEFT*0.4, RIGHT*0.4, color=WHITE)
+        division_line1.next_to(dv1, UP*0.3, buff=0.4)
+        division_line2.next_to(dv2, UP*0.3, buff=0.4)
 
-        self.play(Write(dv1), Write(dv2))
+        self.play(Write(dv1), Write(dv2), Write(division_line1), Write(division_line2))
         self.wait(1)
 
         # Transform into actual values
         div_val1 = MathTex("11.5", font_size=36).move_to(dv1)
         div_val2 = MathTex("10", font_size=36).move_to(dv2)
 
-        score_1_group = VGroup(score_num1, dv1)
-        score_2_group = VGroup(score_num2, dv2)
+        score_1_group = VGroup(score_num1, dv1, division_line1)
+        score_2_group = VGroup(score_num2, dv2, division_line2)
 
         self.play(
             ReplacementTransform(score_1_group, div_val1),
@@ -604,15 +609,19 @@ class QKVtoAttentionScore2(Scene):
         dv = MathTex("\\sqrt{D_v}", font_size=36)
         dv1 = dv.copy().next_to(score_num1, DOWN + UP*0.25)
         dv2 = dv.copy().next_to(score_num2, DOWN + UP*0.25)
+        division_line1 = Line(LEFT*0.4, RIGHT*0.4, color=WHITE)
+        division_line2 = Line(LEFT*0.4, RIGHT*0.4, color=WHITE)
+        division_line1.next_to(dv1, UP*0.3, buff=0.4)
+        division_line2.next_to(dv2, UP*0.3, buff=0.4)
 
-        self.play(Write(dv1), Write(dv2))
+        self.play(Write(dv1), Write(dv2), Write(division_line1), Write(division_line2))
 
         # Transform into actual values
         div_val1 = MathTex("9.5", font_size=36).move_to(dv1)
         div_val2 = MathTex("12.25", font_size=36).move_to(dv2)
 
-        score_1_group = VGroup(score_num1, dv1)
-        score_2_group = VGroup(score_num2, dv2)
+        score_1_group = VGroup(score_num1, dv1, division_line1)
+        score_2_group = VGroup(score_num2, dv2, division_line2)
 
         self.play(
             ReplacementTransform(score_1_group, div_val1),
@@ -631,7 +640,7 @@ class QKVtoAttentionScore2(Scene):
         softmax_box1[0].next_to(softmax_box1[1], UP, buff=0.1)
         softmax_box2[0].next_to(softmax_box2[1], UP, buff=0.1)
 
-        self.play(Create(softmax_box1), Create(softmax_box2))
+        self.play(Create(softmax_box1, run_time=1), Create(softmax_box2, run_time=1))
 
         # Fade out right score
         self.play(
