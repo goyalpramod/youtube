@@ -355,7 +355,7 @@ class QKVtoAttentionScore(Scene):
         softmax_box1[0].next_to(softmax_box1[1], UP, buff=0.1)
         softmax_box2[0].next_to(softmax_box2[1], UP, buff=0.1)
 
-        self.play(Create(softmax_box1), Create(softmax_box2))
+        self.play(Create(softmax_box1, run_time=2, rate_func = linear), Create(softmax_box2, run_time=2, rate_func=linear))
         self.wait(1)
 
         # Fade out right score
@@ -596,13 +596,6 @@ class QKVtoAttentionScore2(Scene):
         self.play(ReplacementTransform(rect_q2.copy(), rect_k1))
         self.play(Write(score1))
 
-        # Move q2 instead of q1 to multiply with k2
-        q2_target_pos = k2_squares.get_center() + UP*2
-        self.play(
-            q2_squares.animate.move_to(q2_target_pos),
-            q2_label.animate.next_to(q2_target_pos, LEFT*4, buff=0.3),
-            rect_q2.animate.move_to(q2_target_pos)
-        )
 
         # Second multiplication animation (q2 · k2)
         self.play(ReplacementTransform(rect_q2.copy(), rect_k2))
@@ -656,7 +649,7 @@ class QKVtoAttentionScore2(Scene):
         softmax_box1[0].next_to(softmax_box1[1], UP, buff=0.1)
         softmax_box2[0].next_to(softmax_box2[1], UP, buff=0.1)
 
-        self.play(Create(softmax_box1, run_time=1), Create(softmax_box2, run_time=1))
+        self.play(Create(softmax_box1, run_time=2, rate_func=linear), Create(softmax_box2, run_time=2, rate_func=linear))
 
         # Fade out right score
         self.play(
