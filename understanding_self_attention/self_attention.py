@@ -2,7 +2,7 @@ from manim import *
 
 class TextSelfAttention(Scene):
     def construct(self):
-        text = Text("Self Attention")
+        text = Text("Self Attention", font_size=98)
         self.play(Write(text), run_time=3)
         self.play(FadeOut(text))
 
@@ -10,14 +10,42 @@ class TextWorkingOfSelfAttention(Scene):
     def construct(self):
         text = Text("Working of Self Attention")
         self.play(Write(text))
+        self.play(text.animate.shift(UP*3))
         # Move this text up and below show some quick animations of matrix multiplication to calculate the attention scores
         self.play(FadeOut(text))
-
+class LatexSelfAttention(Scene):
+    def construct(self):
+        # Break down the equation into parts for better control and animation
+        self_attention_equation = MathTex(
+            r"Attention(Q, K, V)", 
+            r"=", 
+            r"softmax",
+            r"(",
+            r"\frac{QK^T}{\sqrt{d_k}}",
+            r")",
+            r"V",
+        )
+        
+        # Position the equation in the center
+        self_attention_equation.move_to(ORIGIN)
+        
+        # Animate each part of the equation
+        self.play(Write(self_attention_equation))
+        
+        # Wait at the end
+        self.wait(2)
+class TextAttentionIsAllYouNeed(Scene):
+    def construct(self):
+        text = Text("Attention Is All You Need", font_size=36)
+        self.play(Write(text))
+        # Move this text up and below show some quick animations of writing the Q, K, V
+        self.play(FadeOut(text))
 
 class TextWhyDoesAttentionWork(Scene):
     def construct(self):
         text = Text("Why does Attention work?")
         self.play(Write(text))
+        self.play(text.animate.shift(UP*3))
         # Move this text up and below show some quick animations of writing the Q, K, V
         self.play(FadeOut(text))
 
