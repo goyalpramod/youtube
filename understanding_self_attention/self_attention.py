@@ -21,6 +21,12 @@ class TextWhyDoesAttentionWork(Scene):
         # Move this text up and below show some quick animations of writing the Q, K, V
         self.play(FadeOut(text))
 
+class YoutubeThumbnail(Scene):
+    def construct(self):
+        text1 = Text("Understanding")
+        text2 = Text("Self Attention").next_to(text1, DOWN, buff=0.2)
+        self.play(Write(text1), Write(text2))
+
 class TextToQKV(Scene):
     def construct(self):
         # Initial text setup (same until words split apart)
