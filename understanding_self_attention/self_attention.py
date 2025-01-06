@@ -844,8 +844,8 @@ class TextToMatrix(Scene):
         
         # Position weight matrices
         w_q.move_to(RIGHT*4 + UP*2)
-        w_k.move_to(w_q.get_center() + DOWN*2.5)
-        w_v.move_to(w_k.get_center() + DOWN*2.5)
+        w_k.next_to(w_q, DOWN, buff=0.5)
+        w_v.next_to(w_k, DOWN, buff=0.5)
         
         # Add matrix labels
         w_q_label = MathTex("W_Q", font_size=36).next_to(w_q, LEFT, buff=0.5)
@@ -873,17 +873,30 @@ class TextToMatrix(Scene):
             w_q_label.animate.move_to(UP*1.5 + RIGHT)
         )
         
+        w_k.move_to(w_q.get_center())
+        w_v.move_to(w_q.get_center())
+
         # Add multiplication symbols
         mult_symbol = MathTex("\\times", font_size=36).next_to(matrix_X, RIGHT, buff=0.5)
         equals_sign = MathTex("=", font_size=36).next_to(w_q, RIGHT, buff=0.5)
         
         # Create result matrix Q (2×3)
         q_matrix = VGroup(*[
-            VGroup(*[Square(side_length=0.5, fill_color="#FFB6C1") for _ in range(3)]).arrange(RIGHT, buff=0)
+            VGroup(*[Square(side_length=0.5, fill_color="#FFB6C1", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+            for _ in range(2)
+        ]).arrange(DOWN, buff=0)
+        k_matrix = VGroup(*[
+            VGroup(*[Square(side_length=0.5, fill_color="#E6E6FA", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+            for _ in range(2)
+        ]).arrange(DOWN, buff=0)
+        v_matrix = VGroup(*[
+            VGroup(*[Square(side_length=0.5, fill_color="#FFDAB9", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
             for _ in range(2)
         ]).arrange(DOWN, buff=0)
         
         q_matrix.next_to(equals_sign, RIGHT, buff=0.5)
+        k_matrix.next_to(equals_sign, RIGHT, buff=0.5)
+        v_matrix.next_to(equals_sign, RIGHT, buff=0.5)
         q_label = MathTex("Q", font_size=36).next_to(q_matrix, UP, buff=0.3)
         
         self.play(Write(mult_symbol), Write(equals_sign))
@@ -924,26 +937,34 @@ class TextToMatrix(Scene):
         # Switch to K
         self.play(
             FadeOut(w_q_label),
-            FadeOut(q_label)
+            FadeOut(q_label),
+            FadeOut(q_matrix),
+            FadeOut(w_q),
         )
         k_label = MathTex("K", font_size=36).next_to(q_matrix, UP, buff=0.3)
         w_k_label_new = w_k_label.copy().next_to(w_q, UP)
         self.play(
             FadeIn(w_k_label_new),
-            FadeIn(k_label)
+            FadeIn(k_label),
+            FadeIn(w_k),
+            FadeIn(k_matrix),
         )
         
         # Switch to V
         self.wait(1)
         self.play(
             FadeOut(w_k_label_new),
-            FadeOut(k_label)
+            FadeOut(k_label),
+            FadeOut(w_k),
+            FadeOut(k_matrix),
         )
         v_label = MathTex("V", font_size=36).next_to(q_matrix, UP, buff=0.3)
         w_v_label_new = w_v_label.copy().next_to(w_q, UP)
         self.play(
             FadeIn(w_v_label_new),
-            FadeIn(v_label)
+            FadeIn(v_label),
+            FadeIn(w_v),
+            FadeIn(v_matrix),
         )
         
         self.wait(1)
@@ -951,29 +972,30 @@ class TextToMatrix(Scene):
         # Clear multiplication elements but keep result matrix
         self.play(
             FadeOut(VGroup(
-                matrix_X, x_label, w_q, w_v_label_new,
-                mult_symbol, equals_sign,
+                matrix_X, x_label, w_v_label_new,
+                mult_symbol, equals_sign, v_matrix, w_v, v_label
             ))
         )
 
+        self.wait(2)
+
         # Move Q matrix to the left
-        self.play(
-            q_matrix.animate.shift(LEFT*6),
-            v_label.animate.shift(LEFT*6)
-        )
+    
+        q_matrix.move_to(LEFT*2)
+        q_label.next_to(q_matrix, UP, buff=0.3)
 
         # Create K matrix
-        k_matrix = q_matrix.copy()
         k_matrix.next_to(q_matrix, RIGHT, buff=1)
         k_label = MathTex("K", font_size=36).next_to(k_matrix, UP, buff=0.3)
 
         # Create V matrix
-        v_matrix = q_matrix.copy()
         v_matrix.next_to(k_matrix, RIGHT, buff=1)
-        v_label_final = MathTex("Q", font_size=36).next_to(v_matrix, UP, buff=0.3)
+        v_label_final = MathTex("V", font_size=36).next_to(v_matrix, UP, buff=0.3)
 
         # Show K and V matrices
         self.play(
+            FadeIn(q_matrix),
+            FadeIn(q_label),
             FadeIn(k_matrix),
             FadeIn(k_label),
             FadeIn(v_matrix),
@@ -982,50 +1004,32 @@ class TextToMatrix(Scene):
 
         self.wait(2)
         self.play(
-            FadeOut(q_matrix),
-            FadeOut(v_label)
-        )
-
-        # Move K and V matrices closer for multiplication
-        self.play(
-            k_matrix.animate.shift(LEFT*2),
-            k_label.animate.shift(LEFT*2),
-            v_matrix.animate.shift(LEFT*2),
-            v_label_final.animate.shift(LEFT*2)
-        )
-
-        
-
-        self.play(
-            FadeOut(k_label),
-            FadeOut(v_label_final),
-        )
-        k_transpose_label = MathTex("K^T", font_size=36).next_to(k_matrix, UP, buff=0.3)
-        self.play(
-            FadeIn(v_label_final.next_to(k_matrix, UP, buff=0.3)),
-            FadeIn(k_label.next_to(v_matrix, UP, buff=0.3)),
-        )
-        v_matrix_transpose = v_matrix.copy().rotate(PI/2).next_to(k_matrix, RIGHT*3.5, buff=0.3)
-        self.play(
-            FadeOut(k_label),
             FadeOut(v_matrix),
+            FadeOut(v_label_final)
+        )
+
+        k_transpose_label = MathTex("K^T", font_size=36).next_to(k_matrix, UP, buff=0.3)
+        k_matrix_transpose = k_matrix.copy().rotate(PI/2).move_to(k_matrix.get_center())
+        self.play(
+            FadeOut(k_label),
+            FadeOut(k_matrix),
         )
 
         self.wait(0.5)
 
         self.play(
-            FadeIn(k_transpose_label.next_to(v_matrix_transpose, UP, buff=0.3)),
-            FadeIn(v_matrix_transpose),
+            FadeIn(k_transpose_label.next_to(k_matrix_transpose, UP, buff=0.3)),
+            FadeIn(k_matrix_transpose),
         )
         # After your matrix animations (keeping k_matrix and v_matrix_transpose in their positions)
 
         # First, let's create a VGroup with the existing matrices to help with positioning
-        matrix_group = VGroup(k_matrix, v_matrix_transpose)
+        matrix_group = VGroup(q_matrix, k_matrix_transpose)
 
         # Create multiplication symbol between matrices
         mult_symbol = MathTex("\\times", font_size=36)
         mult_symbol.move_to(
-            (k_matrix.get_right() + v_matrix_transpose.get_left())/2
+            (q_matrix.get_right() + k_matrix_transpose.get_left())/2
         )
 
         # Calculate the width needed for the division line
@@ -1102,7 +1106,10 @@ class TextToMatrix(Scene):
         equals_sign.next_to(v_final_matrix, RIGHT, buff=0.5)
 
         # Create Z matrix (should be same dimensions as Q)
-        z_matrix = q_matrix.copy()  # Using the dimensions from your q_matrix
+        z_matrix = VGroup(*[
+            VGroup(*[Square(side_length=0.5, fill_color="#FFDAB9", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+            for _ in range(2)
+        ]).arrange(DOWN, buff=0)  # Using the dimensions from your q_matrix
         z_matrix.next_to(ORIGIN + LEFT, buff=0.5)
         z_label = MathTex("Z", font_size=36).next_to(z_matrix, UP, buff=0.3)
 
@@ -1111,7 +1118,7 @@ class TextToMatrix(Scene):
         group_everything = VGroup(
             matrix_group, mult_symbol, division_line, root_dk,
             left_paren, right_paren, softmax, v_final_matrix,
-            v_label_new, mult_symbol_v, k_transpose_label, v_label_final
+            v_label_new, mult_symbol_v, k_transpose_label, q_label,
         )
 
         group_z_matrix = VGroup(z_matrix, z_label)
@@ -1182,7 +1189,7 @@ class TextToMatrix(Scene):
         # Create WO matrix with smaller squares
         def create_wo_matrix():
             return VGroup(*[
-                VGroup(*[Square(side_length=0.5) for _ in range(4)]).arrange(RIGHT, buff=0)
+                VGroup(*[Square(side_length=0.5, fill_color="GREEN", fill_opacity=0.5) for _ in range(4)]).arrange(RIGHT, buff=0)
                 for _ in range(12)
             ]).arrange(DOWN, buff=0)
 
@@ -1199,7 +1206,7 @@ class TextToMatrix(Scene):
 
         # Create final Z matrix (2×4 dimension)
         final_z = VGroup(*[
-            VGroup(*[Square(side_length=0.5) for _ in range(4)]).arrange(RIGHT, buff=0)
+            VGroup(*[Square(side_length=0.5, fill_color="#FFDAB9", fill_opacity=0.5) for _ in range(4)]).arrange(RIGHT, buff=0)
             for _ in range(2)
         ]).arrange(DOWN, buff=0)
 
