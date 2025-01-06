@@ -1083,7 +1083,6 @@ class TextToMatrix(Scene):
         )
 
         # Create equals sign
-        equals_sign = MathTex("=", font_size=36)
         equals_sign.next_to(v_final_matrix, RIGHT, buff=0.5)
 
         # Create Z matrix (should be same dimensions as Q)
@@ -1091,12 +1090,12 @@ class TextToMatrix(Scene):
         z_matrix.next_to(ORIGIN + LEFT, buff=0.5)
         z_label = MathTex("Z", font_size=36).next_to(z_matrix, UP, buff=0.3)
 
-        self.wait(1)
+        self.wait(2)
 
         group_everything = VGroup(
             matrix_group, mult_symbol, division_line, root_dk,
             left_paren, right_paren, softmax, v_final_matrix,
-            v_label_new, mult_symbol_v, equals_sign, k_transpose_label, v_label_final
+            v_label_new, mult_symbol_v, k_transpose_label, v_label_final
         )
 
         group_z_matrix = VGroup(z_matrix, z_label)
@@ -1105,5 +1104,47 @@ class TextToMatrix(Scene):
         self.play(
             ReplacementTransform(group_everything, group_z_matrix),
         )
+
+        self.wait(2)
+
+        # After your last self.wait(2)
+
+        # First, transform Z to Z1
+        z1_label = MathTex("Z_1", font_size=36).next_to(z_matrix, UP, buff=0.3)
+        self.play(
+            ReplacementTransform(z_label, z1_label)
+        )
+
+        # Move Z1 to absolute left
+        self.play(
+            VGroup(z_matrix, z1_label).animate.shift(LEFT*4)
+        )
+
+        # Create Z2 through Z5 with labels
+        z_matrices = []
+        z_labels = []
+
+        # Create 4 more Z matrices with labels
+        for i in range(2, 5):
+            new_z = z_matrix.copy()
+            new_z_label = MathTex(f"Z_{i}", font_size=36)
+            
+            # Position each new Z matrix to the right of the previous one
+            if i == 2:
+                new_z.next_to(z_matrix, RIGHT, buff=1)
+            else:
+                new_z.next_to(z_matrices[-1], RIGHT, buff=1)
+            
+            new_z_label.next_to(new_z, UP, buff=0.3)
+            
+            z_matrices.append(new_z)
+            z_labels.append(new_z_label)
+            
+            # Animate each new Z appearing
+            self.play(
+                FadeIn(new_z),
+                FadeIn(new_z_label),
+                run_time=0.5
+            )
 
         self.wait(2)
