@@ -1349,13 +1349,21 @@ class MatrixRepresentation(Scene):
         
         self.wait()
         # This will shear the y-axis towards the x-axis
-        matrix = [[1, 0.5], [0, 1]]
+        matrix = [[1, -1], [0, 1]]
         
         # Create new notation showing the transformation
-        new_vector_notation = MathTex(r"\begin{bmatrix} 1 & 0.5 \\ 0 & 1 \end{bmatrix}").next_to(vector_notation, LEFT, buff=0.5)
+        new_vector_notation = MathTex(r"\begin{bmatrix} 1 & -1 \\ 0 & 1 \end{bmatrix}").next_to(vector_notation, LEFT, buff=0.5)
         
         self.play(
             everything.animate.scale(0.35).move_to(ORIGIN + UP*1.5),
+        )
+        copied_group1 = everything.copy()  # Create a copy of the sheared configuration
+        text_representation1 = Text("Representation 1", font_size=36).next_to(copied_group1, DOWN*6.25 + LEFT*4, buff=0.5)
+        # Move the copy down
+        self.play(
+            copied_group1.animate.shift(DOWN*3 + LEFT*5),  # Adjust the 3 value to control how far down it goes
+            Write(text_representation1),
+            run_time=2
         )
 
         # Apply the transformation
@@ -1364,3 +1372,38 @@ class MatrixRepresentation(Scene):
             everything.animate.apply_matrix(matrix),
             run_time=3 
         )
+
+        # After the shear transformation, create a copy and move it down
+        copied_group2 = everything.copy()  # Create a copy of the sheared configuration
+        text_representation2 = Text("Representation 2", font_size=36).next_to(text_representation1, RIGHT*2, buff=0.5)
+        # Move the copy down
+        self.play(
+            copied_group2.animate.shift(DOWN*3),  # Adjust the 3 value to control how far down it goes
+            Write(text_representation2),
+            run_time=2
+        )
+        
+        self.wait()
+
+        # This will shear the y-axis towards the x-axis
+        matrix = [[1, 1.5], [0, 1]]
+        
+        # Create new notation showing the transformation
+        new_vector_notation2 = MathTex(r"\begin{bmatrix} 1 & 0.5 \\ 0 & 1 \end{bmatrix}").next_to(vector_notation, LEFT, buff=0.5)
+
+        self.play(
+            FadeOut(new_vector_notation),
+            FadeIn(new_vector_notation2),
+            everything.animate.apply_matrix(matrix),
+            run_time=3 
+        )
+
+        copied_group3 = everything.copy()  # Create a copy of the sheared configuration
+        text_representation3 = Text("Representation 3", font_size=36).next_to(text_representation2, RIGHT*2, buff=0.5)
+        # Move the copy down
+        self.play(
+            copied_group3.animate.shift(DOWN*3 + RIGHT*3.5),  # Adjust the 3 value to control how far down it goes
+            Write(text_representation3),
+            run_time=2
+        )
+        self.wait(2)
