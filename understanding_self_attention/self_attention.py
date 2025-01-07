@@ -1257,3 +1257,71 @@ class TextToMatrix(Scene):
         )
 
         self.wait(2)
+
+
+class MatrixRepresentation(Scene):
+    def construct(self):
+        # Create the axes and grid with adjusted ranges
+        axes = Axes(
+            x_range=[0, 3],  # Only positive X
+            y_range=[0, 3],  # Only positive Y
+            axis_config={
+                "color": BLUE,
+                "include_numbers": False,
+                "include_ticks": False
+            },
+            x_length=7,  # Make it larger
+            y_length=7,  # Make it larger
+            tips=True
+        )
+        
+        
+        # Create the [Y,X] vector notation
+        vector_notation = MathTex(r"\begin{bmatrix} Y \\ X \end{bmatrix}").to_corner(UR, buff=0.5)
+        
+        # Create the points
+        point1 = Dot(axes.c2p(1, 1), color=RED)
+        point2 = Dot(axes.c2p(2, 1), color=RED)
+        point3 = Dot(axes.c2p(1, 2), color=RED)
+        point4 = Dot(axes.c2p(2, 2), color=RED)
+        
+        # Group everything together for the zoom
+        points = VGroup(point1, point2, point3, point4)
+        everything = VGroup(axes, points)
+        
+        
+        # Animation sequence
+        self.play(
+            Create(axes),
+            run_time=2
+        )
+        self.wait(0.5)
+        
+        self.play(Write(vector_notation), run_time=1)
+        self.wait(0.5)
+        
+        # Add points one by one
+        for point in [point1, point2, point3, point4]:
+            self.play(Create(point), run_time=0.5)
+            self.wait(0.3)
+        
+        
+        self.wait()
+        # This will shear the y-axis towards the x-axis
+        matrix = [[1, 0.5], [0, 1]]
+        
+        # Create new notation showing the transformation
+        new_vector_notation = MathTex(r"\begin{bmatrix} 1 & 0.5 \\ 0 & 1 \end{bmatrix}").next_to(vector_notation, LEFT, buff=0.5)
+        
+        self.play(
+            everything.animate.scale(0.35).move_to(ORIGIN + UP*1.5),
+        )
+
+        # Apply the transformation
+        self.play(
+            FadeIn(new_vector_notation),
+            everything.animate.apply_matrix(matrix),
+            run_time=3 
+        )
+        
+        self.wait()
