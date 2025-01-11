@@ -79,12 +79,18 @@ class TextToQKV(Scene):
     def construct(self):
         # Initial text setup (same until words split apart)
         delicious = Text("Self")
+        new_text2 = Text("of").next_to(delicious, LEFT, buff=0.2)
+        new_text1 = Text("Working").next_to(new_text2, LEFT, buff=0.2)
         pizza = Text("Attention").next_to(delicious, RIGHT, buff=0.2)
+        text_group_new = VGroup(new_text1, new_text2 , delicious, pizza)
         text_group = VGroup(delicious, pizza)
-        text_group.move_to(ORIGIN)
+        text_group_new.move_to(ORIGIN)
         
-        self.play(Write(text_group), run_time=2)
+        self.play(Write(text_group_new), run_time=2)
         self.wait(0.5)
+        self.play(FadeOut(new_text1), FadeOut(new_text2))
+        self.wait(0.5)
+        self.play(text_group.animate.shift(ORIGIN + LEFT*2))   
         self.play(text_group.animate.shift(UP*2))
         self.play(
             delicious.animate.shift(LEFT*2),
