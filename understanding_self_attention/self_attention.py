@@ -13,6 +13,16 @@ class TextWorkingOfSelfAttention(Scene):
         self.play(text.animate.shift(UP*3))
         # Move this text up and below show some quick animations of matrix multiplication to calculate the attention scores
         self.play(FadeOut(text))
+
+class ThankYou(Scene):
+    def construct(self):
+        text = Text("Thank You", font_size=72)
+        text2 = Text("(you are awesome)", font_size=24).next_to(text, DOWN, buff=0.2)
+        self.play(Write(text), run_time=3)
+        self.wait(2)
+        self.play(FadeIn(text2))
+        self.wait(1)
+
 class LatexSelfAttention(Scene):
     def construct(self):
         # Break down the equation into parts for better control and animation
@@ -1427,9 +1437,9 @@ class MatrixRepresentation(Scene):
 
         self.wait(1)
 
-        question_1 = Text("Where can I buy an apple to eat?", font_size=36)
-        question_2 = Text("Who makes the iphones?", font_size=36)
-        question_3 = Text("Where can I buy an iphone?", font_size=36)
+        question_1 = Text("Where can I buy an apple to eat?", font_size=24)
+        question_2 = Text("Who makes the iphones?", font_size=24)
+        question_3 = Text("Where can I buy an iphone?", font_size=24)
 
         question_1.move_to(ORIGIN + UP)
         question_2.move_to(ORIGIN + DOWN)
