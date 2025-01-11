@@ -1304,106 +1304,116 @@ class MatrixRepresentation(Scene):
     def construct(self):
         # Create the axes and grid with adjusted ranges
         axes = Axes(
-            x_range=[0, 3],  # Only positive X
-            y_range=[0, 3],  # Only positive Y
+            x_range=[0, 3],
+            y_range=[0, 3],
             axis_config={
                 "color": BLUE,
                 "include_numbers": False,
                 "include_ticks": False
             },
-            x_length=7,  # Make it larger
-            y_length=7,  # Make it larger
+            x_length=7,
+            y_length=7,
             tips=True
         )
-        
         
         # Create the [Y,X] vector notation
         vector_notation = MathTex(r"\begin{bmatrix} Y \\ X \end{bmatrix}").to_corner(UR, buff=0.5)
         
-        # Create the points
-        point1 = Dot(axes.c2p(1, 1), color=RED)
-        point2 = Dot(axes.c2p(2, 1), color=RED)
-        point3 = Dot(axes.c2p(1, 2), color=RED)
-        point4 = Dot(axes.c2p(2, 2), color=RED)
+        # Create PNG images and position them
+        point_coords = [(1, 1), (2, 1), (1, 2), (2, 2)]
+        image_files = ["assets/apple.png", "assets/Apple_logo.png", "assets/market.png", "assets/phone.png"]
         
-        # Group everything together for the zoom
-        points = VGroup(point1, point2, point3, point4)
-        everything = VGroup(axes, points)
+        # Use Group instead of VGroup for images
+        points = Group()
+        for coord, img_file in zip(point_coords, image_files):
+            image = ImageMobject(img_file)
+            image.scale(0.3)
+            image.move_to(axes.c2p(*coord))
+            points.add(image)
         
+        # Group axes and points using Group instead of VGroup
+        everything = Group(axes, points)
         
         # Animation sequence
-        self.play(
-            Create(axes),
-            run_time=2
-        )
+        self.play(Create(axes), run_time=2)
         self.wait(0.5)
         
         self.play(Write(vector_notation), run_time=1)
         self.wait(0.5)
         
-        # Add points one by one
-        for point in [point1, point2, point3, point4]:
-            self.play(Create(point), run_time=0.5)
-            self.wait(0.3)
+        self.play(FadeIn(points), run_time=1)
+        self.wait(0.5)
         
-        
-        self.wait()
-        # This will shear the y-axis towards the x-axis
-        matrix = [[1, -1], [0, 1]]
-        
-        # Create new notation showing the transformation
-        new_vector_notation = MathTex(r"\begin{bmatrix} 1 & -1 \\ 0 & 1 \end{bmatrix}").next_to(vector_notation, LEFT, buff=0.5)
-        
+        # Scale and position everything
         self.play(
             everything.animate.scale(0.35).move_to(ORIGIN + UP*1.5),
         )
-        copied_group1 = everything.copy()  # Create a copy of the sheared configuration
-        text_representation1 = Text("Representation 1", font_size=36).next_to(copied_group1, DOWN*6.25 + LEFT*4, buff=0.5)
-        # Move the copy down
+        
+        # Create first copy
+        copied_group = Group(axes.copy(), points.copy())
+        text1 = Text("Representation 1", font_size=36).next_to(copied_group, DOWN*6.25 + LEFT*4, buff=0.5)
         self.play(
-            copied_group1.animate.shift(DOWN*3 + LEFT*5),  # Adjust the 3 value to control how far down it goes
-            Write(text_representation1),
+            copied_group.animate.shift(DOWN*3 + LEFT*5),
+            Write(text1),
             run_time=2
         )
 
-        # Apply the transformation
+        # First transformation
+        matrix1 = [[1, -1], [0, 1]]
+        notation1 = MathTex(r"\begin{bmatrix} 1 & -1 \\ 0 & 1 \end{bmatrix}").next_to(vector_notation, LEFT, buff=0.5)
+        self.play(FadeIn(notation1))
+
+        # Apply transformation to axes
+        self.play(axes.animate.apply_matrix(matrix1), run_time=2)
+        
+        # Calculate new positions for all points
+        animations = []
+        for point in points:
+            old_pos = axes.p2c(point.get_center())
+            new_x = matrix1[0][0] * old_pos[0] + matrix1[0][1] * old_pos[1]
+            new_y = matrix1[1][0] * old_pos[0] + matrix1[1][1] * old_pos[1]
+            animations.append(point.animate.move_to(axes.c2p(new_x, new_y) + UP*1.2 + LEFT*0.5))
+        
+        # Move all points simultaneously
+        self.play(*animations, run_time=2)
+
+        # Create second copy
+        copied_group2 = Group(axes.copy(), points.copy())
+        text2 = Text("Representation 2", font_size=36).next_to(text1, RIGHT*2, buff=0.5)
         self.play(
-            FadeIn(new_vector_notation),
-            everything.animate.apply_matrix(matrix),
-            run_time=3 
+            copied_group2.animate.shift(DOWN*3),
+            Write(text2),
+            run_time=2
         )
 
-        # After the shear transformation, create a copy and move it down
-        copied_group2 = everything.copy()  # Create a copy of the sheared configuration
-        text_representation2 = Text("Representation 2", font_size=36).next_to(text_representation1, RIGHT*2, buff=0.5)
-        # Move the copy down
+        # Second transformation
+        matrix2 = [[1, 1.5], [0, 1]]
+        notation2 = MathTex(r"\begin{bmatrix} 1 & 0.5 \\ 0 & 1 \end{bmatrix}").next_to(vector_notation, LEFT, buff=0.5)
         self.play(
-            copied_group2.animate.shift(DOWN*3),  # Adjust the 3 value to control how far down it goes
-            Write(text_representation2),
+            FadeOut(notation1),
+            FadeIn(notation2)
+        )
+
+        # Apply second transformation to axes
+        self.play(axes.animate.apply_matrix(matrix2), run_time=2)
+        
+        # Calculate and apply second transformation to all points simultaneously
+        animations = []
+        for point in points:
+            old_pos = axes.p2c(point.get_center())
+            new_x = matrix2[0][0] * old_pos[0] + matrix2[0][1] * old_pos[1]
+            new_y = matrix2[1][0] * old_pos[0] + matrix2[1][1] * old_pos[1]
+            animations.append(point.animate.move_to(axes.c2p(new_x, new_y) + LEFT + RIGHT*0.2))
+        
+        self.play(*animations, run_time=2)
+
+        # Create third copy
+        copied_group3 = Group(axes.copy(), points.copy())
+        text3 = Text("Representation 3", font_size=36).next_to(text2, RIGHT*2, buff=0.5)
+        self.play(
+            copied_group3.animate.shift(DOWN*3 + RIGHT*3.5),
+            Write(text3),
             run_time=2
         )
         
-        self.wait()
-
-        # This will shear the y-axis towards the x-axis
-        matrix = [[1, 1.5], [0, 1]]
-        
-        # Create new notation showing the transformation
-        new_vector_notation2 = MathTex(r"\begin{bmatrix} 1 & 0.5 \\ 0 & 1 \end{bmatrix}").next_to(vector_notation, LEFT, buff=0.5)
-
-        self.play(
-            FadeOut(new_vector_notation),
-            FadeIn(new_vector_notation2),
-            everything.animate.apply_matrix(matrix),
-            run_time=3 
-        )
-
-        copied_group3 = everything.copy()  # Create a copy of the sheared configuration
-        text_representation3 = Text("Representation 3", font_size=36).next_to(text_representation2, RIGHT*2, buff=0.5)
-        # Move the copy down
-        self.play(
-            copied_group3.animate.shift(DOWN*3 + RIGHT*3.5),  # Adjust the 3 value to control how far down it goes
-            Write(text_representation3),
-            run_time=2
-        )
         self.wait(2)
