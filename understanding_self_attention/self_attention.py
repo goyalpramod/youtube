@@ -1321,13 +1321,16 @@ class MatrixRepresentation(Scene):
         
         # Create PNG images and position them
         point_coords = [(1, 1), (2, 1), (1, 2), (2, 2)]
-        image_files = ["assets/apple.png", "assets/Apple_logo.png", "assets/market.png", "assets/phone.png"]
+        image_files = ["assets/market.png", "assets/Apple_logo.png", "assets/apple.png", "assets/phone.png"]
+        ImageMobject(image_files[1]).scale(0.3)
         
         # Use Group instead of VGroup for images
         points = Group()
         for coord, img_file in zip(point_coords, image_files):
             image = ImageMobject(img_file)
-            image.scale(0.3)
+            if img_file == "assets/Apple_logo.png":
+                image.scale(0.3)
+            image.scale(0.4)
             image.move_to(axes.c2p(*coord))
             points.add(image)
         
@@ -1403,7 +1406,7 @@ class MatrixRepresentation(Scene):
             old_pos = axes.p2c(point.get_center())
             new_x = matrix2[0][0] * old_pos[0] + matrix2[0][1] * old_pos[1]
             new_y = matrix2[1][0] * old_pos[0] + matrix2[1][1] * old_pos[1]
-            animations.append(point.animate.move_to(axes.c2p(new_x, new_y) + LEFT + RIGHT*0.2))
+            animations.append(point.animate.move_to(axes.c2p(new_x, new_y) + LEFT*0.7))
         
         self.play(*animations, run_time=2)
 
@@ -1417,3 +1420,43 @@ class MatrixRepresentation(Scene):
         )
         
         self.wait(2)
+
+        self.play(
+            FadeOut(Group(copied_group, copied_group2, copied_group3, text1, text2, text3, vector_notation, notation2, everything))
+        )
+
+        self.wait(1)
+
+        question_1 = Text("Where can I buy an apple to eat?", font_size=36)
+        question_2 = Text("Who makes the iphones?", font_size=36)
+        question_3 = Text("Where can I buy an iphone?", font_size=36)
+
+        question_1.move_to(ORIGIN + UP)
+        question_2.move_to(ORIGIN + DOWN)
+
+        self.play(Write(question_1))
+        self.wait(1)
+        self.play(Write(question_2))
+
+        self.play(
+            question_1.animate.shift(DOWN*2),
+            question_2.animate.shift(DOWN)
+        )
+        self.play(FadeIn(copied_group3.move_to(ORIGIN + UP*2), text3.next_to(copied_group3, DOWN, buff=0.5)))
+
+        self.wait(1)
+
+        self.play(FadeOut(Group(question_1, question_2), copied_group3, text3))
+
+        self.play(Write(question_3))
+        self.wait(1)
+        self.play(question_3.animate.shift(DOWN*2))
+        self.play(FadeIn(copied_group2.move_to(ORIGIN + UP*2), text3.next_to(copied_group2, DOWN, buff=0.5)))
+
+        self.wait(1)
+        self.play(FadeOut(Group(question_3), text3))
+
+        self.wait(2)
+        self.play(ReplacementTransform(copied_group2, copied_group.move_to(ORIGIN)), run_time=3)
+        self.wait(2)
+        self.play(FadeOut(copied_group))
