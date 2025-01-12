@@ -102,8 +102,8 @@ class YoutubeThumbnailWithUnderline(Scene):
 
 class YoutubeThumbnailWithoutUnderline(Scene):
     def construct(self):
-        text1 = Text("Understanding", font_size=72)
-        text2 = Text("Self Attention", font_size=72).next_to(text1, DOWN*1.5, buff=0.2)
+        text1 = Text("Understanding", font_size=72).set_color_by_gradient("#FFA500", "#FF4D00", "#FF0000")  # Bright orange -> Vivid orange-red -> Pure red
+        text2 = Text("Self Attention", font_size=72).next_to(text1, DOWN*1.5, buff=0.2).set_color_by_gradient("#FFA500", "#FF4D00", "#FF0000")
         self.play(Write(text1), Write(text2))
         self.wait(2)
 
@@ -976,15 +976,15 @@ class TextToMatrix(Scene):
         
         # Create result matrix Q (2×3)
         q_matrix = VGroup(*[
-            VGroup(*[Square(side_length=0.5, fill_color="#FFB6C1", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+            VGroup(*[Square(side_length=0.5, fill_color="#FFB6C1", fill_opacity=0.7) for _ in range(3)]).arrange(RIGHT, buff=0)
             for _ in range(2)
         ]).arrange(DOWN, buff=0)
         k_matrix = VGroup(*[
-            VGroup(*[Square(side_length=0.5, fill_color="#E6E6FA", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+            VGroup(*[Square(side_length=0.5, fill_color="#E6E6FA", fill_opacity=0.7) for _ in range(3)]).arrange(RIGHT, buff=0)
             for _ in range(2)
         ]).arrange(DOWN, buff=0)
         v_matrix = VGroup(*[
-            VGroup(*[Square(side_length=0.5, fill_color="#FFDAB9", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+            VGroup(*[Square(side_length=0.5, fill_color="#FFDAB9", fill_opacity=0.7) for _ in range(3)]).arrange(RIGHT, buff=0)
             for _ in range(2)
         ]).arrange(DOWN, buff=0)
         
@@ -1149,7 +1149,7 @@ class TextToMatrix(Scene):
 
 
         # Create and position softmax
-        softmax = Text("softmax", font_size=36, weight=BOLD)
+        softmax = Text("Softmax", font_size=36)
         softmax.next_to(left_paren, LEFT, buff=0.3)
 
         # Animate everything smoothly
