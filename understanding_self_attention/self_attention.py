@@ -14,6 +14,38 @@ class TextWorkingOfSelfAttention(Scene):
         # Move this text up and below show some quick animations of matrix multiplication to calculate the attention scores
         self.play(FadeOut(text))
 
+class ExampleText(Scene):
+    def construct(self):
+        # Create texts with proper arrangement
+        text1 = Text("Pramod ", font_size=24)
+        text2 = Text("loves to eat ", font_size=24)
+        text3 = Text("pizza. ", font_size=24)
+        text4 = Text("He ", font_size=24)
+        text5 = Text("ate some last night", font_size=24)
+
+        # Arrange texts horizontally
+        text_group = VGroup(text1, text2, text3, text4, text5).arrange(RIGHT, buff=0.1)
+        
+        # Center the text group
+        text_group.move_to(ORIGIN)
+
+        # Write the text
+        self.play(Write(text_group))
+        self.wait(2)
+
+        # Create and show the rectangle around "He"
+        framebox = SurroundingRectangle(text4, buff=0.1, color=RED)
+        self.play(Create(framebox))
+        self.wait(2)
+
+        # Animate opacity changes
+        self.play(
+            text1.animate.set_opacity(0.9),
+            VGroup(text2, text5).animate.set_opacity(0.4),
+            text3.animate.set_opacity(0.7)
+        )
+        self.wait(2)
+
 class ThankYou(Scene):
     def construct(self):
         text = Text("Thank You", font_size=72)
