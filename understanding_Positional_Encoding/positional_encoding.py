@@ -1,4 +1,6 @@
 from manim import *
+import random 
+
 
 class TextPositionalEncoding(Scene):
     def construct(self):
@@ -159,5 +161,121 @@ class HowToMakeAPositionalEncoder(Scene):
         self.wait(1)
         self.play(FadeOut(text))
 
-        text_rule_1 = Text("")
+        text_rule_1 = Text("Unique encoding for each position (across sequences)", font_size=24).shift(ORIGIN)
+        """
+        Each position needs a unique encoding that remains consistent regardless of sequence length
+        a token at position 5 should have the same encoding whether the current sequence is of length 10 or 10,000.
+        """
+
+        self.play(Write(text_rule_1))
+        self.play(text_rule_1.animate.shift(UP*2))
+        self.wait(1)
         
+        
+        """
+        for example lets say we encode each word with an integer
+        """
+# Create the sample text with words
+        words = ["Pramod", "loves", "to", "eat", "pizza"]
+        word_mobjects = VGroup(*[Text(word) for word in words])
+        word_mobjects.arrange(RIGHT, buff=0.5)  # Add some space between words
+        word_mobjects.move_to(ORIGIN)
+
+        # Generate random numbers (4 digits) for each word
+        random_numbers = [str(_) for _ in [7,1,3,9,5]]
+        number_mobjects = VGroup(*[
+            Text(num, font_size=36)  # Smaller font size for numbers
+            .next_to(word_mobjects[i], DOWN, buff=0.5)  # Position below each word
+            for i, num in enumerate(random_numbers)
+        ])
+
+        # Animate words and numbers
+        self.play(FadeIn(word_mobjects))
+        self.play(FadeIn(number_mobjects))
+
+        self.wait(3)
+
+        self.play(ReplacementTransform(number_mobjects[0], Text("5", font_size=36).next_to(word_mobjects[0], DOWN, buff=0.5)))
+
+        self.wait(3)
+
+        to_rect = SurroundingRectangle(
+            word_mobjects[0],
+            corner_radius=0.2,
+            buff=0.3,
+            color=YELLOW_B
+        )
+
+        pizza_rect = SurroundingRectangle(
+            word_mobjects[4],
+            corner_radius=0.2,
+            buff=0.3,
+            color=YELLOW_B
+        )
+
+        self.play(Create(to_rect), Create(pizza_rect))
+
+        self.wait(3)
+
+        """
+        now whatever words will be present in these locations, will be treated to be in the same place
+        """
+        self.play(FadeOut(VGroup(word_mobjects, number_mobjects, to_rect, pizza_rect)))
+        self.wait(1)
+        # Create a copy of "Unique encoding" part that will remain
+        unique_encoding_text = Text("Unique encoding").scale(0.5).to_corner(UL, buff=0.5) 
+        
+        # Animate the transition
+        self.play(
+            Transform(text_rule_1[:14], unique_encoding_text),  # Transform "Unique encoding" to new position
+            FadeOut(text_rule_1[14:]),  # Fade out the rest of the text
+            run_time=1.5
+        )
+
+        self.wait(1)
+
+        text_rule_2 = Text("Linear relation between two encoded positions", font_size=24).shift(ORIGIN)
+        self.play(Write(text_rule_2))
+        """
+        from the following sequence we can infer that value for eat will be
+        """
+        self.play(text_rule_2.animate.shift(UP*2))
+
+        words = ["Pramod", "loves", "to", "eat", "pizza"]
+        word_mobjects = VGroup(*[Text(word) for word in words])
+        word_mobjects.arrange(RIGHT, buff=0.5)  # Add some space between words
+        word_mobjects.move_to(ORIGIN)
+
+        # Generate random numbers (4 digits) for each word
+        random_numbers = [str(_) for _ in [7,1,3,9,5]]
+        number_mobjects = VGroup(*[
+            Text(num, font_size=36)  # Smaller font size for numbers
+            .next_to(word_mobjects[i], DOWN, buff=0.5)  # Position below each word
+            for i, num in enumerate(random_numbers)
+        ])
+
+        # Animate words and numbers
+        self.play(FadeIn(word_mobjects))
+        self.play(FadeIn(number_mobjects))
+
+        self.wait(3)
+
+
+        self.wait(3)
+
+        to_rect = SurroundingRectangle(
+            word_mobjects[2],
+            corner_radius=0.2,
+            buff=0.3,
+            color=YELLOW_B
+        )
+
+        self.play(Create(to_rect), Create(pizza_rect))
+
+        self.wait(3)
+
+        """
+        now whatever words will be present in these locations, will be treated to be in the same place
+        """
+        self.play(FadeOut(VGroup(word_mobjects, number_mobjects, to_rect, pizza_rect)))
+        self.wait(1)
