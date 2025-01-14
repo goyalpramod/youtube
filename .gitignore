@@ -172,3 +172,4 @@ cython_debug/
 media
 scene.txt 
 assets/
+test.py 
