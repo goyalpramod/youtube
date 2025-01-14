@@ -14,6 +14,38 @@ class TextWorkingOfSelfAttention(Scene):
         # Move this text up and below show some quick animations of matrix multiplication to calculate the attention scores
         self.play(FadeOut(text))
 
+class ExampleText(Scene):
+    def construct(self):
+        # Create texts with proper arrangement
+        text1 = Text("Pramod ", font_size=24)
+        text2 = Text("loves to eat ", font_size=24)
+        text3 = Text("pizza. ", font_size=24)
+        text4 = Text("He ", font_size=24)
+        text5 = Text("ate some last night", font_size=24)
+
+        # Arrange texts horizontally
+        text_group = VGroup(text1, text2, text3, text4, text5).arrange(RIGHT, buff=0.1)
+        
+        # Center the text group
+        text_group.move_to(ORIGIN)
+
+        # Write the text
+        self.play(Write(text_group))
+        self.wait(2)
+
+        # Create and show the rectangle around "He"
+        framebox = SurroundingRectangle(text4, buff=0.1, color=RED)
+        self.play(Create(framebox))
+        self.wait(2)
+
+        # Animate opacity changes
+        self.play(
+            text1.animate.set_opacity(0.9),
+            VGroup(text2, text5).animate.set_opacity(0.4),
+            text3.animate.set_opacity(0.7)
+        )
+        self.wait(2)
+
 class ThankYou(Scene):
     def construct(self):
         text = Text("Thank You", font_size=72)
@@ -70,8 +102,8 @@ class YoutubeThumbnailWithUnderline(Scene):
 
 class YoutubeThumbnailWithoutUnderline(Scene):
     def construct(self):
-        text1 = Text("Understanding", font_size=72)
-        text2 = Text("Self Attention", font_size=72).next_to(text1, DOWN*1.5, buff=0.2)
+        text1 = Text("Understanding", font_size=72).set_color_by_gradient("#FFA500", "#FF4D00", "#FF0000")  # Bright orange -> Vivid orange-red -> Pure red
+        text2 = Text("Self Attention", font_size=72).next_to(text1, DOWN*1.5, buff=0.2).set_color_by_gradient("#FFA500", "#FF4D00", "#FF0000")
         self.play(Write(text1), Write(text2))
         self.wait(2)
 
@@ -944,15 +976,15 @@ class TextToMatrix(Scene):
         
         # Create result matrix Q (2×3)
         q_matrix = VGroup(*[
-            VGroup(*[Square(side_length=0.5, fill_color="#FFB6C1", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+            VGroup(*[Square(side_length=0.5, fill_color="#FFB6C1", fill_opacity=0.7) for _ in range(3)]).arrange(RIGHT, buff=0)
             for _ in range(2)
         ]).arrange(DOWN, buff=0)
         k_matrix = VGroup(*[
-            VGroup(*[Square(side_length=0.5, fill_color="#E6E6FA", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+            VGroup(*[Square(side_length=0.5, fill_color="#E6E6FA", fill_opacity=0.7) for _ in range(3)]).arrange(RIGHT, buff=0)
             for _ in range(2)
         ]).arrange(DOWN, buff=0)
         v_matrix = VGroup(*[
-            VGroup(*[Square(side_length=0.5, fill_color="#FFDAB9", fill_opacity=0.5) for _ in range(3)]).arrange(RIGHT, buff=0)
+            VGroup(*[Square(side_length=0.5, fill_color="#FFDAB9", fill_opacity=0.7) for _ in range(3)]).arrange(RIGHT, buff=0)
             for _ in range(2)
         ]).arrange(DOWN, buff=0)
         
@@ -1117,7 +1149,7 @@ class TextToMatrix(Scene):
 
 
         # Create and position softmax
-        softmax = Text("softmax", font_size=36, weight=BOLD)
+        softmax = Text("Softmax", font_size=36)
         softmax.next_to(left_paren, LEFT, buff=0.3)
 
         # Animate everything smoothly
