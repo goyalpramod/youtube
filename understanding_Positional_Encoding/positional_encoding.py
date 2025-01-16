@@ -223,7 +223,7 @@ class HowToMakeAPositionalEncoder(Scene):
         self.play(FadeOut(VGroup(word_mobjects, number_mobjects, to_rect, pizza_rect)))
         self.wait(1)
         # Create a copy of "Unique encoding" part that will remain
-        unique_encoding_text = Text("Unique encoding").scale(0.5).to_corner(UL, buff=0.5) 
+        unique_encoding_text = Text("Unique encoding").scale(0.5).to_corner(UL, buff=0.4) 
         
         # Animate the transition
         self.play(
@@ -279,3 +279,17 @@ class HowToMakeAPositionalEncoder(Scene):
         """
         self.play(FadeOut(VGroup(word_mobjects, number_mobjects, to_rect, pizza_rect)))
         self.wait(1)
+        
+        # Create a copy of "Unique encoding" part that will remain
+        linear_relation_text = Text("Linear relation").scale(0.5).next_to(unique_encoding_text,DOWN, buff=0.2, aligned_edge=LEFT) 
+        
+        # Animate the transition
+        self.play(
+            Transform(text_rule_2[:14], linear_relation_text),  # Transform "Unique encoding" to new position
+            FadeOut(text_rule_2[14:]),  # Fade out the rest of the text
+            run_time=1.5
+        )
+
+        self.wait(1)
+
+        text_rule_3 = Text("Generalizes to longer sequences than those encountered in training")
