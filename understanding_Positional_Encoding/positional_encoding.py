@@ -39,10 +39,10 @@ class TextDifferentPositionalEncoding(Scene):
 class WithoutPositionalEncoding(Scene):
     def construct(self):
         # Start with concatenated text
-        initial_text = Text("Pramod loves to eat pizza")
+        initial_text = Text("Jack loves to eat pizza")
         
         # Create separated words
-        words = ["Pramod", "loves", "to", "eat", "pizza"]
+        words = ["Jack", "loves", "to", "eat", "pizza"]
         word_mobjects = VGroup(*[Text(word) for word in words])
         word_mobjects.arrange(RIGHT, buff=1)
         word_mobjects.shift(DOWN*2)
@@ -139,16 +139,16 @@ class WithoutPositionalEncoding(Scene):
 
         self.play(VGroup(encoder_box, encoder_rect).animate.shift(DOWN*3))
 
-        text_pramod_pizza = Text("Pramod loves to eat pizza").shift(UP*2)
-        text_pizza_pramod = Text("pizza loves to eat Pramod").shift(DOWN*2)
+        text_Jack_pizza = Text("Jack loves to eat pizza").shift(UP*2)
+        text_pizza_Jack = Text("pizza loves to eat Jack").shift(DOWN*2)
 
-        self.play(Write(text_pramod_pizza), Write(text_pizza_pramod))
+        self.play(Write(text_Jack_pizza), Write(text_pizza_Jack))
 
         self.wait(2)
 
-        text_random = Text("to loves Pramod pizza eat").shift(ORIGIN)
+        text_random = Text("to loves Jack pizza eat").shift(ORIGIN)
 
-        self.play(FadeOut(encoder_box, encoder_rect), FadeOut(text_pramod_pizza), FadeOut(text_pizza_pramod),)
+        self.play(FadeOut(encoder_box, encoder_rect), FadeOut(text_Jack_pizza), FadeOut(text_pizza_Jack),)
         self.wait(2)
         self.play(Write(text_random))
         self.play( FadeOut(text_random))
@@ -176,7 +176,7 @@ class HowToMakeAPositionalEncoder(Scene):
         for example lets say we encode each word with an integer
         """
 # Create the sample text with words
-        words = ["Pramod", "loves", "to", "eat", "pizza"]
+        words = ["Jack", "loves", "to", "eat", "pizza"]
         word_mobjects = VGroup(*[Text(word) for word in words])
         word_mobjects.arrange(RIGHT, buff=0.5)  # Add some space between words
         word_mobjects.move_to(ORIGIN)
@@ -241,7 +241,7 @@ class HowToMakeAPositionalEncoder(Scene):
         """
         self.play(text_rule_2.animate.shift(UP*2))
 
-        words = ["Pramod", "loves", "to", "eat", "pizza"]
+        words = ["Jack", "loves", "to", "eat", "pizza"]
         word_mobjects = VGroup(*[Text(word) for word in words])
         word_mobjects.arrange(RIGHT, buff=0.5)  # Add some space between words
         word_mobjects.move_to(ORIGIN)
@@ -495,7 +495,40 @@ class HowToMakeAPositionalEncoder(Scene):
             FadeOut(text_rule_5[22:]),
             FadeOut(VGroup(
                 one_d_text, one_d_boxes, one_d_numbers,
-                two_d_text, two_d_grid, two_d_numbers,
+                two_d_text, two_d_grid, two_d_numbers, arrow,
             )),
             run_time=1.5
         )
+
+        # Collect all corner texts in a VGroup
+        all_properties = VGroup(
+            unique_encoding_text,
+            linear_relation_text,
+            generalize_text,
+            deterministic_text,
+            multidim_text
+        )
+        
+        self.play(
+            all_properties.animate.move_to(ORIGIN),
+            all_properties.animate.scale(1),
+        )        
+        
+        
+        self.wait(1)
+        
+        # Final fadeout
+        self.play(
+            FadeOut(all_properties),
+            run_time=1.5
+        )
+        
+        self.wait(1)
+
+class DifferentPositionalEncoding(Scene):
+    def construct(self):
+        integer_encoding = Text("Integer Encoding", font_size=48).shift(ORIGIN)
+
+        self.play(Write(integer_encoding))
+        self.wait(1)
+        self.play(FadeOut(integer_encoding))
