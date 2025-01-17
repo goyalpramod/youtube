@@ -431,3 +431,71 @@ class HowToMakeAPositionalEncoder(Scene):
             FadeOut(VGroup(entire_sequence, formula_text, pattern_text)),
             run_time=1.5
         )
+
+        text_rule_5 = Text("Extensible to multiple dimensions", font_size=24).shift(ORIGIN)
+        self.play(Write(text_rule_5))
+        self.play(text_rule_5.animate.shift(UP*2))
+
+        # Create 1D sequence
+        one_d_text = Text("1D (Sequence)", font_size=20).to_edge(LEFT).shift(UP)
+        one_d_boxes = VGroup(*[
+            Square(side_length=0.5, fill_opacity=0.3, fill_color=BLUE)
+            for _ in range(5)
+        ]).arrange(RIGHT, buff=0.2).next_to(one_d_text, RIGHT, buff=1)
+        
+        # Add position numbers for 1D
+        one_d_numbers = VGroup(*[
+            Text(f"{i+1}", font_size=16).move_to(box)
+            for i, box in enumerate(one_d_boxes)
+        ])
+
+        self.play(
+            Write(one_d_text),
+            *[Create(box) for box in one_d_boxes],
+            *[Write(num) for num in one_d_numbers]
+        )
+        self.wait(1)
+
+        # Create 2D grid
+        two_d_text = Text("2D (Image)", font_size=20).to_edge(LEFT)
+        grid_size = 3
+        two_d_grid = VGroup(*[
+            VGroup(*[
+                Square(side_length=0.5, fill_opacity=0.3, fill_color=GREEN)
+                for _ in range(grid_size)
+            ]).arrange(RIGHT, buff=0.2)
+            for _ in range(grid_size)
+        ]).arrange(DOWN, buff=0.2).next_to(two_d_text, RIGHT, buff=1)
+
+        # Add position numbers for 2D
+        two_d_numbers = VGroup(*[
+            Text(f"({i+1},{j+1})", font_size=12).move_to(
+                two_d_grid[i][j]
+            )
+            for i in range(grid_size)
+            for j in range(grid_size)
+        ])
+
+        self.play(
+            Write(two_d_text),
+            *[Create(cell) for row in two_d_grid for cell in row],
+            *[Write(num) for num in two_d_numbers]
+        )
+        self.wait(1)
+
+
+        # Create corner text
+        multidim_text = Text("Multi-dimensional").scale(0.5).next_to(
+            deterministic_text, DOWN, buff=0.2, aligned_edge=LEFT
+        )
+
+        # Final transition
+        self.play(
+            Transform(text_rule_5[:22], multidim_text),
+            FadeOut(text_rule_5[22:]),
+            FadeOut(VGroup(
+                one_d_text, one_d_boxes, one_d_numbers,
+                two_d_text, two_d_grid, two_d_numbers,
+            )),
+            run_time=1.5
+        )
