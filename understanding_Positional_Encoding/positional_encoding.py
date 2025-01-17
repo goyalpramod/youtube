@@ -499,30 +499,31 @@ class HowToMakeAPositionalEncoder(Scene):
             )),
             run_time=1.5
         )
-
+        all_properties = VGroup()
         # Collect all corner texts in a VGroup
-        all_properties = VGroup(
+        all_properties.add(
             unique_encoding_text,
             linear_relation_text,
             generalize_text,
             deterministic_text,
             multidim_text
         )
-        
+
+        # Combine the animations using a single .animate chain
         self.play(
-            all_properties.animate.move_to(ORIGIN),
-            all_properties.animate.scale(1),
+            FadeOut(unique_encoding_text, linear_relation_text, generalize_text, deterministic_text, multidim_text),
+            all_properties.animate.move_to(ORIGIN).scale(2),  # Scale by 2 to counter the initial 0.5
+            run_time=2
         )        
-        
-        
-        self.wait(1)
-        
+
+        self.wait(3)
+
         # Final fadeout
         self.play(
             FadeOut(all_properties),
             run_time=1.5
         )
-        
+
         self.wait(1)
 
 class DifferentPositionalEncoding(Scene):
@@ -532,3 +533,92 @@ class DifferentPositionalEncoding(Scene):
         self.play(Write(integer_encoding))
         self.wait(1)
         self.play(FadeOut(integer_encoding))
+
+        # Create the sentence
+        sentence = "Jack loves to eat pizza"
+        text = Text(sentence, font_size=36).move_to(ORIGIN)
+        self.play(Write(text))
+        self.wait(1)
+
+        # Highlight "loves" (second word)
+        words = text.get_text().split()
+        word_lengths = [len(word) for word in words]
+        
+        # Calculate the position of "loves"
+        loves_start = sum(word_lengths[:1]) + 1  # Add 1 for the space
+        loves_end = len(words[1])
+        
+        loves_rect = SurroundingRectangle(
+            text[loves_start:loves_end],
+            buff=0.1,
+            color=YELLOW
+        )
+        
+        self.play(Create(loves_rect))
+        self.wait(1)
+
+        # Move text up
+        self.play(
+            text.animate.shift(UP*2),
+            loves_rect.animate.shift(UP*2)
+        )
+
+        # Create embedding vector (8 boxes to represent the embedding)
+        num_dimensions = 8
+        embedding_boxes = VGroup(*[
+            Square(
+                side_length=0.5,
+                fill_opacity=0.3,
+                fill_color=GREEN
+            ).set_stroke(WHITE, 2)
+            for _ in range(num_dimensions)
+        ]).arrange(RIGHT, buff=0.1)
+        
+        # Add random numbers inside boxes
+        embedding_numbers = VGroup(*[
+            Text(f"{random.uniform(-0.05, 0.05):.3f}", font_size=16)
+            .move_to(box)
+            for box in embedding_boxes
+        ])
+        
+        embedding_group = VGroup(embedding_boxes, embedding_numbers)
+        embedding_group.next_to(loves_rect, DOWN, buff=1)
+
+        # Animate embedding appearance
+        self.play(
+            Create(embedding_boxes),
+            Write(embedding_numbers)
+        )
+        self.wait(1)
+
+        # Add position number (2 for "loves")
+        position_text = Text("2", font_size=36).next_to(embedding_group, RIGHT, buff=0.5)
+        self.play(Write(position_text))
+        self.wait(1)
+
+        # Create position boxes
+        position_boxes = VGroup(*[
+            Square(
+                side_length=0.5,
+                fill_opacity=0.3,
+                fill_color=YELLOW
+            ).set_stroke(WHITE, 2)
+            for _ in range(num_dimensions)
+        ]).arrange(RIGHT, buff=0.1)
+        
+        # Add "2" in each position box
+        position_numbers = VGroup(*[
+            Text("2", font_size=16).move_to(box)
+            for box in position_boxes
+        ])
+        
+        position_group = VGroup(position_boxes, position_numbers)
+        position_group.next_to(position_text, RIGHT, buff=0.5)
+
+        # Animate position boxes appearance
+        self.play(
+            Create(position_boxes),
+            Write(position_numbers)
+        )
+        
+        self.wait(2)
