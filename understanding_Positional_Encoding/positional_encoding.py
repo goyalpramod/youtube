@@ -537,27 +537,43 @@ class DifferentPositionalEncoding(Scene):
         # Create the sentence
         sentence = "Jack loves to eat pizza"
         text = Text(sentence, font_size=36).move_to(ORIGIN)
-        self.play(Write(text))
         self.wait(1)
-
-        # Split text and find the word "loves"
-        words = sentence.split()
+        words = ["Jack", "loves", "to", "eat", "pizza"]
         word_starts = [0]  # Start positions of each word
+        
         for i in range(len(words)-1):
             word_starts.append(word_starts[i] + len(words[i]) + 1)  # +1 for space
-        
-        loves_start = word_starts[1] - 1
-        loves_end = loves_start + len(words[1])
 
-        # Move text up
-        self.play(
-            text.animate.shift(UP*2.5),
-        )
+        word_mobjects = VGroup(*[
+            Text(word, font_size=36) for word in words
+        ]).arrange(RIGHT, buff=0.3)  # Arrange words horizontally with spacing
+        word_mobjects.move_to(ORIGIN)
+
+        # Create position numbers aligned with each word
+        position_numbers = VGroup(*[
+            Text(str(i+1), font_size=24) 
+            for i in range(len(words))
+        ])
+
+        # Align each number with its corresponding word
+        for number, word in zip(position_numbers, word_mobjects):
+            number.move_to(word.get_top() + UP*0.3)
+
+        # Animate everything
+        self.play(Write(word_mobjects))
+        self.wait(1)
+        self.play(Write(position_numbers))
         self.wait(1)
 
-        # Color the word "loves"
+        # Move everything up together
         self.play(
-            text[loves_start:loves_end].animate.set_color(YELLOW)
+            word_mobjects.animate.shift(UP*2.5),
+            position_numbers.animate.shift(UP*2.5)
+        )
+
+        # Color the word "loves" - fixed indexing
+        self.play(
+            word_mobjects[1].animate.set_color(YELLOW)
         )
 
         # Create embedding vector (8 boxes to represent the embedding)
@@ -579,10 +595,11 @@ class DifferentPositionalEncoding(Scene):
         ])
         
         embedding_group = VGroup(embedding_boxes, embedding_numbers)
-        embedding_group.next_to(text, DOWN, buff=1).align_to(text[loves_start:loves_end], LEFT)  # Changed from loves_rect
-
-        # Animate embedding appearance 
+        embedding_group.next_to(word_mobjects, DOWN, buff=1).align_to(word_mobjects[1], LEFT)
+        embedding_text = Text("Embedding", font_size=24).next_to(embedding_group, LEFT, buff=0.5)
+        
         self.play(
+            Write(embedding_text),
             Create(embedding_boxes),
             Write(embedding_numbers)
         )
@@ -611,9 +628,218 @@ class DifferentPositionalEncoding(Scene):
         
         position_group = VGroup(position_boxes, position_numbers)
         position_group.next_to(position_text, RIGHT, buff=0.5)
-
+        position_encoding_text = Text("Position Encoding", font_size=24).next_to(position_group, RIGHT, buff=0.5)
+        
         self.play(
-            ReplacementTransform(position_text,position_group)
+            Write(position_encoding_text),
+            ReplacementTransform(position_text, position_group)
         )
+        
+        self.wait(2)
+
+        # Modified addition animation
+        plus_sign = Text("+", font_size=36).move_to(
+            (embedding_group.get_right() + position_group.get_left()) / 2
+        )
+        
+        self.play(Write(plus_sign))
+        self.wait(1)
+
+        # Create final sum boxes
+        sum_boxes = VGroup(*[
+            Square(
+                side_length=0.6,
+                fill_opacity=0.3,
+                fill_color=BLUE
+            ).set_stroke(WHITE, 2)
+            for _ in range(num_dimensions)
+        ]).arrange(DOWN, buff=0)
+
+        # Calculate sum numbers
+        sum_numbers = VGroup(*[
+            Text(
+                f"{float(embedding_numbers[i].text) + float(position_numbers[i].text):.2f}",
+                font_size=16
+            ).move_to(box)
+            for i, box in enumerate(sum_boxes)
+        ])
+
+        sum_group = VGroup(sum_boxes, sum_numbers)
+        sum_group.move_to(
+            (embedding_group.get_center() + position_group.get_center()) / 2
+        )
+        
+        final_encoding_text = Text("Final Encoding", font_size=24).next_to(sum_group, RIGHT, buff=0.5)
+
+        # New animation sequence
+        self.play(
+            FadeOut(plus_sign),
+            ReplacementTransform(embedding_group, sum_group),
+            ReplacementTransform(position_group, sum_group),
+            FadeOut(embedding_text, position_encoding_text),
+            Write(final_encoding_text)
+        )
+        
+        self.wait(2)
+
+class DifferentPositionalEncoding2(Scene):
+    def construct(self):
+        integer_encoding = Text("Integer Encoding", font_size=48).shift(ORIGIN)
+
+        self.play(Write(integer_encoding))
+        self.wait(1)
+        self.play(FadeOut(integer_encoding))
+
+        # Create the sentence
+        sentence = "... Joe has the best ..."
+        text = Text(sentence, font_size=36).move_to(ORIGIN)
+        self.play(Write(text))
+        self.wait(1)
+
+        # Split text and find the word "Joe"
+        words = sentence.split()
+        word_starts = [0]  # Start positions of each word
+        for i in range(len(words)-1):
+            word_starts.append(word_starts[i] + len(words[i]) + 1)  # +1 for space
+        
+        # Adjust for the leading "..."
+        joe_start = 4  # Start after "... "
+        joe_end = joe_start + len("Joe")
+
+        # Add position numbers above each word
+        positions = VGroup(*[
+            Text(str(pos), font_size=24)
+            .next_to(text[word_starts[i]+4:word_starts[i]+len(words[i])+4], UP, buff=0.3)
+            for i, pos in enumerate(range(253, 257))
+        ])
+        self.play(Write(positions))
+        self.wait(1)
+
+        # Move text up
+        self.play(
+            text.animate.shift(UP*2.5),
+            positions.animate.shift(UP*2.5)
+        )
+        self.wait(1)
+
+        # Color the word "Joe"
+        self.play(
+            text[joe_start:joe_end].animate.set_color(YELLOW)
+        )
+
+        # Create embedding vector (8 boxes to represent the embedding)
+        num_dimensions = 8
+        embedding_boxes = VGroup(*[
+            Square(
+                side_length=0.6,
+                fill_opacity=0.3,
+                fill_color=GREEN
+            ).set_stroke(WHITE, 2)
+            for _ in range(num_dimensions)
+        ]).arrange(DOWN, buff=0)
+        
+        # Add random numbers inside boxes
+        embedding_numbers = VGroup(*[
+            Text(f"{random.uniform(-0.5, 0.5):.2f}", font_size=16)
+            .move_to(box)
+            for box in embedding_boxes
+        ])
+        
+        embedding_group = VGroup(embedding_boxes, embedding_numbers)
+        embedding_group.next_to(text, DOWN, buff=1).align_to(text[joe_start:joe_end], LEFT)
+        embedding_text = Text("Embedding", font_size=24).next_to(embedding_group, LEFT, buff=0.5)
+        
+        # Animate embedding appearance 
+        self.play(
+            Write(embedding_text),
+            Create(embedding_boxes),
+            Write(embedding_numbers)
+        )
+        self.wait(1)
+
+        # Add position number (253 for "Joe")
+        position_text = Text("253", font_size=36).next_to(embedding_group, RIGHT*1.5, buff=0.5)
+        self.play(Write(position_text))
+        self.wait(1)
+
+        # Create position boxes
+        position_boxes = VGroup(*[
+            Square(
+                side_length=0.6,
+                fill_opacity=0.3,
+                fill_color=YELLOW
+            ).set_stroke(WHITE, 2)
+            for _ in range(num_dimensions)
+        ]).arrange(DOWN, buff=0)
+        
+        # Add "253" in each position box
+        position_numbers = VGroup(*[
+            Text("253", font_size=16).move_to(box)
+            for box in position_boxes
+        ])
+        
+        position_group = VGroup(position_boxes, position_numbers)
+        position_group.next_to(position_text, RIGHT, buff=0.5)
+        position_encoding_text = Text("Position Encoding", font_size=24).next_to(position_group, RIGHT, buff=0.5)
+        
+        self.play(
+            Write(position_encoding_text),
+            ReplacementTransform(position_text, position_group)
+        )
+        
+        # Create sum boxes for Text + Position encoding
+        sum_boxes = VGroup(*[
+            Square(
+                side_length=0.6,
+                fill_opacity=0.3,
+                fill_color=BLUE
+            ).set_stroke(WHITE, 2)
+            for _ in range(num_dimensions)
+        ]).arrange(DOWN, buff=0)
+
+        # Add numbers that are sum of embedding and position encoding
+        sum_numbers = VGroup(*[
+            Text(
+                f"{float(embedding_numbers[i].text) + 253:.2f}",
+                font_size=16
+            ).move_to(box)
+            for i, box in enumerate(sum_boxes)
+        ])
+
+        sum_group = VGroup(sum_boxes, sum_numbers)
+        sum_group.next_to(position_group, RIGHT*2, buff=0.5)
+        
+        plus_sign = Text("+", font_size=36).next_to(position_group, RIGHT, buff=0.5)
+        equals_sign = Text("=", font_size=36).next_to(plus_sign, RIGHT, buff=0.5)
+        
+        final_encoding_text = Text("Final Encoding", font_size=24).next_to(sum_group, RIGHT, buff=0.5)
+
+        # Show the addition process
+        self.play(Write(plus_sign))
+        self.play(Write(equals_sign))
+        
+        self.play(
+            Create(sum_boxes),
+            Write(sum_numbers),
+            Write(final_encoding_text)
+        )
+
+        # Add arrows to show addition
+        arrows = VGroup(*[
+            Arrow(
+                start=embedding_numbers[i].get_center(),
+                end=sum_numbers[i].get_center(),
+                color=YELLOW,
+                stroke_width=2,
+                max_tip_length_to_length_ratio=0.1
+            )
+            for i in range(num_dimensions)
+        ])
+
+        self.play(Create(arrows))
+        self.wait(1)
+
+        # Fade out arrows
+        self.play(FadeOut(arrows))
         
         self.wait(2)
