@@ -540,51 +540,48 @@ class DifferentPositionalEncoding(Scene):
         self.play(Write(text))
         self.wait(1)
 
-        # Highlight "loves" (second word)
-        words = text.get_text().split()
-        word_lengths = [len(word) for word in words]
+        # Split text and find the word "loves"
+        words = sentence.split()
+        word_starts = [0]  # Start positions of each word
+        for i in range(len(words)-1):
+            word_starts.append(word_starts[i] + len(words[i]) + 1)  # +1 for space
         
-        # Calculate the position of "loves"
-        loves_start = sum(word_lengths[:1]) + 1  # Add 1 for the space
-        loves_end = len(words[1])
-        
-        loves_rect = SurroundingRectangle(
-            text[loves_start:loves_end],
-            buff=0.1,
-            color=YELLOW
-        )
-        
-        self.play(Create(loves_rect))
-        self.wait(1)
+        loves_start = word_starts[1] - 1
+        loves_end = loves_start + len(words[1])
 
         # Move text up
         self.play(
-            text.animate.shift(UP*2),
-            loves_rect.animate.shift(UP*2)
+            text.animate.shift(UP*2.5),
+        )
+        self.wait(1)
+
+        # Color the word "loves"
+        self.play(
+            text[loves_start:loves_end].animate.set_color(YELLOW)
         )
 
         # Create embedding vector (8 boxes to represent the embedding)
         num_dimensions = 8
         embedding_boxes = VGroup(*[
             Square(
-                side_length=0.5,
+                side_length=0.6,
                 fill_opacity=0.3,
                 fill_color=GREEN
             ).set_stroke(WHITE, 2)
             for _ in range(num_dimensions)
-        ]).arrange(RIGHT, buff=0.1)
+        ]).arrange(DOWN, buff=0)
         
         # Add random numbers inside boxes
         embedding_numbers = VGroup(*[
-            Text(f"{random.uniform(-0.05, 0.05):.3f}", font_size=16)
+            Text(f"{random.uniform(-0.5, 0.5):.2f}", font_size=16)
             .move_to(box)
             for box in embedding_boxes
         ])
         
         embedding_group = VGroup(embedding_boxes, embedding_numbers)
-        embedding_group.next_to(loves_rect, DOWN, buff=1)
+        embedding_group.next_to(text, DOWN, buff=1).align_to(text[loves_start:loves_end], LEFT)  # Changed from loves_rect
 
-        # Animate embedding appearance
+        # Animate embedding appearance 
         self.play(
             Create(embedding_boxes),
             Write(embedding_numbers)
@@ -592,19 +589,19 @@ class DifferentPositionalEncoding(Scene):
         self.wait(1)
 
         # Add position number (2 for "loves")
-        position_text = Text("2", font_size=36).next_to(embedding_group, RIGHT, buff=0.5)
+        position_text = Text("2", font_size=36).next_to(embedding_group, RIGHT*1.5, buff=0.5)
         self.play(Write(position_text))
         self.wait(1)
 
         # Create position boxes
         position_boxes = VGroup(*[
             Square(
-                side_length=0.5,
+                side_length=0.6,
                 fill_opacity=0.3,
                 fill_color=YELLOW
             ).set_stroke(WHITE, 2)
             for _ in range(num_dimensions)
-        ]).arrange(RIGHT, buff=0.1)
+        ]).arrange(DOWN, buff=0)
         
         # Add "2" in each position box
         position_numbers = VGroup(*[
@@ -615,10 +612,8 @@ class DifferentPositionalEncoding(Scene):
         position_group = VGroup(position_boxes, position_numbers)
         position_group.next_to(position_text, RIGHT, buff=0.5)
 
-        # Animate position boxes appearance
         self.play(
-            Create(position_boxes),
-            Write(position_numbers)
+            ReplacementTransform(position_text,position_group)
         )
         
         self.wait(2)
