@@ -909,47 +909,82 @@ class SinusoidalEncoding(Scene):
 
         self.play(FadeOut(VGroup(eq1, eq2, explanations, sine_encoding)))
 
-        # After the explanations, add the visualization
+        # Write the simplified equation
+        simple_eq = MathTex(r"PE(pos) = \sin(pos)").move_to(UP * 3.5)
+        self.play(Write(simple_eq))
+        
         # Create the axes
         axes = Axes(
-            x_range=[0, 100, 20],
-            y_range=[-1, 1, 0.5],
+            x_range=[0, 10, 2],  # From 0 to 10 with step size 2
+            y_range=[-1, 1, 0.5],  # From -1 to 1 with step size 0.5
             tips=False,
-            axis_config={"include_numbers": True},
-        ).scale(0.7).shift(DOWN * 0.5)
-
-        # Create sine waves with different frequencies
-        def get_sine_wave(i):
-            return lambda x: np.sin(x / (10000 ** (2 * i / 4)))
+            axis_config={"color": WHITE}
+        ).scale(0.8)
         
-        def get_cosine_wave(i):
-            return lambda x: np.cos(x / (10000 ** (2 * i / 4)))
-
-        # Create graphs with alternating colors and frequencies
-        graphs = VGroup()
-        for i in range(4):
-            # Sine waves (blue)
-            sine_graph = axes.plot(get_sine_wave(i), color=BLUE_C)
-            graphs.add(sine_graph)
-            
-            # Cosine waves (red)
-            cos_graph = axes.plot(get_cosine_wave(i), color=RED_C)
-            graphs.add(cos_graph)
-            
-            # Add value labels on the left
-            sine_label = MathTex(f"+{0.5:.2f}", color=BLUE_C).scale(0.6).next_to(sine_graph, LEFT)
-            cos_label = MathTex(f"-{0.8:.2f}", color=RED_C).scale(0.6).next_to(cos_graph, LEFT)
-            graphs.add(sine_label, cos_label)
-
-        # Add position marker
-        pos_marker = MathTex("99").scale(0.8).next_to(axes.coords_to_point(99, -1), DOWN)
+        # Create the sine graph
+        sine_graph = axes.plot(
+            lambda x: np.sin(x),
+            color=BLUE
+        )
         
-        # Play the animation
+        # Create dots for specific positions
+        dots = VGroup()
+        dot_values = [0, 1, 2, 3, 4, 5]  # x positions for markers
+        
+        for x in dot_values:
+            y = np.sin(x)
+            dot = Dot(axes.coords_to_point(x, y), color=YELLOW)
+            # Add label showing position and value
+            label = MathTex(
+                r"\begin{array}{c}" + 
+                f"pos={x}" + r"\\" +  # \\ creates a new line in array environment
+                f"PE(pos) = {y:.2f}" + 
+                r"\end{array}"
+            ).scale(0.5)
+            label.next_to(dot, UP)
+            dots.add(VGroup(dot, label))
+        
+        # Play animations
         self.play(
             Create(axes),
-            *[Create(graph) for graph in graphs],
-            Write(pos_marker),
-            run_time=3
+            run_time=1
+        )
+        self.play(
+            Create(sine_graph),
+            run_time=2
+        )
+        self.play(
+            AnimationGroup(
+                *[GrowFromCenter(dot) for dot in dots],
+                lag_ratio=0.3
+            )
         )
         
         self.wait(2)
+
+
+        words = ["Jack", "loves", "to", "eat", "pizza"]
+        word_starts = [0]  # Start positions of each word
+        
+        for i in range(len(words)-1):
+            word_starts.append(word_starts[i] + len(words[i]) + 1)  # +1 for space
+
+        word_mobjects = VGroup(*[
+            Text(word, font_size=36) for word in words
+        ]).arrange(RIGHT, buff=0.3)  # Arrange words horizontally with spacing
+        word_mobjects.move_to(DOWN*3.25)
+
+        # Create position numbers aligned with each word
+        position_numbers = VGroup(*[
+            Text(str(i+1), font_size=24) 
+            for i in range(len(words))
+        ])
+
+        # Align each number with its corresponding word
+        for number, word in zip(position_numbers, word_mobjects):
+            number.move_to(word.get_top() + UP*0.3)
+
+        # Animate everything
+        self.play(Write(word_mobjects), Write(position_numbers))
+        self.wait(1)
+        self.play(FadeOut(VGroup(word_mobjects, position_numbers)))
