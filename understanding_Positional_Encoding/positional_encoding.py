@@ -673,13 +673,22 @@ class DifferentPositionalEncoding(Scene):
 
         # New animation sequence
         self.play(
+            FadeIn(plus_sign),
+        )
+        self.wait(1)
+        
+        self.play(
+            FadeOut(embedding_text, position_encoding_text),
+        )
+        self.wait(1)
+        self.play(
             FadeOut(plus_sign),
             ReplacementTransform(embedding_group, sum_group),
             ReplacementTransform(position_group, sum_group),
-            FadeOut(embedding_text, position_encoding_text),
-            Write(final_encoding_text)
         )
-        
+        self.play(
+        Write(final_encoding_text)
+        )       
         self.wait(2)
 
 class DifferentPositionalEncoding2(Scene):
