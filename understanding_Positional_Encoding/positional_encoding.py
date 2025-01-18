@@ -693,17 +693,11 @@ class DifferentPositionalEncoding(Scene):
 
 class DifferentPositionalEncoding2(Scene):
     def construct(self):
-        integer_encoding = Text("Integer Encoding", font_size=48).shift(ORIGIN)
-
-        self.play(Write(integer_encoding))
-        self.wait(1)
-        self.play(FadeOut(integer_encoding))
-
         # Create the sentence
         sentence = "... Joe has the best ..."
         text = Text(sentence, font_size=36).move_to(ORIGIN)
         self.wait(1)
-        words = ["Joe", "has", "the", "best"]
+        words = ["...","Joe", "has", "the", "best", "pizza", "..."]
         word_starts = [0]  # Start positions of each word
         
         for i in range(len(words)-1):
@@ -717,11 +711,11 @@ class DifferentPositionalEncoding2(Scene):
         # Create position numbers aligned with each word
         position_numbers = VGroup(*[
             Text(str(pos), font_size=24) 
-            for pos in range(253, 257)
+            for pos in range(253, 258)
         ])
 
         # Align each number with its corresponding word
-        for number, word in zip(position_numbers, word_mobjects):
+        for number, word in zip(position_numbers, word_mobjects[1:6]):
             number.move_to(word.get_top() + UP*0.3)
 
         # Animate everything
@@ -738,7 +732,7 @@ class DifferentPositionalEncoding2(Scene):
 
         # Color the word "Joe"
         self.play(
-            word_mobjects[0].animate.set_color(YELLOW)
+            word_mobjects[1].animate.set_color(YELLOW)
         )
 
         # Create embedding vector (8 boxes to represent the embedding)
@@ -853,3 +847,10 @@ class DifferentPositionalEncoding2(Scene):
         )
         
         self.wait(2)
+
+class DifferentPositionalEncoding3():
+    def construct(self):
+        # Create the sentence
+        binary_encoding = Text("Binary Encoding", font_size=48).shift(ORIGIN)
+        
+        
