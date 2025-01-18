@@ -1031,7 +1031,7 @@ class SinusoidalEncoding(Scene):
             color=YELLOW,
             buff=0.2
         )
-
+        i_values_group = VGroup()  # Add this before the for loop
         # Create i value text template
         i_text = MathTex("i=", font_size=24)
 
@@ -1042,7 +1042,8 @@ class SinusoidalEncoding(Scene):
             i_value = VGroup(i_text.copy(), current_i)
             i_value.arrange(RIGHT, buff=0.1)
             i_value.next_to(embedding_boxes[i], RIGHT, buff=1)
-            
+            i_values_group.add(i_value) 
+
             if i == 0:
                 # First position - create arrow and first i value
                 self.play(
@@ -1070,21 +1071,21 @@ class SinusoidalEncoding(Scene):
         self.play(Write(eq1))
 
         self.wait(1)
-        self.play(FadeOut(VGroup(embedding_text, embedding_group, pointer_arrow, word_mobjects, eq1, i_value)))
+        self.play(FadeOut(VGroup(embedding_text, embedding_group, pointer_arrow, word_mobjects, eq1, i_values_group)))
         self.wait(1)
 
         # Create axes with adjusted dimensions and no bottom axis
         axes = Axes(
             x_range=[0, 20, 5],
-            y_range=[-4, 4, 1],
+            y_range=[0, 4, 1],
             axis_config={
                 "color": WHITE,
                 "include_numbers": False,
                 "include_ticks": False  # Hide ticks
             },
             x_length=10,
-            y_length=6,
-        ).move_to(ORIGIN)
+            y_length=3,
+        ).move_to(ORIGIN + UP)
 
         # Remove the bottom axis line
         axes.get_x_axis().set_opacity(0)
@@ -1133,7 +1134,7 @@ class SinusoidalEncoding(Scene):
             label.next_to(axes.c2p(0, offset), LEFT)
             
             # Add points for pos=1 and pos=4
-            for pos in [1, 4]:
+            for pos in [1, 6]:
                 point = Dot(axes.c2p(pos, wave_function(pos)), color=color)
                 value = DecimalNumber(
                     wave_function(pos),
@@ -1153,10 +1154,10 @@ class SinusoidalEncoding(Scene):
         # Add label for position markers
         pos_labels = VGroup(
             Text("pos=1", font_size=24),
-            Text("pos=4", font_size=24)
+            Text("pos=6", font_size=24)
         )
-        pos_labels[0].next_to(axes.c2p(1, -3.5), DOWN)
-        pos_labels[1].next_to(axes.c2p(4, -3.5), DOWN)
+        pos_labels[0].next_to(axes.c2p(1, 0), DOWN)
+        pos_labels[1].next_to(axes.c2p(6, 0), DOWN)
 
         # Animate everything
         self.play(Create(axes))
@@ -1181,4 +1182,147 @@ class SinusoidalEncoding(Scene):
             run_time=1.5
         )
 
+        self.wait(2)
+        self.play(FadeOut(VGroup(axes, title, graphs, labels, equations, pos_labels, points_group)))
+
+class ProofForSinusoidalEncoding(Scene):
+    def construct(self):
+        # Title
+        title = Text("Proof: Sinusoidal Encoding Transformation", font_size=36)
+        title.to_edge(UP)
+        self.play(Write(title))
+        
+        # Initial equation showing what we want to prove
+        initial_eq = MathTex(
+            r"M \cdot \begin{bmatrix} \sin(\omega_i p) \\ \cos(\omega_i p) \end{bmatrix} = \begin{bmatrix} \sin(\omega_i(p+k)) \\ \cos(\omega_i(p+k)) \end{bmatrix}"
+        ).scale(0.8)
+        
+        # Frequency definition
+        freq_def = MathTex(
+            r"\omega_i = \frac{1}{10000^{2i/d}}"
+        ).scale(0.8)
+        
+        # Display initial equation and frequency definition
+        VGroup(initial_eq, freq_def).arrange(DOWN, buff=0.5).next_to(title, DOWN, buff=1)
+        self.play(Write(initial_eq))
+        self.play(Write(freq_def))
+        self.wait(2)
+        
+        # Fade out frequency definition to make space
+        self.play(FadeOut(freq_def))
+        
+        # Move initial equation up
+        self.play(initial_eq.animate.to_edge(UP, buff=1))
+        
+        # Show the transformation matrix with unknowns
+        matrix_eq = MathTex(
+            r"\begin{bmatrix} u_1 & v_1 \\ u_2 & v_2 \end{bmatrix}",
+            r"\cdot",
+            r"\begin{bmatrix} \sin(\omega_i p) \\ \cos(\omega_i p) \end{bmatrix}",
+            r"=",
+            r"\begin{bmatrix} \sin(\omega_i(p+k)) \\ \cos(\omega_i(p+k)) \end{bmatrix}"
+        ).scale(0.8)
+        
+        # Position the matrix equation
+        matrix_eq.next_to(initial_eq, DOWN, buff=1)
+        self.play(Write(matrix_eq))
+        self.wait(2)
+        
+        # Show trigonometric expansion
+        # Show trigonometric expansion 
+        trig_expansion = MathTex(
+            r"= \begin{bmatrix} \sin(\omega_i p)\cos(\omega_i k) + \cos(\omega_i p)\sin(\omega_i k) \\ \cos(\omega_i p)\cos(\omega_i k) - \sin(\omega_i p)\sin(\omega_i k) \end{bmatrix}"
+        ).scale(0.7)
+
+        trig_expansion.next_to(matrix_eq, DOWN, buff=0.5)
+        self.play(Write(trig_expansion))
+        self.wait(2)
+        
+        # Create system of equations
+        system = MathTex(
+            r"u_1\sin(\omega_i p) + v_1\cos(\omega_i p) &= \cos(\omega_i k)\sin(\omega_i p) + \sin(\omega_i k)\cos(\omega_i p) \\",
+            r"u_2\sin(\omega_i p) + v_2\cos(\omega_i p) &= -\sin(\omega_i k)\sin(\omega_i p) + \cos(\omega_i k)\cos(\omega_i p)"
+        ).scale(0.7)
+        
+        # Show the system of equations
+        self.play(FadeOut(VGroup(matrix_eq, trig_expansion)))
+        system.next_to(initial_eq, DOWN, buff=1)
+        self.play(Write(system))
+        self.wait(2)
+        
+        # Show final transformation matrix
+        final_matrix = MathTex(
+            r"M_k",                                   # [0]
+            r"=",                                     # [1]
+            r"\begin{bmatrix} \cos(\omega_i k) & \sin(\omega_i k) \\ -\sin(\omega_i k) & \cos(\omega_i k) \end{bmatrix}"  # [2]
+        ).scale(0.8)
+
+        # Create highlighting rectangles for specific parts of the matrix
+        # We'll modify the highlighting to work with this structure
+        highlights = VGroup()
+        matrix = final_matrix[2]  # Get the matrix part
+
+        # Add the matrix to scene first
+        self.play(Write(final_matrix))
+        self.wait(1)
+
+        # Then create and animate highlights one by one
+        for pos in [(0,0), (0,1), (1,0), (1,1)]:  # Positions in matrix to highlight
+            highlight = SurroundingRectangle(matrix, color=YELLOW)
+            highlights.add(highlight)
+            self.play(
+                Create(highlight),
+                run_time=0.5
+            )
+            self.wait(0.5)
+            self.play(FadeOut(highlight))
+        
+        # Create a box around the final result
+        final_box = SurroundingRectangle(final_matrix, color=BLUE)
+        self.play(Create(final_box))
+        
+        # Add a conclusion text
+        conclusion = Text(
+            "This rotation matrix allows position shifts\nin the encoding space",
+            font_size=24,
+            color=BLUE
+        ).next_to(final_box, DOWN, buff=0.5)
+        self.play(Write(conclusion))
+        
+        self.wait(2)
+        
+        # Optional: Create axes and show the transformation visually
+        axes = Axes(
+            x_range=[-2, 2],
+            y_range=[-2, 2],
+            axis_config={"include_tip": True},
+        ).scale(0.5)
+        
+        # Create a unit vector to show transformation
+        vector = Arrow(
+            axes.coords_to_point(0, 0),
+            axes.coords_to_point(1, 0),
+            buff=0,
+            color=YELLOW
+        )
+        
+        # Position the coordinate system
+        coordinate_group = VGroup(axes, vector)
+        coordinate_group.next_to(conclusion, DOWN, buff=0.5)
+        
+        self.play(
+            Create(axes),
+            Create(vector)
+        )
+        
+        # Animate the rotation
+        self.play(
+            Rotate(
+                vector,
+                angle=PI/4,
+                about_point=axes.coords_to_point(0, 0)
+            ),
+            run_time=2
+        )
+        
         self.wait(2)
