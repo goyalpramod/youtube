@@ -848,9 +848,108 @@ class DifferentPositionalEncoding2(Scene):
         
         self.wait(2)
 
-class DifferentPositionalEncoding3():
+class SinusoidalEncoding(Scene):
     def construct(self):
-        # Create the sentence
-        binary_encoding = Text("Binary Encoding", font_size=48).shift(ORIGIN)
+        # Create the title
+        sine_encoding = Text("Sinusoidal Encoding", font_size=48).shift(ORIGIN)
+        self.play(Write(sine_encoding), run_time=3)
         
+        # Move title up to make space for equations
+        self.play(sine_encoding.animate.shift(UP * 3))
         
+        # Create equations as a single MathTex object with parts we want to isolate
+        eq1 = MathTex(
+            r"\text{PE}(",
+            r"\text{pos}",
+            r",",
+            r"2i",
+            r") = \sin\left(\frac{pos}{10000^{2i/d_{model}}}\right)"
+        ).shift(UP)
+        
+        eq2 = MathTex(
+            r"\text{PE}(",
+            r"\text{pos}",
+            r",",
+            r"2i+1",
+            r") = \cos\left(\frac{pos}{10000^{2i/d_{model}}}\right)"
+        ).shift(ORIGIN)
+        
+        # Display equations
+        self.play(Write(eq1), run_time=2)
+        self.play(Write(eq2), run_time=2)
+        
+        # Create explanation texts
+        explanations = VGroup(
+            Text("pos = position of the token in the sequence", font_size=24),
+            Text("i = dimension index (ranges from 0 to d_model/2)", font_size=24),
+            Text("d_model = dimension of the embedding vector", font_size=24),
+            Text("10000 = scaling factor to control frequency variation", font_size=24)
+        ).arrange(DOWN, aligned_edge=LEFT).move_to(DOWN * 2.5)
+        
+        # Use index-based highlighting for precise control
+        # Highlight pos
+        self.play(eq1[1].animate.set_color(YELLOW))
+        self.play(Write(explanations[0]))
+        self.wait(1)
+        self.play(eq1[1].animate.set_color(WHITE))
+        
+        # Highlight 2i
+        self.play(eq1[3].animate.set_color(YELLOW))
+        self.play(Write(explanations[1]))
+        self.wait(1)
+        self.play(eq1[3].animate.set_color(WHITE))
+        
+        # Show d_model explanation
+        self.play(Write(explanations[2]))
+        self.wait(1)
+        
+        # Show scaling factor explanation
+        self.play(Write(explanations[3]))
+        self.wait(2)
+
+        self.play(FadeOut(VGroup(eq1, eq2, explanations, sine_encoding)))
+
+        # After the explanations, add the visualization
+        # Create the axes
+        axes = Axes(
+            x_range=[0, 100, 20],
+            y_range=[-1, 1, 0.5],
+            tips=False,
+            axis_config={"include_numbers": True},
+        ).scale(0.7).shift(DOWN * 0.5)
+
+        # Create sine waves with different frequencies
+        def get_sine_wave(i):
+            return lambda x: np.sin(x / (10000 ** (2 * i / 4)))
+        
+        def get_cosine_wave(i):
+            return lambda x: np.cos(x / (10000 ** (2 * i / 4)))
+
+        # Create graphs with alternating colors and frequencies
+        graphs = VGroup()
+        for i in range(4):
+            # Sine waves (blue)
+            sine_graph = axes.plot(get_sine_wave(i), color=BLUE_C)
+            graphs.add(sine_graph)
+            
+            # Cosine waves (red)
+            cos_graph = axes.plot(get_cosine_wave(i), color=RED_C)
+            graphs.add(cos_graph)
+            
+            # Add value labels on the left
+            sine_label = MathTex(f"+{0.5:.2f}", color=BLUE_C).scale(0.6).next_to(sine_graph, LEFT)
+            cos_label = MathTex(f"-{0.8:.2f}", color=RED_C).scale(0.6).next_to(cos_graph, LEFT)
+            graphs.add(sine_label, cos_label)
+
+        # Add position marker
+        pos_marker = MathTex("99").scale(0.8).next_to(axes.coords_to_point(99, -1), DOWN)
+        
+        # Play the animation
+        self.play(
+            Create(axes),
+            *[Create(graph) for graph in graphs],
+            Write(pos_marker),
+            run_time=3
+        )
+        
+        self.wait(2)
