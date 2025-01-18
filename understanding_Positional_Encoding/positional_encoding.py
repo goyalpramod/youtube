@@ -987,4 +987,39 @@ class SinusoidalEncoding(Scene):
         # Animate everything
         self.play(Write(word_mobjects), Write(position_numbers))
         self.wait(1)
-        self.play(FadeOut(VGroup(word_mobjects, position_numbers), VGroup(simple_eq, axes, sine_graph, dots)))
+        self.play(FadeOut(position_numbers, VGroup(simple_eq, axes, sine_graph, dots)))
+
+        self.play(word_mobjects.animate.move_to(UP*2.5))
+        # Color the word "Joe"
+        self.play(
+            word_mobjects[0].animate.set_color(YELLOW)
+        )
+
+        # Create embedding vector (8 boxes to represent the embedding)
+        num_dimensions = 8
+        embedding_boxes = VGroup(*[
+            Square(
+                side_length=0.6,
+                fill_opacity=0.3,
+                fill_color=GREEN
+            ).set_stroke(WHITE, 2)
+            for _ in range(num_dimensions)
+        ]).arrange(DOWN, buff=0)
+        
+        # Add random numbers inside boxes
+        embedding_numbers = VGroup(*[
+            Text(f"{random.uniform(-0.5, 0.5):.2f}", font_size=16)
+            .move_to(box)
+            for box in embedding_boxes
+        ])
+        
+        embedding_group = VGroup(embedding_boxes, embedding_numbers)
+        embedding_group.next_to(word_mobjects, DOWN, buff=1).align_to(word_mobjects[0], LEFT)
+        embedding_text = Text("Embedding", font_size=24).next_to(embedding_group, LEFT, buff=0.5)
+        
+        self.play(
+            Write(embedding_text),
+            Create(embedding_boxes),
+            Write(embedding_numbers)
+        )
+        self.wait(1)
