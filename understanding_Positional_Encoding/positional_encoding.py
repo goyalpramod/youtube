@@ -929,7 +929,7 @@ class SinusoidalEncoding(Scene):
         
         # Create dots for specific positions
         dots = VGroup()
-        dot_values = [0, 1, 2, 3, 4, 5]  # x positions for markers
+        dot_values = [0, 2, 4, 6, 8]  # x positions for markers
         
         for x in dot_values:
             y = np.sin(x)
@@ -987,4 +987,4 @@ class SinusoidalEncoding(Scene):
         # Animate everything
         self.play(Write(word_mobjects), Write(position_numbers))
         self.wait(1)
-        self.play(FadeOut(VGroup(word_mobjects, position_numbers)))
+        self.play(FadeOut(VGroup(word_mobjects, position_numbers), VGroup(simple_eq, axes, sine_graph, dots)))
