@@ -1023,3 +1023,162 @@ class SinusoidalEncoding(Scene):
             Write(embedding_numbers)
         )
         self.wait(1)
+
+        # Create an arrow that will point to each box
+        pointer_arrow = Arrow(
+            start=embedding_group.get_right() + RIGHT,
+            end=embedding_boxes[0].get_right(),
+            color=YELLOW,
+            buff=0.2
+        )
+
+        # Create i value text template
+        i_text = MathTex("i=", font_size=24)
+
+        # Animate arrow moving to each box with corresponding i value
+        for i in range(num_dimensions):
+            # Create the specific i value for this iteration
+            current_i = MathTex(str(i), font_size=24)
+            i_value = VGroup(i_text.copy(), current_i)
+            i_value.arrange(RIGHT, buff=0.1)
+            i_value.next_to(embedding_boxes[i], RIGHT, buff=1)
+            
+            if i == 0:
+                # First position - create arrow and first i value
+                self.play(
+                    Create(pointer_arrow),
+                    Write(i_value)
+                )
+            else:
+                # Move arrow to next box and show new i value
+                new_arrow = Arrow(
+                    start=embedding_group.get_right() + RIGHT,
+                    end=embedding_boxes[i].get_right(),
+                    color=YELLOW,
+                    buff=0.2
+                )
+                self.play(
+                    Transform(pointer_arrow, new_arrow),
+                    Write(i_value)
+                )
+            
+            self.wait(0.5)
+
+        self.wait(1)
+
+        eq1.shift(RIGHT*3 + DOWN*2).scale(0.8)
+        self.play(Write(eq1))
+
+        self.wait(1)
+        self.play(FadeOut(VGroup(embedding_text, embedding_group, pointer_arrow, word_mobjects, eq1, i_value)))
+        self.wait(1)
+
+        # Create axes with adjusted dimensions and no bottom axis
+        axes = Axes(
+            x_range=[0, 20, 5],
+            y_range=[-4, 4, 1],
+            axis_config={
+                "color": WHITE,
+                "include_numbers": False,
+                "include_ticks": False  # Hide ticks
+            },
+            x_length=10,
+            y_length=6,
+        ).move_to(ORIGIN)
+
+        # Remove the bottom axis line
+        axes.get_x_axis().set_opacity(0)
+
+        def get_pe_function(dim, is_sine, offset):
+            def pe_function(x):
+                frequency = 1 / (2 ** (dim))
+                amplitude = 0.5
+                if is_sine:
+                    return amplitude * np.sin(x * frequency) + offset
+                else:
+                    return amplitude * np.cos(x * frequency) + offset
+            return pe_function
+
+        # Create graphs with proper spacing
+        graphs = VGroup()
+        labels = VGroup()
+        points_group = VGroup()
+
+        # Configuration for the waves
+        wave_configs = [
+            (0, True, "i=0", BLUE, "sin"),    # i=0 sine
+            (0, False, "i=0", RED, "cos"),    # i=0 cosine
+            (1, True, "i=1", BLUE, "sin"),    # i=1 sine
+            (2, True, "i=1", RED, "cos"),    # i=1 cos
+        ]
+
+        # Add equations on the right
+        equations = VGroup(
+            MathTex(r"PE(pos,2i) = \sin(\frac{pos}{10000^{2i/d}})", color=BLUE),
+            MathTex(r"PE(pos,2i+1) = \cos(\frac{pos}{10000^{2i/d}})", color=RED)
+        ).arrange(DOWN, aligned_edge=LEFT).move_to(DOWN*2)
+
+        # Create each wave
+        for i, (dim, is_sine, label_text, color, trig_type) in enumerate(wave_configs):
+            offset = 3 - i
+            wave_function = get_pe_function(dim, is_sine, offset)
+            wave = axes.plot(
+                wave_function,
+                x_range=[0, 20],
+                color=color,
+            )
+            
+            # Add dimension label
+            label = MathTex(label_text, font_size=24)
+            label.next_to(axes.c2p(0, offset), LEFT)
+            
+            # Add points for pos=1 and pos=4
+            for pos in [1, 4]:
+                point = Dot(axes.c2p(pos, wave_function(pos)), color=color)
+                value = DecimalNumber(
+                    wave_function(pos),
+                    num_decimal_places=2,
+                    include_sign=True,
+                    font_size=20
+                ).next_to(point, RIGHT, buff=0.1)
+                value.add_background_rectangle(opacity=0.8, buff=0.1)
+                points_group.add(VGroup(point, value))
+            
+            graphs.add(wave)
+            labels.add(label)
+
+        # Add title
+        title = Text("Positional Encoding Components", font_size=32).next_to(axes, UP, buff=0.3)
+
+        # Add label for position markers
+        pos_labels = VGroup(
+            Text("pos=1", font_size=24),
+            Text("pos=4", font_size=24)
+        )
+        pos_labels[0].next_to(axes.c2p(1, -3.5), DOWN)
+        pos_labels[1].next_to(axes.c2p(4, -3.5), DOWN)
+
+        # Animate everything
+        self.play(Create(axes))
+        self.play(Write(title))
+
+        # Animate graphs and labels one at a time
+        for i in range(len(graphs)):
+            self.play(
+                Create(graphs[i]),
+                Write(labels[i]),
+                run_time=1
+            )
+            self.wait(0.3)
+
+        # Show equations
+        self.play(Write(equations))
+
+        # Show position markers and values
+        self.play(
+            Write(pos_labels),
+            *[GrowFromCenter(point) for point in points_group],
+            run_time=1.5
+        )
+
+        self.wait(2)
