@@ -1560,14 +1560,14 @@ class WhereIsRoPEAdded(Scene):
         # Move QK^T/sqrt(dk) to center
         qk_part = attention_eq[2]
         self.play(
-            qk_part.animate.move_to(ORIGIN)
+            qk_part.animate.move_to(ORIGIN + UP)
         )
         self.wait(1)
 
         # Transform into dot product formula
         dot_product = MathTex(
             r"Q \cdot K^T = |Q| |K^T| \cos(\theta)"
-        ).scale(1.2)
+        ).scale(0.7).move_to(UP)
 
         self.play(
             Transform(
@@ -1588,7 +1588,7 @@ class WhereIsRoPEAdded(Scene):
             x_range=[-2, 2],
             y_range=[-2, 2],
             axis_config={"include_tip": True},
-        ).scale(0.7).next_to(dot_product, DOWN*2)
+        ).scale(0.3).next_to(dot_product, DOWN*2)
 
         # Create vectors
         vector_q = Arrow(
@@ -1605,12 +1605,12 @@ class WhereIsRoPEAdded(Scene):
         )
 
         # Labels for vectors
-        q_label = MathTex("Q", color=BLUE).next_to(vector_q.get_end(), RIGHT)
-        k_label = MathTex("K^T", color=RED).next_to(vector_k.get_end(), UP)
+        q_label = MathTex("Q", color=BLUE).next_to(vector_q.get_end(), RIGHT).scale(0.5)
+        k_label = MathTex("K^T", color=RED).next_to(vector_k.get_end(), UP).scale(0.5)
 
         # Create angle
         angle = Angle(vector_q, vector_k, radius=0.5, color=YELLOW)
-        theta_label = MathTex(r"\theta", color=YELLOW).next_to(angle, RIGHT, buff=0.1)
+        theta_label = MathTex(r"\theta", color=YELLOW).next_to(angle, RIGHT, buff=0.1).scale(0.5)
 
         self.play(
             Write(dot_product_explanation),
@@ -1654,7 +1654,7 @@ class WhereIsRoPEAdded(Scene):
         
         # Update angle visualization
         new_angle = Angle(vector_q, vector_k, radius=0.5, color=YELLOW)
-        new_theta = MathTex(r"\theta'", color=YELLOW).next_to(new_angle, RIGHT, buff=0.1)
+        new_theta = MathTex(r"\theta'", color=YELLOW).next_to(new_angle, RIGHT, buff=0.1).scale(0.5)
         
         self.play(
             FadeOut(angle),
