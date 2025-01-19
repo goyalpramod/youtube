@@ -1,6 +1,19 @@
 from manim import *
 import random 
 
+class YoutubeThumbnailWithoutUnderline(Scene):
+    def construct(self):
+        text1 = Text("Understanding", font_size=72).set_color_by_gradient("#FFA500", "#FF4D00", "#FF0000")  # Bright orange -> Vivid orange-red -> Pure red
+        text2 = Text("Positional Encoding", font_size=72).next_to(text1, DOWN*1.5, buff=0.2).set_color_by_gradient("#FFA500", "#FF4D00", "#FF0000")
+        self.play(Write(text1), Write(text2))
+        self.wait(2)
+
+class YoutubeThumbnailWithoutUnderline2(Scene):
+    def construct(self):
+        text1 = Text("Understanding", font_size=72).set_color_by_gradient("#FFA500", "#FF4D00", "#FF0000")  # Bright orange -> Vivid orange-red -> Pure red
+        text2 = Text("RoPE", font_size=72).next_to(text1, DOWN*1.5, buff=0.2).set_color_by_gradient("#FFA500", "#FF4D00", "#FF0000")
+        self.play(Write(text1), Write(text2))
+        self.wait(2)
 
 class TextPositionalEncoding(Scene):
     def construct(self):
