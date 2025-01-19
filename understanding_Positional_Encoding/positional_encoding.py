@@ -1804,6 +1804,7 @@ class RoPEDetailed(Scene):
         # Step 7: Demonstrate rotation for 'is' word (position 1)
         axes = []
         vectors = []
+        angle_labels = []
         angles = [0.1, 0.4, 0.6]  # Three different rotation angles for 'is'
         
         for i in range(3):
@@ -1834,6 +1835,7 @@ class RoPEDetailed(Scene):
             
             angle_label = MathTex(f"\\theta = {angles[i]}")
             angle_label.next_to(ax, DOWN)
+            angle_labels.append(angle_label)
             
             self.play(
                 Create(ax),
@@ -1859,31 +1861,32 @@ class RoPEDetailed(Scene):
         
         self.play(Write(final_text))
         self.wait(2)
-        self.play(FadeOut(VGroup(rotation_matrix, final_text, *axes, *vectors, *angle_label)))
+        self.play(FadeOut(VGroup(rotation_matrix, final_text, *axes, *vectors, *angle_labels)))
 
         # Create word embeddings boxes
         def create_embedding_box(values, word, position):
-            box_height = 0.4
+            box_size = 0.8  # Make boxes bigger and square
             boxes = VGroup(*[
-                Rectangle(width=1.2, height=box_height, color=WHITE)
+                Square(side_length=box_size, color=WHITE)
                 for _ in range(6)
             ]).arrange(DOWN, buff=0)
             
             # Add values inside boxes
             values_text = VGroup(*[
-                DecimalNumber(val, num_decimal_places=3).scale(0.4)
+                DecimalNumber(val, num_decimal_places=3).scale(0.6)  # Make text bigger
                 for val in values
             ])
             for text, box in zip(values_text, boxes):
                 text.move_to(box)
             
             # Add word label
-            word_label = Text(word, font_size=24).next_to(boxes, UP)
+            word_label = Text(word, font_size=36).next_to(boxes, UP)  # Bigger font
             
             # Group everything
             full_box = VGroup(boxes, values_text, word_label)
+            full_box.scale(1)  # Scale up the entire group
             full_box.move_to(position)
-            return full_box
+            return full_box, boxes, values_text
 
         # Sample embedding values for each word
         this_values = [0.017, -0.030, 0.014, -0.009, 0.043, -0.021]
@@ -1891,66 +1894,96 @@ class RoPEDetailed(Scene):
         awesome_values = [-0.002, 0.015, -0.015, 0.016, 0.007, -0.002]
 
         # Create boxes for each word
-        this_box = create_embedding_box(this_values, "this", LEFT*4)
-        is_box = create_embedding_box(is_values, "is", ORIGIN)
-        awesome_box = create_embedding_box(awesome_values, "awesome", RIGHT*4)
+        this_group, this_boxes, this_values = create_embedding_box(this_values, "this", LEFT*5)
+        is_group, is_boxes, is_values = create_embedding_box(is_values, "is", ORIGIN)
+        awesome_group, awesome_boxes, awesome_values = create_embedding_box(awesome_values, "awesome", RIGHT*5)
 
         # Show embeddings
         self.play(
-            Create(this_box),
-            Create(is_box),
-            Create(awesome_box)
+            Create(this_group),
+            Create(is_group),
+            Create(awesome_group)
         )
         self.wait(1)
 
-        # Create vectors for pairs
-        def create_vector_pair(start_pos, angle, length=0.5):
+        # Create vector pairs boxes (3 larger squares for each word)
+        def create_vector_boxes(position):
+            box_size = 1.6  # Even bigger boxes for vectors
+            vector_boxes = VGroup(*[
+                Square(side_length=box_size, color=WHITE)
+                for _ in range(3)
+            ]).arrange(DOWN, buff=0)
+            vector_boxes.scale(0.8)  # Scale up
+            vector_boxes.move_to(position)
+            return vector_boxes
+
+        # Create and position the new vector boxes
+        this_vector_boxes = create_vector_boxes(LEFT*5)
+        is_vector_boxes = create_vector_boxes(ORIGIN)
+        awesome_vector_boxes = create_vector_boxes(RIGHT*5)
+
+        # Transform from 6 small boxes to 3 larger boxes
+        self.play(
+            ReplacementTransform(this_boxes[0:2], this_vector_boxes[0]),
+            ReplacementTransform(this_boxes[2:4], this_vector_boxes[1]),
+            ReplacementTransform(this_boxes[4:], this_vector_boxes[2]),
+            ReplacementTransform(is_boxes[0:2], is_vector_boxes[0]),
+            ReplacementTransform(is_boxes[2:4], is_vector_boxes[1]),
+            ReplacementTransform(is_boxes[4:], is_vector_boxes[2]),
+            ReplacementTransform(awesome_boxes[0:2], awesome_vector_boxes[0]),
+            ReplacementTransform(awesome_boxes[2:4], awesome_vector_boxes[1]),
+            ReplacementTransform(awesome_boxes[4:], awesome_vector_boxes[2]),
+            FadeOut(this_values),
+            FadeOut(is_values),
+            FadeOut(awesome_values)
+        )
+        self.wait(1)
+
+        # Create vectors inside the new boxes
+        def create_vector_in_box(box, angle, length=0.6):
+            center = box.get_center()
             arrow = Arrow(
-                start=start_pos,
-                end=start_pos + length * (np.cos(angle) * RIGHT + np.sin(angle) * UP),
+                start=center,
+                end=center + length * (np.cos(angle) * RIGHT + np.sin(angle) * UP),
                 buff=0,
-                color=BLUE
+                color=BLUE,
+                max_tip_length_to_length_ratio=0.2
             )
             return arrow
 
-        # Add vectors next to boxes
-        vector_groups = VGroup()
-        angles = [PI/6, PI/4, PI/3]  # Different angles for different pairs
-        
-        for box, base_pos in [(this_box, LEFT*4), (is_box, ORIGIN), (awesome_box, RIGHT*4)]:
-            vectors = VGroup()
-            for i, angle in enumerate(angles):
-                pos = box[0][i*2].get_center() + RIGHT*1.5
-                vector = create_vector_pair(pos, angle)
+        # Create vectors for each box
+        vectors = VGroup()
+        for boxes in [this_vector_boxes, is_vector_boxes, awesome_vector_boxes]:
+            for i, box in enumerate(boxes):
+                angle = PI/4 + (i * PI/6)  # Different angle for each vector
+                vector = create_vector_in_box(box, angle)
                 vectors.add(vector)
-            vector_groups.add(vectors)
 
-        self.play(Create(vector_groups))
+        self.play(Create(vectors))
         self.wait(1)
 
         # Add rotation values
         rotation_labels = VGroup()
-        for i, vectors in enumerate(vector_groups):
-            for j, vector in enumerate(vectors):
-                rho = f"ρ = {0.5*(i+1)*(j+1):.2f}"
-                label = Text(rho, font_size=16).next_to(vector, RIGHT)
-                rotation_labels.add(label)
+        for i, vector in enumerate(vectors):
+            pos = i % 3
+            word_idx = i // 3
+            rho = f"ρ = {0.5*(word_idx+1)*(pos+1):.2f}"
+            label = Text(rho, font_size=24).next_to(vector.get_center(), RIGHT*3, buff=0.3)
+            rotation_labels.add(label)
 
         self.play(Write(rotation_labels))
         self.wait(1)
 
         # Rotate vectors
-        for vectors in vector_groups:
-            self.play(
-                *[Rotate(vector, angle=PI/4, about_point=vector.get_start())
-                  for vector in vectors],
-                run_time=1
-            )
+        self.play(
+            *[Rotate(vector, angle=PI/3, about_point=vector.get_start())
+              for vector in vectors],
+            run_time=2
+        )
         self.wait(1)
 
         # Fade everything out
         self.play(
-            *[FadeOut(mob) for mob in [this_box, is_box, awesome_box, 
-                                     vector_groups, rotation_labels]]
+            *[FadeOut(mob) for mob in self.mobjects]
         )
         self.wait(1)
