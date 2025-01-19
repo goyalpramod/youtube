@@ -1180,7 +1180,7 @@ class SinusoidalEncoding(Scene):
 class ProofForSinusoidalEncoding(Scene):
     def construct(self):
         # Title
-        title = Text("Proof: Sinusoidal Encoding Transformation", font_size=36)
+        title = Text("Proof: Sinusoidal Encoding Transformation", font_size=24)
         title.to_edge(UP)
         self.play(Write(title))
         
@@ -1242,33 +1242,16 @@ class ProofForSinusoidalEncoding(Scene):
         self.play(Write(system))
         self.wait(2)
         
-        # Show final transformation matrix
         final_matrix = MathTex(
-            r"M_k",                                   # [0]
-            r"=",                                     # [1]
-            r"\begin{bmatrix} \cos(\omega_i k) & \sin(\omega_i k) \\ -\sin(\omega_i k) & \cos(\omega_i k) \end{bmatrix}"  # [2]
-        ).scale(0.8)
-
-        # Create highlighting rectangles for specific parts of the matrix
-        # We'll modify the highlighting to work with this structure
-        highlights = VGroup()
-        matrix = final_matrix[2]  # Get the matrix part
+            r"M_k = \begin{pmatrix} \cos(\omega_i k) & \sin(\omega_i k) \\ -\sin(\omega_i k) & \cos(\omega_i k) \end{pmatrix}"
+        ).scale(0.8).next_to(system, DOWN, buff=1)
 
         # Add the matrix to scene first
         self.play(Write(final_matrix))
         self.wait(1)
 
-        # Then create and animate highlights one by one
-        for pos in [(0,0), (0,1), (1,0), (1,1)]:  # Positions in matrix to highlight
-            highlight = SurroundingRectangle(matrix, color=YELLOW)
-            highlights.add(highlight)
-            self.play(
-                Create(highlight),
-                run_time=0.5
-            )
-            self.wait(0.5)
-            self.play(FadeOut(highlight))
-        
+        # If you want to color individual elements, we'll need to use get_part_by_tex
+        # or we can help you set up a different approach for highlighting
         # Create a box around the final result
         final_box = SurroundingRectangle(final_matrix, color=BLUE)
         self.play(Create(final_box))
@@ -1299,8 +1282,8 @@ class ProofForSinusoidalEncoding(Scene):
         )
         
         # Position the coordinate system
-        coordinate_group = VGroup(axes, vector)
-        coordinate_group.next_to(conclusion, DOWN, buff=0.5)
+        coordinate_group = VGroup(axes, vector).scale(0.3)
+        coordinate_group.next_to(conclusion, RIGHT, buff=0.5)
         
         self.play(
             Create(axes),
@@ -1318,6 +1301,7 @@ class ProofForSinusoidalEncoding(Scene):
         )
         
         self.wait(2)
+        self.play(FadeOut(VGroup(final_matrix, final_box, conclusion, coordinate_group, system, initial_eq)))
 
 """
 cons of absolute position encoding, polute that data, no way to know 
