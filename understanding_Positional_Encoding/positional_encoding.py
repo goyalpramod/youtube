@@ -1572,7 +1572,7 @@ class WhereIsRoPEAdded(Scene):
             x_range=[-2, 2],
             y_range=[-2, 2],
             axis_config={"include_tip": True},
-        ).scale(0.3).next_to(dot_product, DOWN*2)
+        ).scale(0.3).next_to(dot_product, DOWN*3)
 
         # Create vectors
         vector_q = Arrow(
@@ -1589,7 +1589,7 @@ class WhereIsRoPEAdded(Scene):
         )
 
         # Labels for vectors
-        q_label = MathTex("Q", color=BLUE).next_to(vector_q.get_end(), RIGHT).scale(0.5)
+        q_label = MathTex("Q", color=BLUE).next_to(vector_q.get_end(), UP*0.5).scale(0.5)
         k_label = MathTex("K^T", color=RED).next_to(vector_k.get_end(), UP).scale(0.5)
 
         # Create angle
