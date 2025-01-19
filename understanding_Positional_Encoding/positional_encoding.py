@@ -1326,3 +1326,43 @@ class ProofForSinusoidalEncoding(Scene):
         )
         
         self.wait(2)
+
+"""
+cons of absolute position encoding, polute that data, no way to know 
+relative position
+"""
+
+class RoPE(Scene):
+    def construct(self):
+        # Part 1: Title and Introduction
+        title = Text("Rotary Position Encoding (RoPE)", font_size=48)
+        self.play(Write(title))
+        self.wait(1)
+        self.play(
+            FadeOut(title)
+        )
+        question = Text("Why RoPE?")
+        self.play(Write(question))
+        self.wait(1)
+        self.play(question.animate.shift(UP*3))
+        text1 = Text("1. Absolute position polltes the data", font_size=36,  should_center=False)
+        text2 = Text("2. No way to know relative position", font_size=36, should_center=False)
+        text1.move_to(ORIGIN)
+        text2.next_to(text1, DOWN)
+        self.play(Write(text1))
+        self.wait(1)
+        self.play(Write(text2))
+        self.wait(1)
+        self.play(FadeOut(VGroup(question, text1, text2)))
+        self.wait(1)
+
+        words = ["Jack", "loves", "to", "eat", "pizza"]
+        word_mobjects = VGroup(*[Text(word) for word in words])
+        word_mobjects.arrange(RIGHT, buff=0.3)
+        self.play(Write(word_mobjects))
+        self.play(word_mobjects.animate.shift(UP*2))
+        self.play(
+            word_mobjects[0].animate.set_color(YELLOW),
+            word_mobjects[4].animate.set_color(YELLOW),
+        )
+
