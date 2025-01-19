@@ -1365,4 +1365,131 @@ class RoPE(Scene):
             word_mobjects[0].animate.set_color(YELLOW),
             word_mobjects[4].animate.set_color(YELLOW),
         )
+        self.wait(2)
+        # After highlighting "Jack" and "Pizza"
+        # Create first coordinate system for shorter sentence
+        axes1 = Axes(
+            x_range=[-2, 5],
+            y_range=[-2, 5],
+            axis_config={"include_tip": True},
+            x_length=4,
+            y_length=4
+        ).scale(0.7).to_edge(LEFT)
+
+        # Create vectors for Jack and Pizza in first sentence
+        vector1 = Arrow(
+            axes1.coords_to_point(0, 0),
+            axes1.coords_to_point(2, 3),
+            buff=0,
+            color=BLUE
+        )
+        vector2 = Arrow(
+            axes1.coords_to_point(0, 0),
+            axes1.coords_to_point(3, 2),
+            buff=0,
+            color=YELLOW
+        )
+
+        # Labels for first pair
+        label1 = Text("Jack", font_size=24, color=BLUE).next_to(vector1.get_end(), UP+RIGHT, buff=0.1)
+        label2 = Text("Pizza", font_size=24, color=YELLOW).next_to(vector2.get_end(), RIGHT, buff=0.1)
+        
+        # Create angle for first set
+        angle1 = Angle(vector2, vector1, radius=0.5, color=RED)
+        theta1 = MathTex(r"\theta_1").next_to(angle1, RIGHT, buff=0.1).scale(0.7)
+
+        # Create second coordinate system for longer sentence
+        axes2 = Axes(
+            x_range=[-2, 5],
+            y_range=[-2, 5],
+            axis_config={"include_tip": True},
+            x_length=4,
+            y_length=4
+        ).scale(0.7).to_edge(RIGHT)
+
+        # Create vectors with larger angle
+        vector3 = Arrow(
+            axes2.coords_to_point(0, 0),
+            axes2.coords_to_point(2, 4),
+            buff=0,
+            color=BLUE
+        )
+        vector4 = Arrow(
+            axes2.coords_to_point(0, 0),
+            axes2.coords_to_point(4, 1),
+            buff=0,
+            color=YELLOW
+        )
+
+        # Labels for second pair
+        label3 = Text("Jack", font_size=24, color=BLUE).next_to(vector3.get_end(), UP+RIGHT, buff=0.1)
+        label4 = Text("Pizza", font_size=24, color=YELLOW).next_to(vector4.get_end(), RIGHT, buff=0.1)
+
+        # Create larger angle for second set
+        angle2 = Angle(vector4, vector3, radius=0.5, color=RED)
+        theta2 = MathTex(r"\theta_2").next_to(angle2, RIGHT, buff=0.1).scale(0.7)
+
+        # Add explanation text
+        explanation = Text("Larger distance = Larger angle", font_size=24).next_to(word_mobjects, DOWN*3)
+
+        # Animate everything
+        self.play(Create(axes1), Create(axes2))
+        self.play(GrowArrow(vector1), GrowArrow(vector2))
+        self.play(Write(label1), Write(label2))
+        self.play(Create(angle1), Write(theta1))
+        self.wait(1)
+        self.play(GrowArrow(vector3), GrowArrow(vector4))
+        self.play(Write(label3), Write(label4))
+        self.play(Create(angle2), Write(theta2))
+        self.play(Write(explanation))
+        self.wait(2)
+        # Fade out axes2 and its components
+        self.play(
+            FadeOut(VGroup(
+                axes2, vector3, vector4, 
+                label3, label4, angle2, theta2
+            ))
+        )
+        
+        # Fade out the center text and word objects
+        self.play(
+            FadeOut(VGroup(explanation, word_mobjects))
+        )
+        
+        # Create a group of all elements that need to move together
+        left_side_group = VGroup(
+            axes1,
+            vector1,
+            vector2,
+            label1,
+            label2,
+            angle1,
+            theta1
+        )
+        
+        # Move the entire group to center
+        self.play(
+            left_side_group.animate.move_to(ORIGIN).shift(DOWN)
+        )
+        
+        # Add new explanation for rotation
+        rotation_text = Text("Relative position preserved under rotation", font_size=24)
+        rotation_text.to_edge(UP)
+        self.play(Write(rotation_text))
+        
+        # Rotate all elements together
+        rotation_angle = PI/3
+        origin_point = axes1.coords_to_point(0, 0)
+
+        # Rotate around the origin
+        self.play(
+            Rotate(
+                VGroup(vector1, vector2, label1, label2, angle1, theta1),
+                angle=rotation_angle,
+                about_point=origin_point
+            ),
+            run_time=2
+        )
+        
+        self.wait(2)
 
