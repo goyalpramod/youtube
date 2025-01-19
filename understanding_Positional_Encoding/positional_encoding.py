@@ -1894,17 +1894,17 @@ class RoPEDetailed(Scene):
         awesome_values = [-0.002, 0.015, -0.015, 0.016, 0.007, -0.002]
 
         # Create boxes for each word
-        this_group, this_boxes, this_values = create_embedding_box(this_values, "this", LEFT*5)
+        this_group, this_boxes, this_values = create_embedding_box(this_values, "This", LEFT*4)
         is_group, is_boxes, is_values = create_embedding_box(is_values, "is", ORIGIN)
-        awesome_group, awesome_boxes, awesome_values = create_embedding_box(awesome_values, "awesome", RIGHT*5)
+        awesome_group, awesome_boxes, awesome_values = create_embedding_box(awesome_values, "delicious", RIGHT*4)
 
         # Show embeddings
         self.play(
-            Create(this_group),
-            Create(is_group),
-            Create(awesome_group)
+            Create(this_group, run_time=4),
+            Create(is_group, run_time=4),
+            Create(awesome_group, run_time=4)
         )
-        self.wait(1)
+        self.wait(3)
 
         # Create vector pairs boxes (3 larger squares for each word)
         def create_vector_boxes(position):
@@ -1918,9 +1918,9 @@ class RoPEDetailed(Scene):
             return vector_boxes
 
         # Create and position the new vector boxes
-        this_vector_boxes = create_vector_boxes(LEFT*5)
+        this_vector_boxes = create_vector_boxes(LEFT*4)
         is_vector_boxes = create_vector_boxes(ORIGIN)
-        awesome_vector_boxes = create_vector_boxes(RIGHT*5)
+        awesome_vector_boxes = create_vector_boxes(RIGHT*4)
 
         # Transform from 6 small boxes to 3 larger boxes
         self.play(
@@ -1968,7 +1968,9 @@ class RoPEDetailed(Scene):
             pos = i % 3
             word_idx = i // 3
             rho = f"ρ = {0.5*(word_idx+1)*(pos+1):.2f}"
-            label = Text(rho, font_size=24).next_to(vector.get_center(), RIGHT*3, buff=0.3)
+            # Align label with the vector's box instead of the vector's center
+            parent_box = [this_vector_boxes, is_vector_boxes, awesome_vector_boxes][word_idx][pos]
+            label = Text(rho, font_size=24).next_to(parent_box, RIGHT, buff=0.5)
             rotation_labels.add(label)
 
         self.play(Write(rotation_labels))
