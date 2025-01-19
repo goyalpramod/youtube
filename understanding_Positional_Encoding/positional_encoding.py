@@ -247,7 +247,7 @@ class HowToMakeAPositionalEncoder(Scene):
         word_mobjects.move_to(ORIGIN)
 
         # Generate random numbers (4 digits) for each word
-        random_numbers = [str(_) for _ in [7,1,3,9,5]]
+        random_numbers = [str(_) for _ in [1,3,5,7,9]]
         number_mobjects = VGroup(*[
             Text(num, font_size=36)  # Smaller font size for numbers
             .next_to(word_mobjects[i], DOWN, buff=0.5)  # Position below each word
@@ -401,14 +401,7 @@ class HowToMakeAPositionalEncoder(Scene):
         # Show calculation process one by one
         for i in range(len(positions)):
             self.play(Write(formula_mobjects[i]))
-            arrow = Arrow(
-                formula_mobjects[i].get_bottom(),
-                result_mobjects[i].get_top(),
-                buff=0.1,
-                color=YELLOW
-            )
             self.play(
-                Create(arrow),
                 Write(result_mobjects[i])
             )
             self.wait(0.5)
@@ -441,7 +434,7 @@ class HowToMakeAPositionalEncoder(Scene):
         one_d_boxes = VGroup(*[
             Square(side_length=0.5, fill_opacity=0.3, fill_color=BLUE)
             for _ in range(5)
-        ]).arrange(RIGHT, buff=0.2).next_to(one_d_text, RIGHT, buff=1)
+        ]).arrange(RIGHT, buff=0).next_to(one_d_text, RIGHT, buff=1)
         
         # Add position numbers for 1D
         one_d_numbers = VGroup(*[
@@ -457,15 +450,15 @@ class HowToMakeAPositionalEncoder(Scene):
         self.wait(1)
 
         # Create 2D grid
-        two_d_text = Text("2D (Image)", font_size=20).to_edge(LEFT)
+        two_d_text = Text("2D (Image)", font_size=20).to_edge(LEFT).shift(DOWN*0.8)
         grid_size = 3
         two_d_grid = VGroup(*[
             VGroup(*[
                 Square(side_length=0.5, fill_opacity=0.3, fill_color=GREEN)
                 for _ in range(grid_size)
-            ]).arrange(RIGHT, buff=0.2)
+            ]).arrange(RIGHT, buff=0)
             for _ in range(grid_size)
-        ]).arrange(DOWN, buff=0.2).next_to(two_d_text, RIGHT, buff=1)
+        ]).arrange(DOWN, buff=0).next_to(two_d_text, RIGHT, buff=1.5)
 
         # Add position numbers for 2D
         two_d_numbers = VGroup(*[
@@ -495,26 +488,25 @@ class HowToMakeAPositionalEncoder(Scene):
             FadeOut(text_rule_5[22:]),
             FadeOut(VGroup(
                 one_d_text, one_d_boxes, one_d_numbers,
-                two_d_text, two_d_grid, two_d_numbers, arrow,
+                two_d_text, two_d_grid, two_d_numbers,
             )),
             run_time=1.5
         )
         all_properties = VGroup()
         # Collect all corner texts in a VGroup
         all_properties.add(
-            unique_encoding_text,
-            linear_relation_text,
-            generalize_text,
-            deterministic_text,
-            multidim_text
+            text_rule_1[:14],  # Instead of unique_encoding_text
+            text_rule_2[:14],  # Instead of linear_relation_text
+            text_rule_3[:10],  # Instead of generalize_text
+            text_rule_4[:13],  # Instead of deterministic_text
+            text_rule_5[:22]   # Instead of multidim_text
         )
 
         # Combine the animations using a single .animate chain
         self.play(
-            FadeOut(unique_encoding_text, linear_relation_text, generalize_text, deterministic_text, multidim_text),
             all_properties.animate.move_to(ORIGIN).scale(2),  # Scale by 2 to counter the initial 0.5
             run_time=2
-        )        
+        )
 
         self.wait(3)
 
