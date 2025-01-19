@@ -1492,4 +1492,465 @@ class RoPE(Scene):
         )
         
         self.wait(2)
+        self.play(FadeOut(VGroup(rotation_text, left_side_group)))
+        self.wait(1)
+        # After the rotation animation
+        # Create rotation matrix equation
+        rotation_matrix = MathTex(
+            r"R(\theta) = \begin{bmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{bmatrix}"
+        )
+        rotation_matrix.move_to(ORIGIN)
 
+        # Add explanation for how RoPE applies rotation
+        rope_equation = MathTex(
+            r"\vec{v}_{\text{pos}} = R(\theta \cdot m) \vec{v}",
+            r"\ \ \text{where}\ m\ \text{is position}"
+        )
+        rope_equation.next_to(rotation_matrix, DOWN, buff=0.5)
+
+        self.play(Write(rotation_matrix))
+        self.play(Write(rope_equation))
+        self.wait(2)
+        self.play(FadeOut(VGroup(rotation_matrix, rope_equation)))
+
+class WhereIsRoPEAdded(Scene):
+    def construct(self):
+        # Title
+        title = Text("RoPE in Self-Attention", font_size=40)
+        self.play(Write(title))
+        self.wait(1)
+        self.play(title.animate.to_edge(UP))
+
+        # Create the attention equation
+        attention_eq = MathTex(
+            r"\text{Attention}(Q, K, V) = \text{softmax}",
+            r"(",
+            r"\frac{QK^T}{\sqrt{d_k}}",
+            r")",
+            r"V"
+        ).scale(1.2)
+        
+        self.play(Write(attention_eq))
+        self.wait(2)
+
+        # Move equation up and create explanation
+        self.play(
+            attention_eq.animate.shift(UP)
+        )
+
+        explanation = Text(
+            "Traditional: Position encoding added to embeddings",
+            font_size=24
+        ).next_to(attention_eq, DOWN*2)
+        
+        problem = Text(
+            "Problem: Pollutes semantic information",
+            font_size=24,
+            color=RED
+        ).next_to(explanation, DOWN)
+
+        self.play(
+            Write(explanation),
+            Write(problem)
+        )
+        self.wait(2)
+
+        # Fade out explanation and focus on QK^T
+        self.play(
+            FadeOut(explanation),
+            FadeOut(problem),
+            FadeOut(attention_eq[0]),  # "Attention(Q, K, V) = softmax"
+            FadeOut(attention_eq[1]),  # "("
+            FadeOut(attention_eq[3]),  # ")"
+            FadeOut(attention_eq[4]),  # "V"
+        )
+
+        # Move QK^T/sqrt(dk) to center
+        qk_part = attention_eq[2]
+        self.play(
+            qk_part.animate.move_to(ORIGIN)
+        )
+        self.wait(1)
+
+        # Transform into dot product formula
+        dot_product = MathTex(
+            r"Q \cdot K^T = |Q| |K^T| \cos(\theta)"
+        ).scale(1.2)
+
+        self.play(
+            Transform(
+                qk_part,
+                dot_product
+            )
+        )
+        self.wait(1)
+
+        # Add geometric interpretation
+        dot_product_explanation = Text(
+            "Geometric Interpretation",
+            font_size=30
+        ).next_to(dot_product, UP*2)
+
+        # Create coordinate system for vector visualization
+        axes = Axes(
+            x_range=[-2, 2],
+            y_range=[-2, 2],
+            axis_config={"include_tip": True},
+        ).scale(0.7).next_to(dot_product, DOWN*2)
+
+        # Create vectors
+        vector_q = Arrow(
+            axes.coords_to_point(0, 0),
+            axes.coords_to_point(1.5, 0),
+            buff=0,
+            color=BLUE
+        )
+        vector_k = Arrow(
+            axes.coords_to_point(0, 0),
+            axes.coords_to_point(1, 1),
+            buff=0,
+            color=RED
+        )
+
+        # Labels for vectors
+        q_label = MathTex("Q", color=BLUE).next_to(vector_q.get_end(), RIGHT)
+        k_label = MathTex("K^T", color=RED).next_to(vector_k.get_end(), UP)
+
+        # Create angle
+        angle = Angle(vector_q, vector_k, radius=0.5, color=YELLOW)
+        theta_label = MathTex(r"\theta", color=YELLOW).next_to(angle, RIGHT, buff=0.1)
+
+        self.play(
+            Write(dot_product_explanation),
+            Create(axes)
+        )
+        self.play(
+            GrowArrow(vector_q),
+            GrowArrow(vector_k),
+            Write(q_label),
+            Write(k_label)
+        )
+        self.play(
+            Create(angle),
+            Write(theta_label)
+        )
+
+        # Add key insight
+        insight = Text(
+            "Key Insight: Rotate vectors based on position\nto control their dot product",
+            font_size=24,
+            color=YELLOW
+        ).to_edge(DOWN)
+        
+        self.play(Write(insight))
+        self.wait(1)
+
+        # Demonstrate rotation effect
+        self.play(
+            Rotate(
+                vector_k,
+                angle=PI/4,
+                about_point=axes.coords_to_point(0, 0)
+            ),
+            Rotate(
+                k_label,
+                angle=PI/4,
+                about_point=axes.coords_to_point(0, 0)
+            ),
+            run_time=2
+        )
+        
+        # Update angle visualization
+        new_angle = Angle(vector_q, vector_k, radius=0.5, color=YELLOW)
+        new_theta = MathTex(r"\theta'", color=YELLOW).next_to(new_angle, RIGHT, buff=0.1)
+        
+        self.play(
+            FadeOut(angle),
+            FadeOut(theta_label),
+            Create(new_angle),
+            Write(new_theta)
+        )
+
+        # Add final note about preserving norms
+        norm_preservation = Text(
+            "Rotation preserves vector norms (semantic information)",
+            font_size=24
+        ).next_to(insight, UP)
+        
+        self.play(Write(norm_preservation))
+        self.wait(2)
+
+class RoPEDetailed(Scene):
+    def construct(self):
+        # Step 1: Show the sentence and its embeddings
+        sentence = Text("This is delicious", font_size=36)
+        sentence.to_edge(UP)
+        self.play(Write(sentence))
+        
+        # Highlight words and show their positions
+        pos_this = Text("0", font_size=24, color=BLUE).next_to(sentence[0:4], DOWN)
+        pos_is = Text("1", font_size=24, color=GREEN).next_to(sentence[4:6], DOWN)
+        
+        self.play(
+            Write(pos_this),
+            sentence[0:4].animate.set_color(BLUE)
+        )
+        self.play(
+            Write(pos_is),
+            sentence[4:6].animate.set_color(GREEN)
+        )
+        self.wait(1)
+
+        # Step 2: Show 6D vectors
+        vector_this = MathTex(
+            r"\text{This} = [x_1, x_2, x_3, x_4, x_5, x_6]",
+            color=BLUE
+        ).next_to(pos_this, DOWN, buff=0.5)
+        
+        vector_is = MathTex(
+            r"\text{is} = [x_7, x_8, x_9, x_{10}, x_{11}, x_{12}]",
+            color=GREEN
+        ).next_to(vector_this, DOWN, buff=0.5)
+        
+        self.play(Write(vector_this), Write(vector_is))
+        self.wait(1)
+
+        # Step 3: Show the pairs of 2D vectors
+        pairs_title = Text("2D Vector Pairs:", font_size=30).to_edge(LEFT).shift(DOWN*2)
+        
+        pair1_this = MathTex(r"\text{Pair 1 'This'}: [x_1, x_2]", color=BLUE)
+        pair2_this = MathTex(r"\text{Pair 2 'This'}: [x_3, x_4]", color=BLUE)
+        pair3_this = MathTex(r"\text{Pair 3 'This'}: [x_5, x_6]", color=BLUE)
+        
+        pairs_this = VGroup(pair1_this, pair2_this, pair3_this).arrange(DOWN, buff=0.3)
+        pairs_this.next_to(pairs_title, RIGHT, buff=0.5)
+        
+        self.play(Write(pairs_title), Write(pairs_this))
+        self.wait(1)
+
+        # Step 4: Show theta values
+        theta_title = Text("Theta Values:", font_size=30).move_to(ORIGIN).shift(DOWN*2 + RIGHT*4)
+        theta_values = MathTex(
+            r"\theta = [0.1, 0.4, 0.6]"
+        ).next_to(theta_title, DOWN)
+        
+        self.play(Write(theta_title), Write(theta_values))
+        self.wait(1)
+
+        self.play(
+
+            FadeOut(VGroup(sentence, pos_this, pos_is, vector_this, vector_is, pairs_title, pairs_this, theta_title, theta_values))
+        )
+
+         # Main equation
+        equation = MathTex(
+            r"\Theta = \theta_i = 10000^{-\frac{2(i-1)}{d}}, i \in [1, 2, ..., \frac{d}{2}]"
+        ).scale(1.2)
+        
+        # Symbol explanations
+        explanations = VGroup(
+            MathTex(r"\text{where:}").scale(0.9),
+            MathTex(r"\theta_i:", r"\text{ frequency for the }i\text{-th pair of features}").scale(0.9),
+            MathTex(r"d:", r"\text{ dimension of the embedding vector}").scale(0.9),
+            MathTex(r"i:", r"\text{ index of the pair (from 1 to }d/2\text{)}").scale(0.9)
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.3)
+        
+        # Position the equation at origin
+        equation.move_to(ORIGIN)
+        explanations.next_to(equation, DOWN*2)
+        
+        # Animations
+        self.play(Write(equation))
+        self.wait(1)
+        
+        for explanation in explanations:
+            self.play(Write(explanation))
+            self.wait(0.5)
+        
+        self.wait(2)
+        self.play(FadeOut(VGroup(equation, explanations)))
+
+
+        # Step 5: Show rotation angles for each word
+        angles_this = MathTex(
+            r"\text{'this' angles} &= [m \cdot \theta_0, m \cdot \theta_1, m \cdot \theta_2] \\",
+            r"&= [0 \cdot 0.1, 0 \cdot 0.4, 0 \cdot 0.6] \\",
+            r"&= [0, 0, 0]",
+            color=BLUE
+        ).move_to(ORIGIN).shift(UP*2)
+        
+        angles_is = MathTex(
+            r"\text{'is' angles} &= [m \cdot \theta_0, m \cdot \theta_1, m \cdot \theta_2] \\",
+            r"&= [1 \cdot 0.1, 1 \cdot 0.4, 1 \cdot 0.6] \\",
+            r"&= [0.1, 0.4, 0.6]",
+            color=GREEN
+        ).next_to(angles_this, DOWN, buff=2)
+        
+        self.play(Write(angles_this), Write(angles_is))
+        self.wait(1)
+
+        self.play(FadeOut(VGroup(angles_this, angles_is)))
+
+        # Step 6: Show rotation matrix for one pair
+        rotation_matrix = MathTex(
+            r"R(\theta) = \begin{bmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{bmatrix}"
+        ).to_edge(UP).shift(DOWN)
+        
+        self.play(
+            rotation_matrix.animate.to_edge(UP)
+        )
+        self.wait(1)
+
+        # Step 7: Demonstrate rotation for 'is' word (position 1)
+        axes = []
+        vectors = []
+        angles = [0.1, 0.4, 0.6]  # Three different rotation angles for 'is'
+        
+        for i in range(3):
+            ax = Axes(
+                x_range=[-2, 2],
+                y_range=[-2, 2],
+                axis_config={"include_tip": True},
+                x_length=3,
+                y_length=3
+            ).scale(0.5)
+            
+            if i == 0:
+                ax.to_edge(LEFT).shift(UP)
+            elif i == 1:
+                ax.move_to(ORIGIN).shift(UP)
+            else:
+                ax.to_edge(RIGHT).shift(UP)
+                
+            vector = Arrow(
+                ax.coords_to_point(0, 0),
+                ax.coords_to_point(1, 0),
+                buff=0,
+                color=GREEN
+            )
+            
+            axes.append(ax)
+            vectors.append(vector)
+            
+            angle_label = MathTex(f"\\theta = {angles[i]}")
+            angle_label.next_to(ax, DOWN)
+            
+            self.play(
+                Create(ax),
+                GrowArrow(vector),
+                Write(angle_label)
+            )
+            
+            # Rotate vector
+            self.play(
+                Rotate(
+                    vector,
+                    angle=angles[i],
+                    about_point=ax.coords_to_point(0, 0)
+                ),
+                run_time=2
+            )
+            
+        # Final explanation
+        final_text = Text(
+            "Each word embedding is rotated by different angles\nbased on its position in the sequence",
+            font_size=24
+        ).to_edge(DOWN)
+        
+        self.play(Write(final_text))
+        self.wait(2)
+        self.play(FadeOut(VGroup(rotation_matrix, final_text, *axes, *vectors, *angle_label)))
+
+        # Create word embeddings boxes
+        def create_embedding_box(values, word, position):
+            box_height = 0.4
+            boxes = VGroup(*[
+                Rectangle(width=1.2, height=box_height, color=WHITE)
+                for _ in range(6)
+            ]).arrange(DOWN, buff=0)
+            
+            # Add values inside boxes
+            values_text = VGroup(*[
+                DecimalNumber(val, num_decimal_places=3).scale(0.4)
+                for val in values
+            ])
+            for text, box in zip(values_text, boxes):
+                text.move_to(box)
+            
+            # Add word label
+            word_label = Text(word, font_size=24).next_to(boxes, UP)
+            
+            # Group everything
+            full_box = VGroup(boxes, values_text, word_label)
+            full_box.move_to(position)
+            return full_box
+
+        # Sample embedding values for each word
+        this_values = [0.017, -0.030, 0.014, -0.009, 0.043, -0.021]
+        is_values = [0.014, 0.053, 0.035, -0.000, 0.000, 0.017]
+        awesome_values = [-0.002, 0.015, -0.015, 0.016, 0.007, -0.002]
+
+        # Create boxes for each word
+        this_box = create_embedding_box(this_values, "this", LEFT*4)
+        is_box = create_embedding_box(is_values, "is", ORIGIN)
+        awesome_box = create_embedding_box(awesome_values, "awesome", RIGHT*4)
+
+        # Show embeddings
+        self.play(
+            Create(this_box),
+            Create(is_box),
+            Create(awesome_box)
+        )
+        self.wait(1)
+
+        # Create vectors for pairs
+        def create_vector_pair(start_pos, angle, length=0.5):
+            arrow = Arrow(
+                start=start_pos,
+                end=start_pos + length * (np.cos(angle) * RIGHT + np.sin(angle) * UP),
+                buff=0,
+                color=BLUE
+            )
+            return arrow
+
+        # Add vectors next to boxes
+        vector_groups = VGroup()
+        angles = [PI/6, PI/4, PI/3]  # Different angles for different pairs
+        
+        for box, base_pos in [(this_box, LEFT*4), (is_box, ORIGIN), (awesome_box, RIGHT*4)]:
+            vectors = VGroup()
+            for i, angle in enumerate(angles):
+                pos = box[0][i*2].get_center() + RIGHT*1.5
+                vector = create_vector_pair(pos, angle)
+                vectors.add(vector)
+            vector_groups.add(vectors)
+
+        self.play(Create(vector_groups))
+        self.wait(1)
+
+        # Add rotation values
+        rotation_labels = VGroup()
+        for i, vectors in enumerate(vector_groups):
+            for j, vector in enumerate(vectors):
+                rho = f"ρ = {0.5*(i+1)*(j+1):.2f}"
+                label = Text(rho, font_size=16).next_to(vector, RIGHT)
+                rotation_labels.add(label)
+
+        self.play(Write(rotation_labels))
+        self.wait(1)
+
+        # Rotate vectors
+        for vectors in vector_groups:
+            self.play(
+                *[Rotate(vector, angle=PI/4, about_point=vector.get_start())
+                  for vector in vectors],
+                run_time=1
+            )
+        self.wait(1)
+
+        # Fade everything out
+        self.play(
+            *[FadeOut(mob) for mob in [this_box, is_box, awesome_box, 
+                                     vector_groups, rotation_labels]]
+        )
+        self.wait(1)
