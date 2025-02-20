@@ -218,8 +218,9 @@ class IndependentProbabilityDistributions(Scene):
         )
 
         self.play(
-            all_elements.animate.move_to(ORIGIN),
+            all_elements.animate.move_to(ORIGIN + LEFT*0.4 + DOWN*0.1),
             run_time=1
         )
         self.wait()
+
 
