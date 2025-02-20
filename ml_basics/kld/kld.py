@@ -169,3 +169,42 @@ class IndependentProbabilityDistributions(Scene):
         
         # Final pause
         self.wait(2)
+
+        def update_clothing_parts(parts, tshirt_prob):
+            coat_prob = 1 - tshirt_prob
+            original_center = parts.get_center()
+            
+            # Update t-shirt part (left)
+            parts[0].stretch_to_fit_width(4 * tshirt_prob, about_edge=LEFT)
+            
+            # Update coat part (right) and position it next to t-shirt
+            parts[1].stretch_to_fit_width(4 * coat_prob, about_edge=RIGHT)
+            parts[1].next_to(parts[0], RIGHT, buff=0)
+            
+            # Move back to original center
+            parts.move_to(original_center)
+            return parts
+
+        # Animate to 20-80 distribution
+        self.play(
+            UpdateFromAlphaFunc(
+                clothing_parts,
+                lambda m, a: update_clothing_parts(m, 0.60 + (0.20 - 0.60) * a)
+            ),
+            Transform(percentages[0], Text("20%", font_size=16).move_to(percentages[0])),
+            Transform(percentages[1], Text("80%", font_size=16).move_to(percentages[1])),
+            run_time=2
+        )
+        self.wait(2)
+
+        # Animate back to 60-40 distribution
+        self.play(
+            UpdateFromAlphaFunc(
+                clothing_parts,
+                lambda m, a: update_clothing_parts(m, 0.20 + (0.60 - 0.20) * a)
+            ),
+            Transform(percentages[0], Text("60%", font_size=16).move_to(percentages[0])),
+            Transform(percentages[1], Text("40%", font_size=16).move_to(percentages[1])),
+            run_time=2
+        )
+        self.wait(2)
