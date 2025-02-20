@@ -211,7 +211,7 @@ class IndependentProbabilityDistributions(Scene):
 
         # Group everything and move to center
         all_elements = VGroup(
-            weather_rect, weather_parts, 
+            weather_rect, weather_parts, weather_labels,
             clothing_rect, clothing_parts,
             bottom_labels, percentages,
             clothing_title, weather_title
@@ -222,3 +222,4 @@ class IndependentProbabilityDistributions(Scene):
             run_time=1
         )
         self.wait()
+
