@@ -10,8 +10,8 @@ class IndependentProbabilityDistributions(Scene):
         # Constants for probabilities
         WEATHER_RAIN_PROB = 0.25
         WEATHER_SUNNY_PROB = 0.75
-        CLOTHING_TSHIRT_PROB = 0.62  # Corrected from 0.60 to 0.62
-        CLOTHING_COAT_PROB = 0.38    # Corrected from 0.40 to 0.38
+        CLOTHING_TSHIRT_PROB = 0.60  # Corrected from 0.60 to 0.62
+        CLOTHING_COAT_PROB = 0.40    # Corrected from 0.40 to 0.38
 
         # Create the first distribution (Weather)
         weather_rect = Rectangle(height=4, width=1, stroke_width=2)
@@ -91,14 +91,14 @@ class IndependentProbabilityDistributions(Scene):
         
         # 3. Rotate clothing and move to bottom (aligned left)
         self.play(
-            Rotate(clothing_group, angle=PI/2),
+            Rotate(clothing_group, angle=-PI/2),
             FadeOut(clothing_title),
             FadeOut(clothing_labels)
         )
         
         # Move to form square (align left edges)
         self.play(
-            clothing_group.animate.next_to(weather_group, DOWN, buff=0).align_to(weather_group, LEFT)  # Align left
+            clothing_group.animate.next_to(weather_group.get_bottom(), UP*0.2, buff=0).align_to(weather_group, LEFT)  # Align left
         )
         
         # 4. Create final square labels
