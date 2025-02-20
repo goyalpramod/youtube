@@ -1,5 +1,41 @@
 from manim import *
 
+class WobbleTransform(Animation):
+    CONFIG = {
+        "amplitude": 0.2,
+        "wave_freq": 2,
+    }
+    
+    def __init__(self, mobject, **kwargs):
+        super().__init__(mobject, **kwargs)
+        # Store original points for reference
+        self.original_points = {
+            mob: mob.get_points().copy() 
+            for mob in self.mobject.family_members_with_points()
+        }
+
+    def interpolate_mobject(self, alpha):
+        # Use a smooth transition for the wave effect
+        time_var = alpha * 2 * PI
+        
+        for mob in self.mobject.family_members_with_points():
+            original_points = self.original_points[mob]
+            points = mob.get_points()
+            
+            for i in range(len(points)):
+                x, y, z = original_points[i]
+                
+                # Create organic distortion using multiple sine waves
+                dx = self.CONFIG["amplitude"] * np.sin(self.CONFIG["wave_freq"] * y + time_var)
+                dy = self.CONFIG["amplitude"] * np.sin(self.CONFIG["wave_freq"] * x + time_var)
+                
+                # Add secondary wave for more organic feel
+                dx += self.CONFIG["amplitude"] * 0.5 * np.sin(self.CONFIG["wave_freq"] * 2 * y - time_var)
+                dy += self.CONFIG["amplitude"] * 0.5 * np.sin(self.CONFIG["wave_freq"] * 2 * x - time_var)
+                
+                # Apply distortion
+                points[i] = [x + dx, y + dy, z]
+
 class TextKLD(Scene):
     def construct(self):
         text = Text("Kullback Leibler Divergence", font_size=72)
@@ -107,18 +143,18 @@ class IndependentProbabilityDistributions(Scene):
 
         # Create target parts with correct proportions
         expanded_weather_parts = VGroup(
-            weather_parts[0].copy().stretch_to_fit_width(4).set_z_index(20),  # sunny
-            weather_parts[1].copy().stretch_to_fit_width(4).set_z_index(20)   # raining
+            weather_parts[0].copy().stretch_to_fit_width(4),  # sunny
+            weather_parts[1].copy().stretch_to_fit_width(4),   # raining
         ).arrange(UP, buff=0)
 
         expanded_clothing_parts = VGroup(
-            clothing_parts[0].copy().stretch_to_fit_height(4).set_z_index(1),  # t-shirt
-            clothing_parts[1].copy().stretch_to_fit_height(4).set_z_index(1)   # coat
+            clothing_parts[0].copy().stretch_to_fit_height(4),  # t-shirt
+            clothing_parts[1].copy().stretch_to_fit_height(4),   # coat
         ).arrange(RIGHT, buff=0)
 
         # Set z-index for the rectangles too
-        expanded_weather.set_z_index(4)
-        expanded_clothing.set_z_index(0)
+        expanded_weather
+        expanded_clothing
 
         # Fix positions precisely
         expanded_weather.move_to(weather_rect).align_to(weather_rect, LEFT)
@@ -218,9 +254,24 @@ class IndependentProbabilityDistributions(Scene):
         )
 
         self.play(
-            all_elements.animate.move_to(ORIGIN + LEFT*0.4 + DOWN*0.1),
+            all_elements.animate.move_to(ORIGIN + LEFT*0.5 + DOWN*0.15),
             run_time=1
         )
         self.wait()
 
+        self.play(
+            FadeOut(bottom_labels, weather_labels, percentages)
+        )
 
+        # After moving to center
+        wobble_group = VGroup(weather_rect, weather_parts, clothing_rect, clothing_parts)
+        
+        # Create the wobble effect
+        wobble = WobbleTransform(
+            wobble_group,
+            run_time=5,
+            rate_func=there_and_back_with_pause,  # This will create a nice wobble and hold
+        )
+        
+        self.play(wobble)
+        self.wait(2)
