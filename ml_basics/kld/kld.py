@@ -21,13 +21,13 @@ class IndependentProbabilityDistributions(Scene):
             .set_fill(color=YELLOW_A, opacity=0.8),
             # Raining (top)
             Rectangle(height=4*WEATHER_RAIN_PROB, width=1)
-            .set_fill(color=PURPLE_A, opacity=0.8),
+            .set_fill(color=BLUE_D, opacity=1),
         ).arrange(UP, buff=0)
         
         weather_group = VGroup(weather_rect, weather_parts)
         
         # Weather labels
-        weather_title = Text("weather\nnext week", font_size=24)
+        weather_title = Text("weather", font_size=24)
         weather_title.next_to(weather_group, UP, buff=0.3)
         
         weather_labels = VGroup(
@@ -45,16 +45,16 @@ class IndependentProbabilityDistributions(Scene):
         clothing_parts = VGroup(
             # T-shirt (bottom)
             Rectangle(height=4*CLOTHING_TSHIRT_PROB, width=1)
-            .set_fill(color=YELLOW_A, opacity=0.8),
+            .set_fill(color=YELLOW_A, opacity=0.5),
             # Coat (top)
             Rectangle(height=4*CLOTHING_COAT_PROB, width=1)
-            .set_fill(color=YELLOW_D, opacity=0.8),
+            .set_fill(color=YELLOW_B, opacity=0.5),
         ).arrange(UP, buff=0)
         
         clothing_group = VGroup(clothing_rect, clothing_parts)
         
         # Clothing labels
-        clothing_title = Text("clothing\ntoday", font_size=24)
+        clothing_title = Text("clothing", font_size=24)
         clothing_title.next_to(clothing_group, UP, buff=0.3)
         
         clothing_labels = VGroup(
@@ -93,13 +93,56 @@ class IndependentProbabilityDistributions(Scene):
         self.play(
             Rotate(clothing_group, angle=-PI/2),
             FadeOut(clothing_title),
-            FadeOut(clothing_labels)
+            FadeOut(clothing_labels),
+            FadeOut(weather_title),
         )
         
         # Move to form square (align left edges)
         self.play(
             clothing_group.animate.next_to(weather_group.get_bottom(), UP*0.2, buff=0).align_to(weather_group, LEFT)  # Align left
         )
+        # Create target rectangles for expansion
+        expanded_weather = weather_rect.copy().stretch_to_fit_width(4)
+        expanded_clothing = clothing_rect.copy().stretch_to_fit_height(4)
+
+        # Create target parts with correct proportions
+        expanded_weather_parts = VGroup(
+            weather_parts[0].copy().stretch_to_fit_width(4).set_z_index(20),  # sunny
+            weather_parts[1].copy().stretch_to_fit_width(4).set_z_index(20)   # raining
+        ).arrange(UP, buff=0)
+
+        expanded_clothing_parts = VGroup(
+            clothing_parts[0].copy().stretch_to_fit_height(4).set_z_index(1),  # t-shirt
+            clothing_parts[1].copy().stretch_to_fit_height(4).set_z_index(1)   # coat
+        ).arrange(RIGHT, buff=0)
+
+        # Set z-index for the rectangles too
+        expanded_weather.set_z_index(4)
+        expanded_clothing.set_z_index(0)
+
+        # Fix positions precisely
+        expanded_weather.move_to(weather_rect).align_to(weather_rect, LEFT)
+        expanded_weather_parts.move_to(expanded_weather)
+        expanded_weather_parts.align_to(weather_parts, LEFT)
+
+        expanded_clothing.move_to(clothing_rect).align_to(clothing_rect, DOWN)
+        expanded_clothing_parts.move_to(expanded_clothing)
+        expanded_clothing_parts.align_to(clothing_parts, DOWN)
+
+        # Ensure groups maintain relative positions
+        weather_group = VGroup(weather_rect, weather_parts)
+        clothing_group = VGroup(clothing_rect, clothing_parts)
+
+        # Animate expansion with fixed positioning
+        self.play(
+            Transform(weather_rect, expanded_weather),
+            Transform(weather_parts, expanded_weather_parts),
+            Transform(clothing_rect, expanded_clothing),
+            Transform(clothing_parts, expanded_clothing_parts),
+            run_time=1.5,
+            rate_func=smooth  # Ensures smooth transformation
+        )
+        self.wait()
         
         # 4. Create final square labels
         bottom_labels = VGroup(
@@ -114,28 +157,15 @@ class IndependentProbabilityDistributions(Scene):
         )
         percentages[0].next_to(bottom_labels[0], DOWN, buff=0.1)
         percentages[1].next_to(bottom_labels[1], DOWN, buff=0.1)
+        clothing_title.next_to(percentages, DOWN, buff=0)
+        weather_title.next_to(weather_labels, LEFT, buff=0)
         
         self.play(
             Write(bottom_labels),
-            Write(percentages)
+            Write(percentages),
+            Write(clothing_title),
+            Write(weather_title),
         )
-        
-        # 5. Create and animate slider
-        slider = Line(LEFT*2, RIGHT*2).next_to(percentages, DOWN, buff=1)
-        dot = Dot().move_to(slider.point_from_proportion(CLOTHING_TSHIRT_PROB))
-        
-        self.play(
-            Create(slider),
-            Create(dot)
-        )
-        
-        # Animate slider to show independence
-        self.play(
-            dot.animate.shift(RIGHT),
-            rate_func=there_and_back,
-            run_time=2
-        )
-        self.wait()
         
         # Final pause
         self.wait(2)
