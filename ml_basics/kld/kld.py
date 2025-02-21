@@ -536,8 +536,10 @@ class KLDIntroTalk(Scene):
     def construct(self):
         pass
 
-
-class KLDIntro(Scene):
+"""
+FIX ALIGNMENT
+"""
+class SimpleEncoding(Scene):
    def construct(self):
         # Constants for consistent styling
         SYMBOL_COLOR = "#C19EE0"  # Light purple
@@ -681,3 +683,77 @@ class KLDIntro(Scene):
             FadeIn(bottom_group[2])
         )
         self.wait(2)
+
+class VariableLengthEncoding(Scene):
+   def construct(self):
+       # Constants
+       SYMBOL_COLOR = "#C19EE0"  # Light purple
+       BAR_COLORS = ["#C19EE0", "#FFB6C1", "#98FB98", "#87CEEB"]  # Different colors for bars
+       BAR_WIDTH = 2  # Constant width for all bars
+       
+       # Create bars and labels
+       base_height = 0.5
+       heights = [2, 1, 0.5, 0.5]  # Heights corresponding to probabilities
+       
+       # Create probability labels on left
+       prob_labels = VGroup(
+           MathTex("\\frac{1}{2}"),
+           MathTex("\\frac{1}{4}"),
+           MathTex("\\frac{1}{8}"),
+           MathTex("\\frac{1}{8}")
+       )
+       
+       # Create food word labels
+       food_labels = VGroup(
+           Text('"Pizza"', font_size=30),
+           Text('"Pasta"', font_size=30),
+           Text('"Salad"', font_size=30),
+           Text('"Soup"', font_size=30)
+       )
+       
+       # Create rectangles (bars)
+       bars = VGroup()
+       for i in range(4):
+           rect = Rectangle(
+               height=heights[i],
+               width=BAR_WIDTH,
+               fill_color=BAR_COLORS[i],
+               fill_opacity=1,
+               stroke_color=WHITE
+           )
+           bars.add(rect)
+       
+       # Position the first bar
+       bars[0].move_to(ORIGIN)
+       
+       # Position subsequent bars relative to the previous one
+       for i in range(1, 4):
+           bars[i].next_to(bars[i-1], DOWN, buff=0)
+           
+       # Position labels inside bars
+       for label, bar in zip(food_labels, bars):
+           label.move_to(bar)
+           
+       # Position probability labels
+       for label, bar in zip(prob_labels, bars):
+           label.next_to(bar, LEFT, buff=0.5)
+           
+       # Group everything
+       entire_group = VGroup(bars, food_labels, prob_labels)
+       entire_group.move_to(ORIGIN)
+       
+       # Animation sequence
+       # Animate probability labels
+       for label in prob_labels:
+           self.play(Write(label))
+       self.wait()
+       
+       # Animate bars and food labels together
+       for i in range(len(bars)):
+           self.play(
+               Create(bars[i]),
+               Write(food_labels[i])
+           )
+           self.wait(0.5)
+           
+       self.wait(2)
