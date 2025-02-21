@@ -275,3 +275,132 @@ class IndependentProbabilityDistributions(Scene):
         
         self.play(wobble)
         self.wait(2)
+
+        self.play(
+            FadeOut(wobble_group),
+            FadeOut(clothing_title),
+            FadeOut(weather_title),
+        )
+
+class ConditionalProbabilityDistributions(Scene):
+    def construct(self):
+        # Constants for probabilities
+        WEATHER_RAIN_PROB = 0.25
+        WEATHER_SUNNY_PROB = 0.75
+        CLOTHING_TSHIRT_PROB = 0.75  # Changed to match image
+        CLOTHING_COAT_PROB = 0.25    # Changed to match image
+        
+        # Initial distribution (left side)
+        weather_height = 4
+        weather_width = 1
+        
+        # Create the initial rectangle with its parts
+        weather_group = VGroup(
+            # Main container
+            Rectangle(height=weather_height, width=weather_width, stroke_width=2),
+            # Sunny part (bottom)
+            Rectangle(height=weather_height*WEATHER_SUNNY_PROB, width=weather_width)
+            .set_fill(color="#D4D0AB", opacity=1),
+            # Raining part (top)
+            Rectangle(height=weather_height*WEATHER_RAIN_PROB, width=weather_width)
+            .set_fill(color="#4FB3BF", opacity=1),
+        )
+        
+        # Position the parts
+        weather_group[1].move_to(weather_group[0].get_bottom(), aligned_edge=DOWN)
+        weather_group[2].move_to(weather_group[0].get_top(), aligned_edge=UP)
+        
+        # Weather labels
+        weather_labels = VGroup(
+            Text("raining\n25%", font_size=20, color=WHITE),
+            Text("sunny\n75%", font_size=20, color=WHITE)
+        )
+        weather_labels[0].next_to(weather_group[2], LEFT, buff=0.3)
+        weather_labels[1].next_to(weather_group[1], LEFT, buff=0.3)
+        
+        initial_group = VGroup(weather_group, weather_labels)
+        initial_group.move_to(LEFT*3)
+
+        # Joint probability square (right side)
+        square_size = 4
+        joint_square = Square(side_length=square_size, stroke_width=2)
+        
+        # Create the sections of the square
+        # Calculate section sizes based on total square size
+        tshirt_width = square_size * 0.75  # 75% of width for t-shirt
+        coat_width = square_size * 0.25    # 25% of width for coat
+        
+        sections = VGroup(
+            # Bottom left (sunny, tshirt) - 56%
+            Rectangle(height=square_size * 0.75, width=tshirt_width)
+            .set_fill(color="#D4D0AB", opacity=1),
+            # Bottom right (sunny, coat) - 19%
+            Rectangle(height=square_size * 0.75, width=coat_width)
+            .set_fill(color="#D4D0AB", opacity=1),
+            # Top left (rain, tshirt) - 6%
+            Rectangle(height=square_size * 0.25, width=coat_width)
+            .set_fill(color="#4FB3BF", opacity=1),
+            # Top right (rain, coat) - 19%
+            Rectangle(height=square_size * 0.25, width=tshirt_width)
+            .set_fill(color="#4FB3BF", opacity=1),
+        )
+
+        # Position sections precisely
+        sections[0].move_to(joint_square.get_bottom(), aligned_edge=DOWN).align_to(joint_square, LEFT)  # 56%
+        sections[1].move_to(joint_square.get_bottom(), aligned_edge=DOWN).align_to(joint_square, RIGHT)  # 19%
+        sections[2].move_to(joint_square.get_top(), aligned_edge=UP).align_to(joint_square, LEFT)  # 6%
+        sections[3].move_to(joint_square.get_top(), aligned_edge=UP).align_to(joint_square, RIGHT)  # 19%
+        
+        joint_group = VGroup(joint_square, sections)
+        joint_group.move_to(RIGHT*3)
+
+        # Percentage labels inside sections
+        percentage_labels = VGroup(
+            Text("56%", font_size=36, color=WHITE).move_to(sections[0]),
+            Text("19%", font_size=36, color=WHITE).move_to(sections[1]),
+            Text("6%", font_size=36, color=WHITE).move_to(sections[2]),
+            Text("19%", font_size=36, color=WHITE).move_to(sections[3]),
+        )
+
+        # Bottom labels for t-shirt and coat
+        bottom_labels = VGroup(
+            Text("t-shirt", font_size=24, color=WHITE),
+            Text("coat", font_size=24, color=WHITE),
+            Text("75%", font_size=20, color=WHITE),
+            Text("25%", font_size=20, color=WHITE),
+        )
+        
+        # Position bottom labels
+        bottom_labels[0].next_to(joint_square, DOWN, buff=0.3).shift(LEFT*1.5)
+        bottom_labels[1].next_to(joint_square, DOWN, buff=0.3).shift(RIGHT*1.5)
+        bottom_labels[2].next_to(bottom_labels[0], DOWN, buff=0.1)
+        bottom_labels[3].next_to(bottom_labels[1], DOWN, buff=0.1)
+
+        # Formula
+        formula = MathTex(
+            r"p(x,y) = p(x) \cdot p(y|x)",
+            color=WHITE,
+            font_size=36
+        ).next_to(joint_square, DOWN, buff=2)
+
+        # Animation sequence
+        self.play(
+            Create(weather_group),
+            Write(weather_labels)
+        )
+        self.wait()
+        
+        self.play(
+            Create(joint_square),
+            Create(sections)
+        )
+        self.wait()
+
+        self.play(Write(percentage_labels))
+        self.wait()
+
+        self.play(Write(bottom_labels))
+        self.wait()
+
+        self.play(Write(formula))
+        self.wait(2)
