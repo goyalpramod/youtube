@@ -404,3 +404,106 @@ class ConditionalProbabilityDistributions(Scene):
 
         self.play(Write(formula))
         self.wait(2)
+
+        # Fade out everything
+        self.play(
+            *[FadeOut(mob) for mob in self.mobjects]
+        )
+        self.wait()
+
+        # Create new visualization
+        # Bottom bar (62% - 38% split)
+        bottom_bar = Rectangle(height=0.5, width=4, stroke_width=2)
+        bottom_sections = VGroup(
+            # Left section (62%)
+            Rectangle(height=0.5, width=4 * 0.62)
+            .set_fill(color="#D4D0AB", opacity=1),
+            # Right section (38%)
+            Rectangle(height=0.5, width=4 * 0.38)
+            .set_fill(color="#D4D0AB", opacity=1),
+        ).arrange(RIGHT, buff=0)
+        
+        bottom_group = VGroup(bottom_bar, bottom_sections)
+        bottom_group.move_to(DOWN*3)
+
+        # Bottom percentages
+        bottom_labels = VGroup(
+            Text("62%", font_size=24, color=WHITE).move_to(bottom_sections[0]),
+            Text("38%", font_size=24, color=WHITE).move_to(bottom_sections[1])
+        )
+
+        # Upward arrow
+        arrow = Arrow(
+            bottom_bar.get_top(),
+            ORIGIN + DOWN*0.5,
+            buff=0.2,
+            color=WHITE
+        )
+
+        # Square with new proportions
+        square_size = 4
+        main_square = Square(side_length=square_size, stroke_width=2)
+        
+        # Create sections with new proportions
+        sections = VGroup(
+            # Bottom left (sunny, left) - 56%
+            Rectangle(height=square_size * 0.80, width=square_size * 0.62)
+            .set_fill(color="#D4D0AB", opacity=1),
+            # Bottom right (sunny, right) - 19%
+            Rectangle(height=square_size * 0.50, width=square_size * 0.38)
+            .set_fill(color="#D4D0AB", opacity=1),
+            # Top left (rain, left) - 6%
+            Rectangle(height=square_size * (1 - 0.80), width=square_size * 0.62)
+            .set_fill(color="#4FB3BF", opacity=1),
+            # Top right (rain, right) - 19%
+            Rectangle(height=square_size * 0.50, width=square_size * 0.38)
+            .set_fill(color="#4FB3BF", opacity=1),
+        )
+
+        # Position sections
+        sections[0].move_to(main_square.get_bottom(), aligned_edge=DOWN).align_to(main_square, LEFT)
+        sections[1].move_to(main_square.get_bottom(), aligned_edge=DOWN).align_to(main_square, RIGHT)
+        sections[2].move_to(sections[0].get_top(), aligned_edge=DOWN)
+        sections[3].move_to(sections[1].get_top(), aligned_edge=DOWN)
+
+        main_group = VGroup(main_square, sections)
+        main_group.move_to(ORIGIN)
+
+        # Percentage labels
+        percentage_labels = VGroup(
+            Text("56%", font_size=36, color=WHITE).move_to(sections[0]),
+            Text("19%", font_size=36, color=WHITE).move_to(sections[1]),
+            Text("6%", font_size=36, color=WHITE).move_to(sections[2]),
+            Text("19%", font_size=36, color=WHITE).move_to(sections[3])
+        )
+
+        # Side labels for rain/sunny percentages
+        side_labels = VGroup(
+            Text("raining\n8%", font_size=24, color=WHITE).next_to(main_square, LEFT, buff=0.5),
+            Text("sunny\n92%", font_size=24, color=WHITE).next_to(main_square, LEFT, buff=0.5).shift(DOWN*2),
+            Text("raining\n50%", font_size=24, color=WHITE).next_to(main_square, RIGHT, buff=0.5),
+            Text("sunny\n50%", font_size=24, color=WHITE).next_to(main_square, RIGHT, buff=0.5).shift(DOWN*2)
+        )
+
+        # Animation sequence for new visualization
+        self.play(
+            Create(bottom_bar),
+            Create(bottom_sections),
+            Write(bottom_labels)
+        )
+        self.wait()
+
+        self.play(Create(arrow))
+        self.wait()
+
+        self.play(
+            Create(main_square),
+            Create(sections)
+        )
+        self.wait()
+
+        self.play(Write(percentage_labels))
+        self.wait()
+
+        self.play(Write(side_labels))
+        self.wait(2)
