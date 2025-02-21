@@ -41,6 +41,16 @@ class TextKLD(Scene):
         text = Text("Kullback Leibler Divergence", font_size=72)
         self.play(Write(text), run_time=3)
         self.play(FadeOut(text))
+
+"""
+Replace the examples with pizza and cooking utensil 
+
+Pizza Style & Cooking Method
+
+Style: {Thin crust (60%), Thick crust (40%)}
+Method: {Oven (55%), Pan (45%)}
+These are dependent because thin crust pizzas are more commonly cooked on stones for crispiness.
+"""
 class IndependentProbabilityDistributions(Scene):
     def construct(self):
         # Constants for probabilities
@@ -282,6 +292,10 @@ class IndependentProbabilityDistributions(Scene):
             FadeOut(weather_title),
         )
 
+"""
+Add multiplication equation for forming each box and explain it in greater detail
+"""
+
 class ConditionalProbabilityDistributions(Scene):
     def construct(self):
         # Constants for probabilities
@@ -506,4 +520,164 @@ class ConditionalProbabilityDistributions(Scene):
         self.wait()
 
         self.play(Write(side_labels))
+        self.wait(2)
+
+"""
+Now I love to cook, and I have a few favorite recipes that I like to make.
+Them being 
+
+Pizza, Pasta, Salad, & Soup
+
+And my sister loves to eat them all. But she would still like to know what I have cooked. 
+But she loves to play games, so she tells me I can only tell the food I have cooked in binary code. 
+
+"""
+class KLDIntroTalk(Scene):
+    def construct(self):
+        pass
+
+
+class KLDIntro(Scene):
+   def construct(self):
+        # Constants for consistent styling
+        SYMBOL_COLOR = "#C19EE0"  # Light purple
+        CODE_COLOR = "#98FB98"    # Light green
+        
+        # Create the binary string at top
+        binary_string = Text("1 0 0 1 1 0...", color=CODE_COLOR)
+        binary_string.to_edge(UP, buff=1)
+        
+        # Create the mapping diagram
+        # Left side - symbols with food items
+        symbols = VGroup(
+            Text("Pizza", font_size=36),
+            Text("Pasta", font_size=36), 
+            Text("Salad", font_size=36),
+            Text("Soup", font_size=36)
+        ).arrange(DOWN, buff=0.5).set_color(SYMBOL_COLOR)
+        
+        symbols_box = RoundedRectangle(
+            height=symbols.height + 1,
+            width=symbols.width + 1,
+            corner_radius=0.2,
+            color=SYMBOL_COLOR
+        )
+        symbols_box.move_to(symbols)
+        symbols_label = Text("symbols", color=SYMBOL_COLOR).next_to(symbols_box, DOWN)
+        symbols_group = VGroup(symbols_box, symbols, symbols_label).shift(LEFT * 3)
+        
+        # Right side - codewords
+        codewords = VGroup(
+            Text("00", font_size=36),
+            Text("01", font_size=36),
+            Text("10", font_size=36),
+            Text("11", font_size=36)
+        ).arrange(DOWN, buff=0.5).set_color(CODE_COLOR)
+        
+        codewords_box = RoundedRectangle(
+            height=codewords.height + 1,
+            width=codewords.width + 1,
+            corner_radius=0.2,
+            color=CODE_COLOR
+        )
+        codewords_box.move_to(codewords)
+        codewords_label = Text("codewords", color=CODE_COLOR).next_to(codewords_box, DOWN)
+        codewords_group = VGroup(codewords_box, codewords, codewords_label).shift(RIGHT * 3)
+        
+        # Arrow and "code" text
+        arrow = Arrow(
+            symbols_box.get_right(),
+            codewords_box.get_left(),
+            buff=0.5,
+            color=WHITE
+        )
+        code_text = Text("code", color=WHITE).next_to(arrow, UP, buff=0.2)
+        
+        # Bottom part - example encoding
+        # Create texts first
+        encoded_string = Text("0 0 0 1 0 0 1 1", color=CODE_COLOR)
+        codewords_text = Text("00 01 00 11", color=CODE_COLOR)
+        source_text = Text("Pizza Pasta Pizza Soup", color=SYMBOL_COLOR)
+        
+        # Create boxes
+        encoded_box = RoundedRectangle(
+            height=encoded_string.height + 0.5,
+            width=encoded_string.width + 1,
+            corner_radius=0.2,
+            color=CODE_COLOR
+        )
+        codewords_box = RoundedRectangle(
+            height=codewords_text.height + 0.5,
+            width=codewords_text.width + 1,
+            corner_radius=0.2,
+            color=CODE_COLOR
+        )
+        source_box = RoundedRectangle(
+            height=source_text.height + 0.5,
+            width=source_text.width + 1,
+            corner_radius=0.2,
+            color=SYMBOL_COLOR
+        )
+        
+        # Create labels
+        encoded_label = Text("encoded string", color=WHITE)
+        codewords_label = Text("codewords", color=WHITE)
+        source_label = Text("source symbols", color=WHITE)
+        
+        # Create groups and align them
+        encoded_group = VGroup(encoded_box, encoded_string)
+        codewords_group = VGroup(codewords_box, codewords_text)
+        source_group = VGroup(source_box, source_text)
+        
+        # Move texts to their boxes
+        encoded_string.move_to(encoded_box)
+        codewords_text.move_to(codewords_box)
+        source_text.move_to(source_box)
+        
+        # Arrange boxes vertically
+        boxes_group = VGroup(encoded_group, codewords_group, source_group).arrange(DOWN, buff=0.5)
+        
+        # Align labels to the right of their respective boxes
+        encoded_label.next_to(encoded_box, RIGHT, buff=0.5)
+        codewords_label.next_to(codewords_box, RIGHT, buff=0.5)
+        source_label.next_to(source_box, RIGHT, buff=0.5)
+        
+        # Create final groups for animation
+        bottom_group = VGroup(
+            VGroup(encoded_group, encoded_label),
+            VGroup(codewords_group, codewords_label),
+            VGroup(source_group, source_label)
+        ).move_to(ORIGIN)
+        
+        # Animation sequence
+        self.play(FadeIn(binary_string))
+        self.wait()
+        self.play(FadeOut(binary_string))
+        
+        self.play(
+            FadeIn(symbols_group),
+            FadeIn(codewords_group),
+            Create(arrow),
+            Write(code_text)
+        )
+        self.wait()
+        self.play(
+            FadeOut(symbols_group),
+            FadeOut(codewords_group),
+            FadeOut(arrow),
+            FadeOut(code_text)
+        )
+        self.wait()
+       
+        self.play(
+            FadeIn(bottom_group[0])
+        )
+        self.wait()
+        self.play(
+            FadeIn(bottom_group[1])
+        )
+        self.wait()
+        self.play(
+            FadeIn(bottom_group[2])
+        )
         self.wait(2)
