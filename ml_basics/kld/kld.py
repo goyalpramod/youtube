@@ -1568,3 +1568,361 @@ class OptimalEncoding(Scene):
         )
         
         self.wait(2)
+# Fade out previous scene
+        self.play(
+            *[FadeOut(mob) for mob in self.mobjects]
+        )
+        
+        # Create axis
+        axes = Axes(
+            x_range=[0, 8, 1],
+            y_range=[-1.2, 1.2, 0.2],  # Modified to include negative y-values
+            x_length=12,
+            y_length=6,
+            axis_config={
+                "include_tip": False,
+                "include_numbers": False,
+                "stroke_color": WHITE
+            }
+        )
+
+        # Create the two mirrored curves
+        upper_curve = axes.plot(lambda x: 1/(2**x), x_range=[0, 8], color=WHITE)
+        lower_curve = axes.plot(lambda x: -1/(2**x), x_range=[0, 8], color=WHITE)
+
+        # Create rectangles for length contributions
+        upper_length = Rectangle(
+            width=2,
+            height=0.5,
+            fill_color="#9370DB",  # Purple
+            fill_opacity=1,
+            stroke_color=WHITE
+        ).move_to(axes.c2p(1, 0.25))
+
+        lower_length = Rectangle(
+            width=4,
+            height=0.5,
+            fill_color="#DEB887",  # Tan
+            fill_opacity=1,
+            stroke_color=WHITE
+        ).move_to(axes.c2p(2, -0.25))
+
+        # Create shaded cost areas - modified approach
+        upper_cost_points = [
+            *[axes.c2p(x, 1/(2**x)) for x in np.linspace(2, 8, 100)],
+            axes.c2p(8, 0),
+            axes.c2p(2, 0)
+        ]
+        upper_cost = Polygon(
+            *upper_cost_points,
+            fill_color=GREY,
+            fill_opacity=0.5,
+            stroke_width=0
+        )
+
+        lower_cost_points = [
+            *[axes.c2p(x, -1/(2**x)) for x in np.linspace(4, 8, 100)],
+            axes.c2p(8, 0),
+            axes.c2p(4, 0)
+        ]
+        lower_cost = Polygon(
+            *lower_cost_points,
+            fill_color=GREY,
+            fill_opacity=0.3,
+            stroke_width=0
+        )
+
+        # Labels
+        pa_label = MathTex("p(a)", color=WHITE).next_to(axes.c2p(0, 0.5), LEFT)
+        pb_label = MathTex("p(b)", color=WHITE).next_to(axes.c2p(0, -0.5), LEFT)
+
+        upper_length_label = Text("Length\nContribution", color=WHITE, font_size=20).move_to(upper_length)
+        upper_cost_label = Text("Cost", color=WHITE, font_size=20).move_to(axes.c2p(4, 0.5))
+
+        lower_length_label = Text("Length\nContribution", color=WHITE, font_size=20).move_to(lower_length)
+        lower_cost_label = Text("Cost", color=WHITE, font_size=20).move_to(axes.c2p(6, -0.5))
+
+        # Animation sequence
+        self.play(Create(axes))
+        self.play(
+            Create(upper_curve),
+            Create(lower_curve)
+        )
+        
+        # Animate upper curve elements
+        self.play(
+            Write(pa_label),
+            Create(upper_length),
+            Write(upper_length_label)
+        )
+        self.play(
+            FadeIn(upper_cost),
+            Write(upper_cost_label)
+        )
+        
+        # Animate lower curve elements
+        self.play(
+            Write(pb_label),
+            Create(lower_length),
+            Write(lower_length_label)
+        )
+        self.play(
+            FadeIn(lower_cost),
+            Write(lower_cost_label)
+        )
+        
+        self.wait(2)
+
+        """
+        Add all the necessary things after fixing the above
+        """
+
+class Entropy(Scene):
+    def construct(self):
+        # Create main rectangle and bars
+        BAR_WIDTH = 4
+        BAR_HEIGHT = 4
+        
+        # Create the first distribution (Weather)
+        rect = Rectangle(height=BAR_HEIGHT, width=BAR_WIDTH, stroke_width=2)
+        
+        # Create bars with different heights and colors
+        bars = VGroup(
+            # 1/2
+            Rectangle(height=BAR_HEIGHT/2, width=BAR_WIDTH)
+            .set_fill(color="#C19EE0", opacity=1),
+            # 1/4
+            Rectangle(height=BAR_HEIGHT/4, width=BAR_WIDTH)
+            .set_fill(color="#FFB6C1", opacity=1),
+            # 1/8
+            Rectangle(height=BAR_HEIGHT/8, width=BAR_WIDTH)
+            .set_fill(color="#FFFFE0", opacity=1),
+            # 1/8
+            Rectangle(height=BAR_HEIGHT/8, width=BAR_WIDTH)
+            .set_fill(color="#98FB98", opacity=1),
+        ).arrange(DOWN, buff=0)
+        
+        bars_group = VGroup(rect, bars)
+        
+        # Create vertical lines
+        v_lines = VGroup()
+        line_positions = [BAR_WIDTH/3, 2*BAR_WIDTH/3]  # Positions for solid lines
+        
+        for x_pos in line_positions:
+            line = Line(
+                start=UP * BAR_HEIGHT/2,
+                end=DOWN * BAR_HEIGHT/2,
+                stroke_width=2
+            )
+            line.move_to(LEFT * BAR_WIDTH/2 + RIGHT * x_pos)
+            v_lines.add(line)
+        
+        # Add dotted line at the end
+        dotted_line = DashedLine(
+            start=UP * BAR_HEIGHT/2,
+            end=DOWN * BAR_HEIGHT/2,
+            stroke_width=2,
+            dash_length=0.1
+        )
+        dotted_line.move_to(LEFT * BAR_WIDTH/2 + RIGHT * BAR_WIDTH)
+        v_lines.add(dotted_line)
+        
+        # Probability labels
+        prob_labels = VGroup(
+            MathTex("\\frac{1}{2}", font_size=36),
+            MathTex("\\frac{1}{4}", font_size=36),
+            MathTex("\\frac{1}{8}", font_size=36),
+            MathTex("\\frac{1}{8}", font_size=36)
+        )
+        
+        for label, bar in zip(prob_labels, bars):
+            label.next_to(bar, LEFT, buff=0.5)
+        
+        # Create bit labels
+        bit_labels = VGroup(
+            Text("1 bit", font_size=24),
+            Text("2 bit", font_size=24),
+            Text("3 bit", font_size=24)
+        )
+        
+        # Position bit labels
+        bit_positions = [-BAR_WIDTH/6, BAR_WIDTH/6, BAR_WIDTH/2]
+        for label, x_pos in zip(bit_labels, bit_positions):
+            label.move_to(LEFT * BAR_WIDTH/2 + RIGHT * x_pos)
+            label.shift(DOWN * (BAR_HEIGHT/2 + 0.5))
+        
+        # p(x) label
+        p_x_label = MathTex("p(x)", font_size=36).next_to(prob_labels, LEFT, buff=0.5)
+        
+        # L(x) formula
+        l_x_formula = MathTex(
+            "L(x) = \\log_2 \\left(\\frac{1}{p(x)}\\right)",
+            font_size=36
+        )
+        l_x_formula.next_to(bars_group, RIGHT, buff=2)
+        
+        # Align everything to center and shift left
+        full_viz = VGroup(bars_group, v_lines, prob_labels, bit_labels, p_x_label)
+        full_viz.move_to(LEFT * 2)
+        
+        # Animation sequence
+        self.play(
+            Create(rect),
+            FadeIn(bars),
+            Create(v_lines)
+        )
+        self.play(
+            Write(prob_labels),
+            Write(p_x_label)
+        )
+        self.play(Write(bit_labels))
+        self.play(Write(l_x_formula))
+        
+        self.wait(2)
+
+        # Fade out everything
+        self.play(
+            *[FadeOut(mob) for mob in self.mobjects]
+        )
+        
+        # Write entropy equation
+        entropy_eq = MathTex(
+            "H(p) = \\sum_{x} p(x) \\log_2 \\left(\\frac{1}{p(x)}\\right)",
+            font_size=48
+        ).move_to(ORIGIN)
+        
+        self.play(Write(entropy_eq))
+        self.wait(2)
+
+        # Fade out the entropy equation first
+        self.play(
+            *[FadeOut(mob) for mob in self.mobjects]
+        )
+        self.wait(0.5)
+
+        # Create title text
+        dog_title = Text("Dog Lover's\nWord Frequency", font_size=24).to_edge(DOWN)
+        cat_title = Text("Cat Lover's\nWord Frequency", font_size=24).to_edge(DOWN)
+        
+        # Constants for consistent styling
+        BAR_HEIGHT = 4
+        BAR_WIDTH = 1.5
+        LEFT_SHIFT = 3
+        
+        # Create dog lover's distribution (keeping order: dog, cat, fish, bird)
+        dog_rect = Rectangle(height=BAR_HEIGHT, width=BAR_WIDTH, stroke_width=2)
+        dog_parts = VGroup(
+            # Dog (1/2)
+            Rectangle(height=BAR_HEIGHT/2, width=BAR_WIDTH)
+            .set_fill(color="#C19EE0", opacity=1),
+            # Cat (1/4) 
+            Rectangle(height=BAR_HEIGHT/4, width=BAR_WIDTH)
+            .set_fill(color="#FFB6C1", opacity=1),
+            # Fish (1/8)
+            Rectangle(height=BAR_HEIGHT/8, width=BAR_WIDTH)
+            .set_fill(color="#FFFFE0", opacity=1),
+            # Bird (1/8)
+            Rectangle(height=BAR_HEIGHT/8, width=BAR_WIDTH)
+            .set_fill(color="#98FB98", opacity=1),
+        ).arrange(DOWN, buff=0)
+        
+        dog_group = VGroup(dog_rect, dog_parts)
+        
+        # Dog labels in same order
+        dog_labels = VGroup(
+            Text('"dog"', font_size=20),
+            Text('"cat"', font_size=20),
+            Text('"fish"', font_size=20),
+            Text('"bird"', font_size=20)
+        )
+        
+        dog_prob_labels = VGroup(
+            Text("1/2", font_size=20),
+            Text("1/4", font_size=20), 
+            Text("1/8", font_size=20),
+            Text("1/8", font_size=20)
+        )
+        
+        for label, prob, part in zip(dog_labels, dog_prob_labels, dog_parts):
+            label.move_to(part)
+            prob.next_to(part, LEFT, buff=0.3)
+            
+        p_x_label = MathTex("p(x)", font_size=36).next_to(dog_prob_labels, LEFT, buff=0.5)
+        
+        dog_full_group = VGroup(dog_group, dog_labels, dog_prob_labels, p_x_label, dog_title)
+        dog_full_group.move_to(LEFT * LEFT_SHIFT)
+        
+        # Create cat lover's distribution (keeping same order: dog, cat, fish, bird)
+        cat_rect = Rectangle(height=BAR_HEIGHT, width=BAR_WIDTH, stroke_width=2)
+        cat_parts = VGroup(
+            # Dog (1/8)
+            Rectangle(height=BAR_HEIGHT/8, width=BAR_WIDTH)
+            .set_fill(color="#C19EE0", opacity=1),
+            # Cat (1/2)
+            Rectangle(height=BAR_HEIGHT/2, width=BAR_WIDTH)
+            .set_fill(color="#FFB6C1", opacity=1),
+            # Fish (1/4)
+            Rectangle(height=BAR_HEIGHT/4, width=BAR_WIDTH)
+            .set_fill(color="#FFFFE0", opacity=1),
+            # Bird (1/8)
+            Rectangle(height=BAR_HEIGHT/8, width=BAR_WIDTH)
+            .set_fill(color="#98FB98", opacity=1),
+        ).arrange(DOWN, buff=0)
+        
+        cat_group = VGroup(cat_rect, cat_parts)
+        
+        # Cat labels in same order
+        cat_labels = VGroup(
+            Text('"dog"', font_size=20),
+            Text('"cat"', font_size=20),
+            Text('"fish"', font_size=20),
+            Text('"bird"', font_size=20)
+        )
+        
+        cat_prob_labels = VGroup(
+            Text("1/8", font_size=20),
+            Text("1/2", font_size=20),
+            Text("1/4", font_size=20),
+            Text("1/8", font_size=20)
+        )
+        
+        for label, prob, part in zip(cat_labels, cat_prob_labels, cat_parts):
+            label.move_to(part)
+            prob.next_to(part, LEFT, buff=0.3)
+            
+        q_x_label = MathTex("q(x)", font_size=36).next_to(cat_prob_labels, LEFT, buff=0.5)
+        
+        cat_full_group = VGroup(cat_group, cat_labels, cat_prob_labels, q_x_label, cat_title)
+        cat_full_group.move_to(RIGHT * LEFT_SHIFT)
+
+        # Add KL divergence equation in the middle
+        kl_eq = MathTex(
+            "\\sum_x p(x) \\log_2 \\left(\\frac{1}{p(x)}\\right)",
+            font_size=36
+        ).move_to(ORIGIN)
+        
+        # Animation sequence
+        self.play(
+            Create(dog_rect),
+            Create(cat_rect)
+        )
+        self.play(
+            FadeIn(dog_parts),
+            FadeIn(cat_parts)
+        )
+        self.play(
+            Write(dog_labels),
+            Write(cat_labels)
+        )
+        self.play(
+            Write(dog_prob_labels),
+            Write(cat_prob_labels),
+            Write(p_x_label),
+            Write(q_x_label)
+        )
+        self.play(
+            Write(dog_title),
+            Write(cat_title)
+        )
+        
+        self.wait(2)
