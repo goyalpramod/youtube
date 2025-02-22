@@ -2481,3 +2481,84 @@ class EntropyAndMultiVariables(Scene):
             )
         
         self.wait(2)
+
+        self.play(*[FadeOut(mob) for mob in self.mobjects])
+        self.wait()
+
+class EntropyIn3D(ThreeDScene):
+    def construct(self):
+        # Set the camera orientation
+        self.set_camera_orientation(phi=75 * DEGREES, theta=30 * DEGREES)
+        
+        # Create the axes
+        axes = ThreeDAxes(
+            x_range=[0, 2, 1],
+            y_range=[0, 2, 1],
+            z_range=[0, 4, 1],
+            x_length=4,
+            y_length=4,
+            z_length=6
+        )
+        
+        # Create title and axis labels
+        title = MathTex("L(x,y)", "= -\\log_2 \\frac{1}{p(x,y)}")
+        title.to_corner(UL)
+        x_label = Text("t-shirt", font_size=24)
+        y_label = Text("coat", font_size=24)
+        
+        # Create the prisms
+        # Raining & t-shirt (tallest, 4 bits)
+        rain_tshirt = Prism(
+            dimensions=[1, 1, 4],
+            fill_color="#9370DB",
+            fill_opacity=0.8
+        )
+        
+        # Raining & coat (2.5 bits)
+        rain_coat = Prism(
+            dimensions=[1, 1, 2.5],
+            fill_color="#9370DB",
+            fill_opacity=0.8
+        )
+        
+        # Sunny & t-shirt (1 bit)
+        sunny_tshirt = Prism(
+            dimensions=[1, 1, 1],
+            fill_color="#E8E8AA",
+            fill_opacity=0.8
+        )
+        
+        # Sunny & coat (2 bits)
+        sunny_coat = Prism(
+            dimensions=[1, 1, 2],
+            fill_color="#E8E8AA",
+            fill_opacity=0.8
+        )
+        
+        # Position the prisms
+        rain_tshirt.move_to(axes.c2p(0, 0, 2))
+        rain_coat.move_to(axes.c2p(1, 0, 1.25))
+        sunny_tshirt.move_to(axes.c2p(0, 1, 0.5))
+        sunny_coat.move_to(axes.c2p(1, 1, 1))
+        
+        # Create side labels
+        weather_label = Text("weather", font_size=24).rotate(90 * DEGREES)
+        prob_label = MathTex("p(x,y)", font_size=24)
+        
+        # Animations
+        self.play(Create(axes))
+        self.play(Write(title))
+        
+        # Add prisms one by one
+        self.play(Create(rain_tshirt))
+        self.play(Create(rain_coat))
+        self.play(Create(sunny_tshirt))
+        self.play(Create(sunny_coat))
+        
+        # Rotate the camera to show the 3D nature
+        self.begin_ambient_camera_rotation(rate=0.2)
+        self.wait(3)
+        self.stop_ambient_camera_rotation()
+        
+        # Final pause
+        self.wait(2)
