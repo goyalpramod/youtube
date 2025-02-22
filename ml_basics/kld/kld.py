@@ -684,76 +684,360 @@ class SimpleEncoding(Scene):
         )
         self.wait(2)
 
+"""
+Fix structure of the stuff
+"""
+
 class VariableLengthEncoding(Scene):
    def construct(self):
-       # Constants
-       SYMBOL_COLOR = "#C19EE0"  # Light purple
-       BAR_COLORS = ["#C19EE0", "#FFB6C1", "#98FB98", "#87CEEB"]  # Different colors for bars
-       BAR_WIDTH = 2  # Constant width for all bars
-       
-       # Create bars and labels
-       base_height = 0.5
-       heights = [2, 1, 0.5, 0.5]  # Heights corresponding to probabilities
-       
-       # Create probability labels on left
-       prob_labels = VGroup(
-           MathTex("\\frac{1}{2}"),
-           MathTex("\\frac{1}{4}"),
-           MathTex("\\frac{1}{8}"),
-           MathTex("\\frac{1}{8}")
-       )
-       
-       # Create food word labels
-       food_labels = VGroup(
-           Text('"Pizza"', font_size=30),
-           Text('"Pasta"', font_size=30),
-           Text('"Salad"', font_size=30),
-           Text('"Soup"', font_size=30)
-       )
-       
-       # Create rectangles (bars)
-       bars = VGroup()
-       for i in range(4):
-           rect = Rectangle(
-               height=heights[i],
-               width=BAR_WIDTH,
-               fill_color=BAR_COLORS[i],
-               fill_opacity=1,
-               stroke_color=WHITE
-           )
-           bars.add(rect)
-       
-       # Position the first bar
-       bars[0].move_to(ORIGIN)
-       
-       # Position subsequent bars relative to the previous one
-       for i in range(1, 4):
-           bars[i].next_to(bars[i-1], DOWN, buff=0)
-           
-       # Position labels inside bars
-       for label, bar in zip(food_labels, bars):
-           label.move_to(bar)
-           
-       # Position probability labels
-       for label, bar in zip(prob_labels, bars):
-           label.next_to(bar, LEFT, buff=0.5)
-           
-       # Group everything
-       entire_group = VGroup(bars, food_labels, prob_labels)
-       entire_group.move_to(ORIGIN)
-       
-       # Animation sequence
-       # Animate probability labels
-       for label in prob_labels:
-           self.play(Write(label))
-       self.wait()
-       
-       # Animate bars and food labels together
-       for i in range(len(bars)):
-           self.play(
-               Create(bars[i]),
-               Write(food_labels[i])
-           )
-           self.wait(0.5)
-           
-       self.wait(2)
+        # Constants
+        SYMBOL_COLOR = "#C19EE0"  # Light purple
+        BAR_COLORS = ["#C19EE0", "#FFB6C1", "#98FB98", "#87CEEB"]  # Different colors for bars
+        BAR_WIDTH = 4  # Constant width for all bars
+        
+        # Create bars and labels
+        base_height = 0.5
+        heights = [2, 1, 0.5, 0.5]  # Heights corresponding to probabilities
+        
+        # Create probability labels on left
+        prob_labels = VGroup(
+            MathTex("{1/2}", font_size=30),
+            MathTex("{1/4}", font_size=30),
+            MathTex("{1/8}", font_size=30),
+            MathTex("{1/8}", font_size=30)
+        )
+        
+        # Create food word labels
+        food_labels = VGroup(
+            Text('"Pizza"', font_size=30),
+            Text('"Pasta"', font_size=30),
+            Text('"Salad"', font_size=30),
+            Text('"Soup"', font_size=30)
+        )
+        
+        # Create rectangles (bars)
+        bars = VGroup()
+        for i in range(4):
+            rect = Rectangle(
+                height=heights[i],
+                width=BAR_WIDTH,
+                fill_color=BAR_COLORS[i],
+                fill_opacity=1,
+                stroke_color=WHITE
+            )
+            bars.add(rect)
+        
+        # Position the first bar
+        bars[0].move_to(ORIGIN)
+        
+        # Position subsequent bars relative to the previous one
+        for i in range(1, 4):
+            bars[i].next_to(bars[i-1], DOWN, buff=0)
+            
+        # Position labels inside bars
+        for label, bar in zip(food_labels, bars):
+            label.move_to(bar)
+            
+        # Position probability labels
+        for label, bar in zip(prob_labels, bars):
+            label.next_to(bar, LEFT, buff=0.5)
+            
+        # Group everything
+        entire_group = VGroup(bars, food_labels, prob_labels)
+        entire_group.move_to(ORIGIN)
+        
+        # Animation sequence
+        # Animate probability labels
+        
+        # Animate bars and food labels together
+        for i in range(len(bars)):
+            self.play(
+                Create(bars[i]),
+                Write(food_labels[i])
+            )
+            self.wait(0.5)
+            
+        for label in prob_labels:
+            self.play(Write(label))
+        self.wait()
+        
+        self.wait(2)
+
+       # Create title for the new encoding
+        title = Text("Old Code", font_size=36)
+        title.to_edge(UP)
+        bits_label = Text("2 bits", font_size=30)
+        bits_label.next_to(title, RIGHT)
+        
+        # Create the vertical dividing line
+        vertical_line = Line(
+            bars.get_top() + UP * 0.1,
+            bars.get_bottom() + DOWN * 0.1,
+            stroke_width=2
+        ).set_opacity(0.5)
+        vertical_line.move_to(bars.get_center())
+        
+        # Binary numbers
+        binary_numbers = VGroup()
+        positions = [(0,0), (0,1), (1,0), (1,1)]  # Binary values for each bar
+        
+        for i, bar in enumerate(bars):
+            left_num = Text("0" if positions[i][0] == 0 else "1", font_size=36)
+            right_num = Text("0" if positions[i][1] == 0 else "1", font_size=36)
+            
+            # Position numbers in left and right halves of each bar
+            left_num.move_to(bar.get_left() + RIGHT * bar.width/4)
+            right_num.move_to(bar.get_left() + RIGHT * bar.width * 3/4)
+            
+            binary_numbers.add(left_num, right_num)
+        
+        # Create L(x) label at bottom
+        l_x_label = MathTex("L(x)", font_size=36)
+        l_x_label.next_to(bars, DOWN, buff=0.5)
+        
+        # Create bit labels
+        bit1_label = Text("1 bit", font_size=24)
+        bit2_label = Text("2 bit", font_size=24)
+        bit1_label.next_to(vertical_line, DOWN, buff=0.1)
+        bit2_label.next_to(bit1_label, RIGHT, buff=1)
+        
+        # Animation sequence
+        # Fade out food labels
+        self.play(FadeOut(food_labels))
+        
+        # Add title and move everything up slightly
+        self.play(
+            Write(title),
+            Write(bits_label),
+        )
+        
+        # Add vertical line
+        self.play(Create(vertical_line))
+        
+        # Add binary numbers one by one
+        for num in binary_numbers:
+            self.play(Write(num), run_time=0.5)
+        
+        # Add bottom labels
+        self.play(
+            Write(l_x_label),
+            Write(bit1_label),
+            Write(bit2_label)
+        )
+        
+        self.wait(2)
+
+        symbols_rect = RoundedRectangle(
+            height=2, width=1.5,
+            corner_radius=0.2,
+            fill_color="#E6E6FA",
+            fill_opacity=1,
+            stroke_color=WHITE
+        )
+        
+        codewords_rect = RoundedRectangle(
+            height=2, width=1.5,
+            corner_radius=0.2,
+            fill_color="#90EE90",
+            fill_opacity=1,
+            stroke_color=WHITE
+        )
+        
+        # Position rectangles
+        symbols_rect.shift(LEFT * 2)
+        codewords_rect.shift(RIGHT * 2)
+        
+        # Create labels
+        symbols_label = Text("symbols", font_size=30).next_to(symbols_rect, DOWN)
+        codewords_label = Text("codewords", font_size=30).next_to(codewords_rect, DOWN)
+        
+        # Create arrow
+        arrow = Arrow(symbols_rect.get_right(), codewords_rect.get_left())
+        code_text = Text("code", font_size=30).next_to(arrow, UP, buff=0.1)
+        
+        # Create symbol texts
+        symbols = VGroup(
+            Text('"dog"', font_size=30),
+            Text('"cat"', font_size=30),
+            Text('"fish"', font_size=30),
+            Text('"bird"', font_size=30)
+        ).arrange(DOWN, buff=0.2).move_to(symbols_rect)
+        
+        # Create codewords
+        codewords = VGroup(
+            Text("0", font_size=30),
+            Text("10", font_size=30),
+            Text("110", font_size=30),
+            Text("111", font_size=30)
+        ).arrange(DOWN, buff=0.2).move_to(codewords_rect)
+        
+        # Fade out previous scene
+        everything = VGroup(bars, prob_labels, binary_numbers, vertical_line, 
+                          title, bits_label, l_x_label, bit1_label, bit2_label)
+        
+        self.play(FadeOut(everything))
+        
+        # Animate new scene
+        self.play(
+            Create(symbols_rect),
+            Create(codewords_rect),
+            Write(symbols_label),
+            Write(codewords_label)
+        )
+        
+        self.play(
+            Create(arrow),
+            Write(code_text)
+        )
+        
+        self.play(Write(symbols))
+        self.play(Write(codewords))
+        
+        self.wait(2)
+        
+        # Fade out first transition
+        everything_new = VGroup(symbols_rect, codewords_rect, symbols_label, 
+                              codewords_label, arrow, code_text, symbols, codewords)
+        
+        self.play(FadeOut(everything_new))
+        
+        # Constants for the bars
+        BAR_HEIGHT = 0.75
+        BAR_WIDTH = 4
+        
+        # Title
+        new_title = Text("New Code", font_size=36)
+        title_group = VGroup(new_title).arrange(RIGHT, buff=0.5)
+        title_group.to_edge(UP)
+        
+        # Create bars
+        bars = VGroup()
+        heights = [BAR_HEIGHT * 3, BAR_HEIGHT * 1.5, BAR_HEIGHT * 0.75, BAR_HEIGHT * 0.75]
+        colors = ["#C19EE0", "#FFB6C1", "#98FB98", "#87CEEB"]
+        
+        for height, color in zip(heights, colors):
+            rect = Rectangle(
+                height=height,
+                width=BAR_WIDTH,
+                fill_color=color,
+                fill_opacity=1,
+                stroke_color=WHITE
+            )
+            bars.add(rect)
+        
+        # Stack bars vertically
+        bars.arrange(DOWN, buff=0)
+        bars.next_to(title_group, DOWN, buff=1)
+        
+        # Create vertical lines
+        v_lines = VGroup()
+        line_positions = [BAR_WIDTH/3, 2*BAR_WIDTH/3]  # Positions for solid lines
+        
+        for x_pos in line_positions:
+            line = Line(
+                start=bars.get_top() + UP * 0.1,
+                end=bars.get_bottom() + DOWN * 0.1,
+                stroke_width=2
+            ).set_opacity(0.5)
+            line.move_to(bars.get_left() + RIGHT * x_pos)
+            v_lines.add(line)
+        
+        # Add dotted line
+        dotted_line = DashedLine(
+            start=bars.get_top() + UP * 0.1,
+            end=bars.get_bottom() + DOWN * 0.1,
+            stroke_width=2,
+            dash_length=0.1
+        ).set_opacity(0.5)
+        dotted_line.move_to(bars.get_right())
+        
+        # Binary numbers positioning
+        binary_values = [
+            ["0"],
+            ["1", "0"],
+            ["1", "1", "0"],
+            ["1", "1", "1"]
+        ]
+        
+        binary_numbers = VGroup()
+        
+        for bar, values in zip(bars, binary_values):
+            section_width = BAR_WIDTH / 3  # Width of each section
+            
+            for i, value in enumerate(values):
+                number = Text(value, font_size=36, color=WHITE)
+                # Position in the center of each section
+                x_pos = bar.get_left() + RIGHT * (i * section_width + section_width/2)
+                number.move_to(x_pos)
+                binary_numbers.add(number)
+        
+        # Add labels at bottom
+        bottom_labels = VGroup(
+            Text("1 bit", font_size=24),
+            Text("2 bit", font_size=24),
+            Text("3 bit", font_size=24)
+        )
+        
+        # Position bottom labels
+        for i, label in enumerate(bottom_labels):
+            label.next_to(v_lines[0] if i == 0 else v_lines[1] if i == 1 else dotted_line, 
+                        DOWN, buff=0.3)
+            label.shift(LEFT * label.width/2 if i == 0 else RIGHT * label.width/2 if i == 2 else 0)
+        
+        # Add probability labels on left
+        prob_labels = VGroup(
+            MathTex("{1/2}", font_size=30),
+            MathTex("{1/4}", font_size=30),
+            MathTex("{1/8}", font_size=30),
+            MathTex("{1/8}", font_size=30)
+        )
+        
+        for label, bar in zip(prob_labels, bars):
+            label.next_to(bar, LEFT, buff=0.5)
+        
+        # Add L(x) label
+        l_x_label = MathTex("L(x)", font_size=36)
+        l_x_label.next_to(bottom_labels[1], DOWN, buff=0.5)
+        
+        # Animation sequence
+        self.play(
+            Write(title_group)
+        )
+        
+        self.play(
+            Create(bars),
+            Write(prob_labels)
+        )
+        
+        self.play(
+            Create(v_lines),
+            Create(dotted_line)
+        )
+        
+        self.play(Write(binary_numbers))
+        
+        self.play(
+            Write(VGroup(bottom_labels, l_x_label))
+        )
+        
+        self.wait()
+
+        # Create entropy labels
+        entropy_title = Text("Entropy = Optimal Average Length", font_size=36)
+        entropy_equals = Text("= Area = 1.75 bits", font_size=36)
+
+        entropy_group = VGroup(entropy_title, entropy_equals)
+        entropy_group.arrange(DOWN, aligned_edge=LEFT, buff=0.2)
+        entropy_group.next_to(bars, RIGHT, buff=1)
+
+        self.play(
+            FadeOut(VGroup(prob_labels, bottom_labels, l_x_label, title_group)),
+        )
+
+        VGroup(bars, v_lines, dotted_line, binary_numbers).animate.shift(LEFT*2),
+        # self.play(
+        # )
+
+        self.play(
+            Write(entropy_group)
+        )
