@@ -2261,304 +2261,454 @@ class KLDivergence(Scene):
         )
         self.wait(2)
 
-class EntropyAndMultiVariables(Scene):
-    def construct(self):
-        # Create main square
-        square_size = 4
-        main_square = Square(side_length=square_size, stroke_width=2)
-        
-        # Create sections with proportions
-        sections = VGroup(
-            # Bottom left (sunny, t-shirt) - 56%
-            Rectangle(height=square_size * 0.92, width=square_size * 0.62)
-            .set_fill(color="#E8E8AA", opacity=1),
-            # Bottom right (sunny, coat) - 19%
-            Rectangle(height=square_size * 0.50, width=square_size * 0.38)
-            .set_fill(color="#C1C178", opacity=1),
-            # Top left (rain, t-shirt) - 6%
-            Rectangle(height=square_size * 0.08, width=square_size * 0.62)
-            .set_fill(color="#9370DB", opacity=1),
-            # Top right (rain, coat) - 19%
-            Rectangle(height=square_size * 0.50, width=square_size * 0.38)
-            .set_fill(color="#9370DB", opacity=1),
-        )
+"""
+Below this not required for KLD or cross entropy
+"""
 
-        # Position sections
-        sections[0].move_to(main_square.get_bottom(), aligned_edge=DOWN).align_to(main_square, LEFT)
-        sections[1].move_to(main_square.get_bottom(), aligned_edge=DOWN).align_to(main_square, RIGHT)
-        sections[2].move_to(sections[0].get_top(), aligned_edge=DOWN)
-        sections[3].move_to(sections[1].get_top(), aligned_edge=DOWN)
-
-        # Create title
-        title = MathTex("P(X,", "\\,", "Y)").scale(0.8)
-        clothing = Text("clothing", font_size=24).next_to(title[0], DOWN, buff=0.1)
-        weather = Text("weather", font_size=24).next_to(title[2], DOWN, buff=0.1)
-        title_group = VGroup(title, clothing, weather).arrange_in_grid(rows=2, cols=3, buff=0.1)
-        title_group.next_to(main_square, UP, buff=0.3)
-
-        # Create percentage labels
-        percentage_labels = VGroup(
-            Text("56%", font_size=36, color=BLACK).move_to(sections[0]),
-            Text("19%", font_size=36, color=BLACK).move_to(sections[1]),
-            Text("6%", font_size=36, color=WHITE).move_to(sections[2]),
-            Text("19%", font_size=36, color=WHITE).move_to(sections[3])
-        )
-
-        # Create side labels
-        left_labels = VGroup(
-            VGroup(
-                Text("raining", font_size=24),
-                Text("8%", font_size=24)
-            ).arrange(DOWN, buff=0.1),
-            VGroup(
-                Text("sunny", font_size=24),
-                Text("92%", font_size=24)
-            ).arrange(DOWN, buff=0.1)
-        ).arrange(DOWN, buff=1.5).next_to(main_square, LEFT, buff=0.5)
-
-        right_labels = VGroup(
-            VGroup(
-                Text("raining", font_size=24),
-                Text("50%", font_size=24)
-            ).arrange(DOWN, buff=0.1),
-            VGroup(
-                Text("sunny", font_size=24),
-                Text("50%", font_size=24)
-            ).arrange(DOWN, buff=0.1)
-        ).arrange(DOWN, buff=1.5).next_to(main_square, RIGHT, buff=0.5)
-
-        # Create bottom labels
-        bottom_labels = VGroup(
-            VGroup(
-                Text("t-shirt", font_size=24),
-                Text("62%", font_size=24)
-            ).arrange(DOWN, buff=0.1),
-            VGroup(
-                Text("coat", font_size=24),
-                Text("38%", font_size=24)
-            ).arrange(DOWN, buff=0.1)
-        ).arrange(RIGHT, buff=2).next_to(main_square, DOWN, buff=0.5)
-
-        VGroup(main_square, sections, title_group, percentage_labels, left_labels, right_labels, bottom_labels).animate.move_to(ORIGIN)
-
-        # Animations
-        self.play(Create(main_square))
-        self.play(Create(sections))
-        self.play(Write(title_group))
-        self.play(Write(percentage_labels))
-        self.play(
-            Write(left_labels),
-            Write(right_labels)
-        )
-        self.play(Write(bottom_labels))
-        self.wait(2)
-
-        # Group everything for movement
-        all_elements = VGroup(
-            main_square, sections, title_group, percentage_labels,
-            left_labels, right_labels, bottom_labels
-        )
-
-        # Move everything to the left
-        self.play(
-            all_elements.animate.shift(LEFT * 3)
-        )
-        self.wait()
-
-        # Create arrow
-        arrow = Arrow(LEFT * 1.5, RIGHT * 1.5, buff=0.3, color=WHITE)
-        self.play(Create(arrow))
-
-        # Create flattened rectangle
-        rect_height = 4  # Same as square_size
-        rect_width = 1.5
+# class EntropyAndMultiVariables(Scene):
+#     def construct(self):
+#         # Create main square
+#         square_size = 4
+#         main_square = Square(side_length=square_size, stroke_width=2)
         
-        flat_sections = VGroup(
-            # Raining & t-shirt (6%)
-            Rectangle(height=rect_height * 0.06, width=rect_width)
-            .set_fill(color="#9370DB", opacity=1),
-            # Raining & coat (19%)
-            Rectangle(height=rect_height * 0.19, width=rect_width)
-            .set_fill(color="#9370DB", opacity=1),
-            # Sunny & t-shirt (56%)
-            Rectangle(height=rect_height * 0.56, width=rect_width)
-            .set_fill(color="#E8E8AA", opacity=1),
-            # Sunny & coat (19%)
-            Rectangle(height=rect_height * 0.19, width=rect_width)
-            .set_fill(color="#C1C178", opacity=1)
-        ).arrange(DOWN, buff=0)
-        
-        flat_rect = Rectangle(height=rect_height, width=rect_width, stroke_width=2)
-        flat_group = VGroup(flat_rect, flat_sections).move_to(RIGHT * 3)
+#         # Create sections with proportions
+#         sections = VGroup(
+#             # Bottom left (sunny, t-shirt) - 56%
+#             Rectangle(height=square_size * 0.92, width=square_size * 0.62)
+#             .set_fill(color="#E8E8AA", opacity=1),
+#             # Bottom right (sunny, coat) - 19%
+#             Rectangle(height=square_size * 0.50, width=square_size * 0.38)
+#             .set_fill(color="#C1C178", opacity=1),
+#             # Top left (rain, t-shirt) - 6%
+#             Rectangle(height=square_size * 0.08, width=square_size * 0.62)
+#             .set_fill(color="#9370DB", opacity=1),
+#             # Top right (rain, coat) - 19%
+#             Rectangle(height=square_size * 0.50, width=square_size * 0.38)
+#             .set_fill(color="#9370DB", opacity=1),
+#         )
 
-        # Labels for flattened rectangle
-        flat_labels = VGroup(
-            Text("6%   raining & t-shirt", font_size=24),
-            Text("19%  raining & coat", font_size=24),
-            Text("56%  sunny & t-shirt", font_size=24),
-            Text("19%  sunny & coat", font_size=24)
-        )
+#         # Position sections
+#         sections[0].move_to(main_square.get_bottom(), aligned_edge=DOWN).align_to(main_square, LEFT)
+#         sections[1].move_to(main_square.get_bottom(), aligned_edge=DOWN).align_to(main_square, RIGHT)
+#         sections[2].move_to(sections[0].get_top(), aligned_edge=DOWN)
+#         sections[3].move_to(sections[1].get_top(), aligned_edge=DOWN)
 
-        for label, section in zip(flat_labels, flat_sections):
-            label.next_to(section, RIGHT, buff=0.5)
+#         # Create title
+#         title = MathTex("P(X,", "\\,", "Y)").scale(0.8)
+#         clothing = Text("clothing", font_size=24).next_to(title[0], DOWN, buff=0.1)
+#         weather = Text("weather", font_size=24).next_to(title[2], DOWN, buff=0.1)
+#         title_group = VGroup(title, clothing, weather).arrange_in_grid(rows=2, cols=3, buff=0.1)
+#         title_group.next_to(main_square, UP, buff=0.3)
 
-        self.play(
-            Create(flat_rect),
-            Create(flat_sections)
-        )
-        self.play(Write(flat_labels))
-        self.wait(2)
+#         # Create percentage labels
+#         percentage_labels = VGroup(
+#             Text("56%", font_size=36, color=BLACK).move_to(sections[0]),
+#             Text("19%", font_size=36, color=BLACK).move_to(sections[1]),
+#             Text("6%", font_size=36, color=WHITE).move_to(sections[2]),
+#             Text("19%", font_size=36, color=WHITE).move_to(sections[3])
+#         )
 
-        # Fade out previous elements
-        self.play(*[FadeOut(mob) for mob in self.mobjects])
-        self.wait()
+#         # Create side labels
+#         left_labels = VGroup(
+#             VGroup(
+#                 Text("raining", font_size=24),
+#                 Text("8%", font_size=24)
+#             ).arrange(DOWN, buff=0.1),
+#             VGroup(
+#                 Text("sunny", font_size=24),
+#                 Text("92%", font_size=24)
+#             ).arrange(DOWN, buff=0.1)
+#         ).arrange(DOWN, buff=1.5).next_to(main_square, LEFT, buff=0.5)
 
-        # Create title
-        title = MathTex("H(X, Y)").scale(1.2)
-        title.to_edge(UP, buff=0.5)
-        
-        # Create axes lines and labels
-        x_line = Line(LEFT * 2, RIGHT * 4, stroke_width=1)
-        x_labels = VGroup(
-            Text("1 bit", font_size=24),
-            Text("2 bit", font_size=24),
-            Text("3 bit", font_size=24),
-            Text("4 bit", font_size=24)
-        )
-        
-        for i, label in enumerate(x_labels):
-            label.next_to(x_line, DOWN, buff=0.3)
-            label.shift(RIGHT * (i - 1))
+#         right_labels = VGroup(
+#             VGroup(
+#                 Text("raining", font_size=24),
+#                 Text("50%", font_size=24)
+#             ).arrange(DOWN, buff=0.1),
+#             VGroup(
+#                 Text("sunny", font_size=24),
+#                 Text("50%", font_size=24)
+#             ).arrange(DOWN, buff=0.1)
+#         ).arrange(DOWN, buff=1.5).next_to(main_square, RIGHT, buff=0.5)
 
-        # Create bars
-        bar_height = 0.5
-        bars = VGroup(
-            # 6% bar (4 bits)
-            Rectangle(height=bar_height, width=6, color=WHITE, fill_color="#9370DB", fill_opacity=1),
-            # 19% bar (2.5 bits)
-            Rectangle(height=bar_height, width=3.75, color=WHITE, fill_color="#9370DB", fill_opacity=0.8),
-            # 56% bar (1 bit)
-            Rectangle(height=bar_height, width=1.5, color=WHITE, fill_color="#E8E8AA", fill_opacity=1),
-            # 19% bar (2 bits)
-            Rectangle(height=bar_height, width=3, color=WHITE, fill_color="#C1C178", fill_opacity=1)
-        )
-        
-        # Position bars
-        bars.arrange(DOWN, buff=0.5, aligned_edge=LEFT)
-        bars.next_to(x_line, UP, buff=1)
-        
-        # Add percentage labels
-        percentages = VGroup(
-            Text("6%", font_size=24),
-            Text("19%", font_size=24),
-            Text("56%", font_size=24),
-            Text("19%", font_size=24)
-        )
-        
-        for percentage, bar in zip(percentages, bars):
-            percentage.next_to(bar, LEFT, buff=0.3)
+#         # Create bottom labels
+#         bottom_labels = VGroup(
+#             VGroup(
+#                 Text("t-shirt", font_size=24),
+#                 Text("62%", font_size=24)
+#             ).arrange(DOWN, buff=0.1),
+#             VGroup(
+#                 Text("coat", font_size=24),
+#                 Text("38%", font_size=24)
+#             ).arrange(DOWN, buff=0.1)
+#         ).arrange(RIGHT, buff=2).next_to(main_square, DOWN, buff=0.5)
 
-        # Add dotted vertical lines
-        vertical_lines = VGroup()
-        for i in range(4):
-            line = DashedLine(
-                UP * 4, DOWN * 1,
-                dash_length=0.1,
-                stroke_width=1,
-                color=GRAY
-            ).move_to(x_line.get_left() + RIGHT * (i + 1))
-            vertical_lines.add(line)
+#         VGroup(main_square, sections, title_group, percentage_labels, left_labels, right_labels, bottom_labels).animate.move_to(ORIGIN)
 
-        # Animations
-        self.play(Write(title))
-        self.play(Create(x_line), Create(vertical_lines))
-        self.play(Write(x_labels))
-        
-        for bar, percentage in zip(bars, percentages):
-            self.play(
-                Create(bar),
-                Write(percentage)
-            )
-        
-        self.wait(2)
+#         # Animations
+#         self.play(Create(main_square))
+#         self.play(Create(sections))
+#         self.play(Write(title_group))
+#         self.play(Write(percentage_labels))
+#         self.play(
+#             Write(left_labels),
+#             Write(right_labels)
+#         )
+#         self.play(Write(bottom_labels))
+#         self.wait(2)
 
-        self.play(*[FadeOut(mob) for mob in self.mobjects])
-        self.wait()
+#         # Group everything for movement
+#         all_elements = VGroup(
+#             main_square, sections, title_group, percentage_labels,
+#             left_labels, right_labels, bottom_labels
+#         )
 
-class EntropyIn3D(ThreeDScene):
-    def construct(self):
-        # Set the camera orientation
-        self.set_camera_orientation(phi=75 * DEGREES, theta=30 * DEGREES)
+#         # Move everything to the left
+#         self.play(
+#             all_elements.animate.shift(LEFT * 3)
+#         )
+#         self.wait()
+
+#         # Create arrow
+#         arrow = Arrow(LEFT * 1.5, RIGHT * 1.5, buff=0.3, color=WHITE)
+#         self.play(Create(arrow))
+
+#         # Create flattened rectangle
+#         rect_height = 4  # Same as square_size
+#         rect_width = 1.5
         
-        # Create the axes
-        axes = ThreeDAxes(
-            x_range=[0, 2, 1],
-            y_range=[0, 2, 1],
-            z_range=[0, 4, 1],
-            x_length=4,
-            y_length=4,
-            z_length=6
-        )
+#         flat_sections = VGroup(
+#             # Raining & t-shirt (6%)
+#             Rectangle(height=rect_height * 0.06, width=rect_width)
+#             .set_fill(color="#9370DB", opacity=1),
+#             # Raining & coat (19%)
+#             Rectangle(height=rect_height * 0.19, width=rect_width)
+#             .set_fill(color="#9370DB", opacity=1),
+#             # Sunny & t-shirt (56%)
+#             Rectangle(height=rect_height * 0.56, width=rect_width)
+#             .set_fill(color="#E8E8AA", opacity=1),
+#             # Sunny & coat (19%)
+#             Rectangle(height=rect_height * 0.19, width=rect_width)
+#             .set_fill(color="#C1C178", opacity=1)
+#         ).arrange(DOWN, buff=0)
         
-        # Create title and axis labels
-        title = MathTex("L(x,y)", "= -\\log_2 \\frac{1}{p(x,y)}")
-        title.to_corner(UL)
-        x_label = Text("t-shirt", font_size=24)
-        y_label = Text("coat", font_size=24)
+#         flat_rect = Rectangle(height=rect_height, width=rect_width, stroke_width=2)
+#         flat_group = VGroup(flat_rect, flat_sections).move_to(RIGHT * 3)
+
+#         # Labels for flattened rectangle
+#         flat_labels = VGroup(
+#             Text("6%   raining & t-shirt", font_size=24),
+#             Text("19%  raining & coat", font_size=24),
+#             Text("56%  sunny & t-shirt", font_size=24),
+#             Text("19%  sunny & coat", font_size=24)
+#         )
+
+#         for label, section in zip(flat_labels, flat_sections):
+#             label.next_to(section, RIGHT, buff=0.5)
+
+#         self.play(
+#             Create(flat_rect),
+#             Create(flat_sections)
+#         )
+#         self.play(Write(flat_labels))
+#         self.wait(2)
+
+#         # Fade out previous elements
+#         self.play(*[FadeOut(mob) for mob in self.mobjects])
+#         self.wait()
+
+#         # Create title
+#         title = MathTex("H(X, Y)").scale(1.2)
+#         title.to_edge(UP, buff=0.5)
         
-        # Create the prisms
-        # Raining & t-shirt (tallest, 4 bits)
-        rain_tshirt = Prism(
-            dimensions=[1, 1, 4],
-            fill_color="#9370DB",
-            fill_opacity=0.8
-        )
+#         # Create axes lines and labels
+#         x_line = Line(LEFT * 2, RIGHT * 4, stroke_width=1)
+#         x_labels = VGroup(
+#             Text("1 bit", font_size=24),
+#             Text("2 bit", font_size=24),
+#             Text("3 bit", font_size=24),
+#             Text("4 bit", font_size=24)
+#         )
         
-        # Raining & coat (2.5 bits)
-        rain_coat = Prism(
-            dimensions=[1, 1, 2.5],
-            fill_color="#9370DB",
-            fill_opacity=0.8
-        )
+#         for i, label in enumerate(x_labels):
+#             label.next_to(x_line, DOWN, buff=0.3)
+#             label.shift(RIGHT * (i - 1))
+
+#         # Create bars
+#         bar_height = 0.5
+#         bars = VGroup(
+#             # 6% bar (4 bits)
+#             Rectangle(height=bar_height, width=6, color=WHITE, fill_color="#9370DB", fill_opacity=1),
+#             # 19% bar (2.5 bits)
+#             Rectangle(height=bar_height, width=3.75, color=WHITE, fill_color="#9370DB", fill_opacity=0.8),
+#             # 56% bar (1 bit)
+#             Rectangle(height=bar_height, width=1.5, color=WHITE, fill_color="#E8E8AA", fill_opacity=1),
+#             # 19% bar (2 bits)
+#             Rectangle(height=bar_height, width=3, color=WHITE, fill_color="#C1C178", fill_opacity=1)
+#         )
         
-        # Sunny & t-shirt (1 bit)
-        sunny_tshirt = Prism(
-            dimensions=[1, 1, 1],
-            fill_color="#E8E8AA",
-            fill_opacity=0.8
-        )
+#         # Position bars
+#         bars.arrange(DOWN, buff=0.5, aligned_edge=LEFT)
+#         bars.next_to(x_line, UP, buff=1)
         
-        # Sunny & coat (2 bits)
-        sunny_coat = Prism(
-            dimensions=[1, 1, 2],
-            fill_color="#E8E8AA",
-            fill_opacity=0.8
-        )
+#         # Add percentage labels
+#         percentages = VGroup(
+#             Text("6%", font_size=24),
+#             Text("19%", font_size=24),
+#             Text("56%", font_size=24),
+#             Text("19%", font_size=24)
+#         )
         
-        # Position the prisms
-        rain_tshirt.move_to(axes.c2p(0, 0, 2))
-        rain_coat.move_to(axes.c2p(1, 0, 1.25))
-        sunny_tshirt.move_to(axes.c2p(0, 1, 0.5))
-        sunny_coat.move_to(axes.c2p(1, 1, 1))
+#         for percentage, bar in zip(percentages, bars):
+#             percentage.next_to(bar, LEFT, buff=0.3)
+
+#         # Add dotted vertical lines
+#         vertical_lines = VGroup()
+#         for i in range(4):
+#             line = DashedLine(
+#                 UP * 4, DOWN * 1,
+#                 dash_length=0.1,
+#                 stroke_width=1,
+#                 color=GRAY
+#             ).move_to(x_line.get_left() + RIGHT * (i + 1))
+#             vertical_lines.add(line)
+
+#         # Animations
+#         self.play(Write(title))
+#         self.play(Create(x_line), Create(vertical_lines))
+#         self.play(Write(x_labels))
         
-        # Create side labels
-        weather_label = Text("weather", font_size=24).rotate(90 * DEGREES)
-        prob_label = MathTex("p(x,y)", font_size=24)
+#         for bar, percentage in zip(bars, percentages):
+#             self.play(
+#                 Create(bar),
+#                 Write(percentage)
+#             )
         
-        # Animations
-        self.play(Create(axes))
-        self.play(Write(title))
+#         self.wait(2)
+
+#         self.play(*[FadeOut(mob) for mob in self.mobjects])
+#         self.wait()
+
+# class EntropyIn3D(ThreeDScene):
+#     def construct(self):
+#         # Set the camera orientation
+#         self.set_camera_orientation(phi=75 * DEGREES, theta=30 * DEGREES)
         
-        # Add prisms one by one
-        self.play(Create(rain_tshirt))
-        self.play(Create(rain_coat))
-        self.play(Create(sunny_tshirt))
-        self.play(Create(sunny_coat))
+#         # Create the axes
+#         axes = ThreeDAxes(
+#             x_range=[0, 2, 1],
+#             y_range=[0, 2, 1],
+#             z_range=[0, 4, 1],
+#             x_length=4,
+#             y_length=4,
+#             z_length=6
+#         )
         
-        # Rotate the camera to show the 3D nature
-        self.begin_ambient_camera_rotation(rate=0.2)
-        self.wait(3)
-        self.stop_ambient_camera_rotation()
+#         # Create title and axis labels
+#         title = MathTex("L(x,y)", "= -\\log_2 \\frac{1}{p(x,y)}")
+#         title.to_corner(UL)
+#         x_label = Text("t-shirt", font_size=24)
+#         y_label = Text("coat", font_size=24)
         
-        # Final pause
-        self.wait(2)
+#         # Create the prisms
+#         # Raining & t-shirt (tallest, 4 bits)
+#         rain_tshirt = Prism(
+#             dimensions=[1, 1, 4],
+#             fill_color="#9370DB",
+#             fill_opacity=0.8
+#         )
+        
+#         # Raining & coat (2.5 bits)
+#         rain_coat = Prism(
+#             dimensions=[1, 1, 2.5],
+#             fill_color="#9370DB",
+#             fill_opacity=0.8
+#         )
+        
+#         # Sunny & t-shirt (1 bit)
+#         sunny_tshirt = Prism(
+#             dimensions=[1, 1, 1],
+#             fill_color="#E8E8AA",
+#             fill_opacity=0.8
+#         )
+        
+#         # Sunny & coat (2 bits)
+#         sunny_coat = Prism(
+#             dimensions=[1, 1, 2],
+#             fill_color="#E8E8AA",
+#             fill_opacity=0.8
+#         )
+        
+#         # Position the prisms
+#         rain_tshirt.move_to(axes.c2p(0, 0, 2))
+#         rain_coat.move_to(axes.c2p(1, 0, 1.25))
+#         sunny_tshirt.move_to(axes.c2p(0, 1, 0.5))
+#         sunny_coat.move_to(axes.c2p(1, 1, 1))
+        
+#         # Create side labels
+#         weather_label = Text("weather", font_size=24).rotate(90 * DEGREES)
+#         prob_label = MathTex("p(x,y)", font_size=24)
+        
+#         # Animations
+#         self.play(Create(axes))
+#         self.play(Write(title))
+        
+#         # Add prisms one by one
+#         self.play(Create(rain_tshirt))
+#         self.play(Create(rain_coat))
+#         self.play(Create(sunny_tshirt))
+#         self.play(Create(sunny_coat))
+        
+#         # Rotate the camera to show the 3D nature
+#         self.begin_ambient_camera_rotation(rate=0.2)
+#         self.wait(3)
+#         self.stop_ambient_camera_rotation()
+        
+#         # Final pause
+#         self.wait(2)
+
+        
+#         # Stop any ongoing camera movement
+#         self.stop_ambient_camera_rotation()
+        
+#         # Create new axes for split view
+#         axes_left = ThreeDAxes(
+#             x_range=[0, 2, 1],
+#             y_range=[0, 2, 1],
+#             z_range=[0, 4, 1],
+#             x_length=4,
+#             y_length=4,
+#             z_length=6
+#         ).shift(LEFT * 4)
+
+#         axes_right = ThreeDAxes(
+#             x_range=[0, 2, 1],
+#             y_range=[0, 2, 1],
+#             z_range=[0, 4, 1],
+#             x_length=4,
+#             y_length=4,
+#             z_length=6
+#         ).shift(RIGHT * 4)
+
+#         # New titles
+#         left_title = MathTex("H(X|Y = raining)").next_to(axes_left, UP)
+#         right_title = MathTex("H(X|Y = sunny)").next_to(axes_right, UP)
+
+#         # First transform the axes and add new ones
+#         self.play(
+#             Transform(axes, VGroup(axes_left, axes_right)),
+#             Transform(title, VGroup(left_title, right_title))
+#         )
+
+#         # Move purple prisms to left side
+#         self.play(
+#             rain_tshirt.animate.move_to(axes_left.c2p(0, 0, 2)),
+#             rain_coat.animate.move_to(axes_left.c2p(1, 0, 1.25))
+#         )
+
+#         # Move yellow prisms to right side
+#         self.play(
+#             sunny_tshirt.animate.move_to(axes_right.c2p(0, 0, 0.5)),
+#             sunny_coat.animate.move_to(axes_right.c2p(1, 0, 1))
+#         )
+
+#         # Add new labels
+#         labels_left = VGroup(
+#             Text("t-shirt", font_size=24).next_to(axes_left.x_axis, RIGHT),
+#             Text("coat", font_size=24).next_to(axes_left.y_axis, RIGHT),
+#             Text("raining", font_size=24).next_to(axes_left, DOWN)
+#         )
+
+#         labels_right = VGroup(
+#             Text("t-shirt", font_size=24).next_to(axes_right.x_axis, RIGHT),
+#             Text("coat", font_size=24).next_to(axes_right.y_axis, RIGHT),
+#             Text("sunny", font_size=24).next_to(axes_right, DOWN)
+#         )
+
+#         self.play(
+#             Write(labels_left),
+#             Write(labels_right)
+#         )
+
+#         self.wait(2)
+
+#         # Add this at the end of your construct method, after self.wait(2):
+
+#         # Create new axes for joint probability
+#         joint_axes = ThreeDAxes(
+#             x_range=[0, 2, 1],
+#             y_range=[0, 2, 1],
+#             z_range=[0, 4, 1],
+#             x_length=4,
+#             y_length=4,
+#             z_length=6
+#         )
+
+#         # New title for joint probability
+#         joint_title = MathTex("H(X|Y)", "= 0.81\\ bits").to_corner(UL)
+
+#         # Move all prisms back to center
+#         self.play(
+#             Transform(VGroup(axes_left, axes_right), joint_axes),
+#             Transform(VGroup(left_title, right_title), joint_title),
+#             rain_tshirt.animate.move_to(joint_axes.c2p(0, 0, 2)),
+#             rain_coat.animate.move_to(joint_axes.c2p(1, 0, 1.25)),
+#             sunny_tshirt.animate.move_to(joint_axes.c2p(0, 1, 0.5)),
+#             sunny_coat.animate.move_to(joint_axes.c2p(1, 1, 1)),
+#             FadeOut(labels_left),
+#             FadeOut(labels_right)
+#         )
+
+#         # Add final labels
+#         final_labels = VGroup(
+#             Text("t-shirt", font_size=24).next_to(joint_axes.x_axis, RIGHT),
+#             Text("coat", font_size=24).next_to(joint_axes.y_axis, RIGHT),
+#             VGroup(
+#                 Text("raining", font_size=20),
+#                 Text("sunny", font_size=20).next_to(Text("raining", font_size=20), DOWN)
+#             ).next_to(joint_axes, LEFT)
+#         )
+
+#         self.play(Write(final_labels))
+
+#         # Final rotation to match the image perspective
+#         self.move_camera(phi=60 * DEGREES, theta=45 * DEGREES)
+#         self.wait(2)
+
+#         # Add this after your last self.wait(2):
+
+#         # Create the equations
+#         eq1 = MathTex(
+#             "H(X|Y)", "=", "\\sum_y", "p(y)", "\\sum_x", "p(x|y)", "\\log_2", "\\left(\\frac{1}{p(x|y)}\\right)"
+#         ).scale(0.9)
+
+#         eq2 = MathTex(
+#             "=", "\\sum_{x,y}", "p(x,y)", "\\log_2", "\\left(\\frac{1}{p(x|y)}\\right)"
+#         ).scale(0.9)
+
+#         # Position equations
+#         eq1.shift(UP * 0.5)
+#         eq2.shift(DOWN * 0.5)
+#         eq2.align_to(eq1, LEFT)
+
+#         # Group equations
+#         equations = VGroup(eq1, eq2)
+#         equations.center()
+
+#         # Add text above
+#         text = Text("We call this the conditional entropy. If you formalize it into an equation, you get:", 
+#                     font_size=36).next_to(equations, UP * 2)
+
+#         # Fade out everything except camera
+#         self.play(
+#             *[FadeOut(mob) for mob in self.mobjects if not isinstance(mob, Camera)],
+#             run_time=1.5
+#         )
+
+#         # Show text and equations
+#         self.play(Write(text))
+#         self.wait(0.5)
+#         self.play(Write(eq1))
+#         self.wait(1)
+#         self.play(Write(eq2))
+#         self.wait(2)
