@@ -1163,7 +1163,7 @@ class CodeWords(Scene):
         )
 
         encoded_string = Text("0 0 0 1 0 0 1 1", font_size=30)
-        codewords_text = Text("0 10 0 111", font_size=30)
+        codewords_text = Text("0  10  0  111", font_size=30)
         source_text = Text("Pizza Pasta Pizza Soup", font_size=30)
         
         # Create rounded rectangles
@@ -1222,4 +1222,112 @@ class CodeWords(Scene):
         self.play(FadeIn(codewords_group), FadeIn(codewords_label))
         self.wait(0.5)
         self.play(FadeIn(source_group), FadeIn(source_label))
+        self.wait(2)
+        self.play(FadeOut(encoding_group))
+
+        # Create shaded grid with same dimensions as before
+        shaded_grid = VGroup()
+        shaded_values = VGroup()
+        
+        # First column (2 large cells)
+        for i in range(2):
+            cell = Rectangle(
+                width=cell_widths[0],
+                height=cell_height * 4,
+                stroke_color=WHITE,
+                fill_opacity=0
+            )
+            if i > 0:
+                cell.next_to(shaded_grid[-1], DOWN, buff=0)
+            shaded_grid.add(cell)
+            
+            value = Text(str(i), font_size=24)
+            value.move_to(cell.get_center())
+            shaded_values.add(value)
+        
+        # Second column (4 cells)
+        second_col = VGroup()
+        for i in range(4):
+            cell = Rectangle(
+                width=cell_widths[1],
+                height=cell_height * 2,
+                stroke_color=WHITE,
+                fill_opacity=0
+            )
+            if i > 0:
+                cell.next_to(second_col[-1], DOWN, buff=0)
+            second_col.add(cell)
+            
+            value = Text(str(i % 2), font_size=24)
+            value.move_to(cell.get_center() + RIGHT*1.25 + UP*0.5)
+            shaded_values.add(value)
+            
+        second_col.next_to(shaded_grid, RIGHT, buff=0)
+        shaded_grid.add(second_col)
+        
+        # Third column (8 cells)
+        third_col = VGroup()
+        for i in range(8):
+            # Only shade the first two cells with grey
+            fill_color = GREY if i < 2 else WHITE
+            fill_opacity = 0.3 if i < 2 else 0
+            
+            cell = Rectangle(
+                width=cell_widths[2],
+                height=cell_height,
+                stroke_color=WHITE,
+                fill_color=fill_color,
+                fill_opacity=fill_opacity
+            )
+            if i > 0:
+                cell.next_to(third_col[-1], DOWN, buff=0)
+            third_col.add(cell)
+            
+            value = Text(str(i % 2), font_size=24)
+            value.move_to(cell.get_center() + RIGHT*2.25 + UP*0.75)
+            shaded_values.add(value)
+            
+        third_col.next_to(second_col, RIGHT, buff=0)
+        shaded_grid.add(third_col)
+        
+        # Add fraction on the right
+        fraction = MathTex("\\frac{1}{2^L} = \\frac{1}{4}", font_size=36)
+        fraction.next_to(shaded_grid, RIGHT, buff=1)
+        
+        # Add labels
+        labels = VGroup(
+            Text("bit 1", font_size=24),
+            Text("bit 2", font_size=24),
+            Text("bit 3", font_size=24)
+        )
+        
+        for i, label in enumerate(labels):
+            if i == 0:
+                label.next_to(shaded_grid[:2], DOWN)
+            elif i == 1:
+                label.next_to(second_col, DOWN)
+            else:
+                label.next_to(third_col, DOWN)
+        
+        # Add dotted line
+        dotted_line = DashedLine(
+            shaded_grid.get_top(),
+            shaded_grid.get_bottom(),
+            stroke_width=2,
+            dash_length=0.1
+        ).next_to(shaded_grid, RIGHT, buff=0.5)
+        
+        # Group everything
+        final_scene = VGroup(shaded_grid, shaded_values, labels, dotted_line, fraction)
+        final_scene.move_to(ORIGIN)
+        
+        # Animate
+        self.play(FadeIn(shaded_grid))
+        self.play(Write(shaded_values))
+        self.play(Write(labels))
+        self.play(
+            Create(dotted_line),
+            Write(fraction)
+        )
+        
         self.wait(2)
