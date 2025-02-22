@@ -2263,10 +2263,9 @@ class KLDivergence(Scene):
 
 class EntropyAndMultiVariables(Scene):
     def construct(self):
-        # Create initial square visualization (left side)
+        # Create main square
         square_size = 4
         main_square = Square(side_length=square_size, stroke_width=2)
-        main_square.move_to(LEFT * 3)
         
         # Create sections with proportions
         sections = VGroup(
@@ -2284,15 +2283,20 @@ class EntropyAndMultiVariables(Scene):
             .set_fill(color="#9370DB", opacity=1),
         )
 
-        # Position sections in square
+        # Position sections
         sections[0].move_to(main_square.get_bottom(), aligned_edge=DOWN).align_to(main_square, LEFT)
         sections[1].move_to(main_square.get_bottom(), aligned_edge=DOWN).align_to(main_square, RIGHT)
         sections[2].move_to(sections[0].get_top(), aligned_edge=DOWN)
         sections[3].move_to(sections[1].get_top(), aligned_edge=DOWN)
 
-        square_group = VGroup(main_square, sections)
+        # Create title
+        title = MathTex("P(X,", "\\,", "Y)").scale(0.8)
+        clothing = Text("clothing", font_size=24).next_to(title[0], DOWN, buff=0.1)
+        weather = Text("weather", font_size=24).next_to(title[2], DOWN, buff=0.1)
+        title_group = VGroup(title, clothing, weather).arrange_in_grid(rows=2, cols=3, buff=0.1)
+        title_group.next_to(main_square, UP, buff=0.3)
 
-        # Labels for square
+        # Create percentage labels
         percentage_labels = VGroup(
             Text("56%", font_size=36, color=BLACK).move_to(sections[0]),
             Text("19%", font_size=36, color=BLACK).move_to(sections[1]),
@@ -2300,21 +2304,75 @@ class EntropyAndMultiVariables(Scene):
             Text("19%", font_size=36, color=WHITE).move_to(sections[3])
         )
 
-        original_labels = VGroup(
-            Text("raining\n8%", font_size=24).next_to(main_square, LEFT, buff=0.5),
-            Text("sunny\n92%", font_size=24).next_to(main_square, LEFT, buff=0.5).shift(DOWN*2),
-            Text("raining\n50%", font_size=24).next_to(main_square, RIGHT, buff=0.5),
-            Text("sunny\n50%", font_size=24).next_to(main_square, RIGHT, buff=0.5).shift(DOWN*2),
-            Text("t-shirt\n62%", font_size=24).next_to(main_square, DOWN, buff=0.5).shift(LEFT),
-            Text("coat\n38%", font_size=24).next_to(main_square, DOWN, buff=0.5).shift(RIGHT)
+        # Create side labels
+        left_labels = VGroup(
+            VGroup(
+                Text("raining", font_size=24),
+                Text("8%", font_size=24)
+            ).arrange(DOWN, buff=0.1),
+            VGroup(
+                Text("sunny", font_size=24),
+                Text("92%", font_size=24)
+            ).arrange(DOWN, buff=0.1)
+        ).arrange(DOWN, buff=1.5).next_to(main_square, LEFT, buff=0.5)
+
+        right_labels = VGroup(
+            VGroup(
+                Text("raining", font_size=24),
+                Text("50%", font_size=24)
+            ).arrange(DOWN, buff=0.1),
+            VGroup(
+                Text("sunny", font_size=24),
+                Text("50%", font_size=24)
+            ).arrange(DOWN, buff=0.1)
+        ).arrange(DOWN, buff=1.5).next_to(main_square, RIGHT, buff=0.5)
+
+        # Create bottom labels
+        bottom_labels = VGroup(
+            VGroup(
+                Text("t-shirt", font_size=24),
+                Text("62%", font_size=24)
+            ).arrange(DOWN, buff=0.1),
+            VGroup(
+                Text("coat", font_size=24),
+                Text("38%", font_size=24)
+            ).arrange(DOWN, buff=0.1)
+        ).arrange(RIGHT, buff=2).next_to(main_square, DOWN, buff=0.5)
+
+        VGroup(main_square, sections, title_group, percentage_labels, left_labels, right_labels, bottom_labels).animate.move_to(ORIGIN)
+
+        # Animations
+        self.play(Create(main_square))
+        self.play(Create(sections))
+        self.play(Write(title_group))
+        self.play(Write(percentage_labels))
+        self.play(
+            Write(left_labels),
+            Write(right_labels)
+        )
+        self.play(Write(bottom_labels))
+        self.wait(2)
+
+        # Group everything for movement
+        all_elements = VGroup(
+            main_square, sections, title_group, percentage_labels,
+            left_labels, right_labels, bottom_labels
         )
 
-        # Create arrow
-        arrow = Arrow(ORIGIN, RIGHT * 2, buff=0.3, color=WHITE).move_to(ORIGIN)
+        # Move everything to the left
+        self.play(
+            all_elements.animate.shift(LEFT * 3)
+        )
+        self.wait()
 
-        # Create flattened rectangle (right side)
-        rect_height = square_size
-        rect_width = square_size * 0.4
+        # Create arrow
+        arrow = Arrow(LEFT * 1.5, RIGHT * 1.5, buff=0.3, color=WHITE)
+        self.play(Create(arrow))
+
+        # Create flattened rectangle
+        rect_height = 4  # Same as square_size
+        rect_width = 1.5
+        
         flat_sections = VGroup(
             # Raining & t-shirt (6%)
             Rectangle(height=rect_height * 0.06, width=rect_width)
@@ -2327,7 +2385,7 @@ class EntropyAndMultiVariables(Scene):
             .set_fill(color="#E8E8AA", opacity=1),
             # Sunny & coat (19%)
             Rectangle(height=rect_height * 0.19, width=rect_width)
-            .set_fill(color="#C1C178", opacity=1),
+            .set_fill(color="#C1C178", opacity=1)
         ).arrange(DOWN, buff=0)
         
         flat_rect = Rectangle(height=rect_height, width=rect_width, stroke_width=2)
@@ -2341,25 +2399,85 @@ class EntropyAndMultiVariables(Scene):
             Text("19%  sunny & coat", font_size=24)
         )
 
-        # Position flat labels
         for label, section in zip(flat_labels, flat_sections):
             label.next_to(section, RIGHT, buff=0.5)
-
-        # Animations
-        self.play(
-            Create(main_square),
-            Create(sections)
-        )
-        self.play(Write(percentage_labels))
-        self.play(Write(original_labels))
-        self.wait()
-
-        self.play(Create(arrow))
-        self.wait()
 
         self.play(
             Create(flat_rect),
             Create(flat_sections)
         )
         self.play(Write(flat_labels))
+        self.wait(2)
+
+        # Fade out previous elements
+        self.play(*[FadeOut(mob) for mob in self.mobjects])
+        self.wait()
+
+        # Create title
+        title = MathTex("H(X, Y)").scale(1.2)
+        title.to_edge(UP, buff=0.5)
+        
+        # Create axes lines and labels
+        x_line = Line(LEFT * 2, RIGHT * 4, stroke_width=1)
+        x_labels = VGroup(
+            Text("1 bit", font_size=24),
+            Text("2 bit", font_size=24),
+            Text("3 bit", font_size=24),
+            Text("4 bit", font_size=24)
+        )
+        
+        for i, label in enumerate(x_labels):
+            label.next_to(x_line, DOWN, buff=0.3)
+            label.shift(RIGHT * (i - 1))
+
+        # Create bars
+        bar_height = 0.5
+        bars = VGroup(
+            # 6% bar (4 bits)
+            Rectangle(height=bar_height, width=6, color=WHITE, fill_color="#9370DB", fill_opacity=1),
+            # 19% bar (2.5 bits)
+            Rectangle(height=bar_height, width=3.75, color=WHITE, fill_color="#9370DB", fill_opacity=0.8),
+            # 56% bar (1 bit)
+            Rectangle(height=bar_height, width=1.5, color=WHITE, fill_color="#E8E8AA", fill_opacity=1),
+            # 19% bar (2 bits)
+            Rectangle(height=bar_height, width=3, color=WHITE, fill_color="#C1C178", fill_opacity=1)
+        )
+        
+        # Position bars
+        bars.arrange(DOWN, buff=0.5, aligned_edge=LEFT)
+        bars.next_to(x_line, UP, buff=1)
+        
+        # Add percentage labels
+        percentages = VGroup(
+            Text("6%", font_size=24),
+            Text("19%", font_size=24),
+            Text("56%", font_size=24),
+            Text("19%", font_size=24)
+        )
+        
+        for percentage, bar in zip(percentages, bars):
+            percentage.next_to(bar, LEFT, buff=0.3)
+
+        # Add dotted vertical lines
+        vertical_lines = VGroup()
+        for i in range(4):
+            line = DashedLine(
+                UP * 4, DOWN * 1,
+                dash_length=0.1,
+                stroke_width=1,
+                color=GRAY
+            ).move_to(x_line.get_left() + RIGHT * (i + 1))
+            vertical_lines.add(line)
+
+        # Animations
+        self.play(Write(title))
+        self.play(Create(x_line), Create(vertical_lines))
+        self.play(Write(x_labels))
+        
+        for bar, percentage in zip(bars, percentages):
+            self.play(
+                Create(bar),
+                Write(percentage)
+            )
+        
         self.wait(2)
