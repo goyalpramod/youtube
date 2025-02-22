@@ -1443,3 +1443,128 @@ class OptimalEncoding(Scene):
         )
         
         self.wait(2)
+        # Fade everything out
+        self.play(
+            *[FadeOut(mob) for mob in self.mobjects]
+        )
+        
+        # Create two smaller axes for the split view
+        left_axes = Axes(
+            x_range=[0, 4, 1],
+            y_range=[0, 1.2, 0.2],
+            x_length=5,
+            y_length=3,  # Changed from y_height to y_length
+            axis_config={
+                "include_tip": False,
+                "include_numbers": False,
+                "stroke_color": WHITE
+            }
+        ).shift(LEFT * 3)
+
+        right_axes = Axes(
+            x_range=[0, 4, 1],
+            y_range=[0, 1.2, 0.2],
+            x_length=5,
+            y_length=3,  # Changed from y_height to y_length
+            axis_config={
+                "include_tip": False,
+                "include_numbers": False,
+                "stroke_color": WHITE
+            }
+        ).shift(RIGHT * 3)
+
+        # Create curves
+        left_curve = left_axes.plot(lambda x: 1/(2**x), x_range=[0, 4], color=WHITE)
+        right_curve = right_axes.plot(lambda x: 1/(2**x), x_range=[0, 4], color=WHITE)
+
+        # Create vertical lines on left axis
+        left_vertical_line = Line(
+            left_axes.c2p(0, 0),
+            left_axes.c2p(0, 1),
+            color=WHITE
+        )
+        left_one_label = MathTex("1", color=WHITE).next_to(left_vertical_line, LEFT)
+
+        # Create vertical lines on right axis
+        right_vertical_line = Line(
+            right_axes.c2p(0, 0),
+            right_axes.c2p(0, 1),
+            color=WHITE
+        )
+        right_one_label = MathTex("1", color=WHITE).next_to(right_vertical_line, LEFT)
+
+        # Areas under the curve - modified for partial shading
+        left_area = left_axes.get_area(
+            left_curve,
+            x_range=[0.5, 4],  # Grey area starts after purple rectangle
+            color=GREY,
+            opacity=0.5
+        )
+
+        right_area = right_axes.get_area(
+            right_curve,
+            x_range=[3, 4],  # Grey area starts after purple rectangle
+            color=GREY,
+            opacity=0.5
+        )
+
+        left_rect = Rectangle(
+            width=0.5 * left_axes.x_length / 4,  # 0.5 units in x direction
+            height=left_axes.y_length*0.5,  # Full height
+            fill_color="#9370DB",
+            fill_opacity=0.4,
+            stroke_color=WHITE
+        ).move_to(left_axes.c2p(0.25, 0.3))  # Position at x=0.25 (half of width)
+        left_rect.align_to(left_axes.c2p(0, 0), LEFT)  # Align to left edge
+
+        right_rect = Rectangle(
+            width=0.75*right_axes.x_length,  # 0.5 units in x direction
+            height=right_axes.y_length / 8,  # 0.25 height
+            fill_color="#9370DB",
+            fill_opacity=0.4,
+            stroke_color=WHITE
+        ).move_to(right_axes.c2p(0.4, 0.125))  # Position at x=2.75
+
+        # Labels
+        left_title = Text("Short Codeword,\nHigh Cost", 
+                         color=WHITE, 
+                         font_size=24).next_to(left_axes, UP)
+        right_title = Text("Long Codeword,\nSmall Cost", 
+                          color=WHITE, 
+                          font_size=24).next_to(right_axes, UP)
+
+        # x-axis labels
+        left_x_label = MathTex("L(x)", color=WHITE).next_to(left_axes.x_axis, RIGHT)
+        right_x_label = MathTex("L(x)", color=WHITE).next_to(right_axes.x_axis, RIGHT)
+
+        # Animation sequence
+        self.play(
+            Create(left_axes),
+            Create(right_axes)
+        )
+        self.play(
+            Create(left_vertical_line),
+            Create(right_vertical_line),
+            Write(left_one_label),
+            Write(right_one_label),
+            Write(left_x_label),
+            Write(right_x_label)
+        )
+        self.play(
+            Create(left_curve),
+            Create(right_curve)
+        )
+        self.play(
+            FadeIn(left_area),
+            FadeIn(right_area)
+        )
+        self.play(
+            FadeIn(left_rect),
+            FadeIn(right_rect)
+        )
+        self.play(
+            Write(left_title),
+            Write(right_title)
+        )
+        
+        self.wait(2)
