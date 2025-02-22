@@ -1023,12 +1023,13 @@ class VariableLengthEncoding(Scene):
         self.wait()
 
         # Create entropy labels
-        entropy_title = Text("Entropy = Optimal Average Length", font_size=36)
+        entropy_title = Text("Entropy", font_size=36)
+        entropy_title_2 = Text("= Optimal Average Length", font_size=36)
         entropy_equals = Text("= Area = 1.75 bits", font_size=36)
 
-        entropy_group = VGroup(entropy_title, entropy_equals)
+        entropy_group = VGroup(entropy_title,entropy_title_2, entropy_equals)
         entropy_group.arrange(DOWN, aligned_edge=LEFT, buff=0.2)
-        entropy_group.next_to(bars, RIGHT*0.5, buff=0)
+        entropy_group.next_to(bars, RIGHT + LEFT*0.2, buff=1)
 
         self.play(
             FadeOut(VGroup(prob_labels, bottom_labels, l_x_label, title_group)),
@@ -1042,3 +1043,183 @@ class VariableLengthEncoding(Scene):
         self.play(
             Write(entropy_group)
         )
+
+        self.wait(2)
+
+        self.play(
+            FadeOut(entropy_group, bars, v_lines, dotted_line, binary_numbers),
+        )
+        self.wait(2)
+
+class CodeWords(Scene):
+    def construct(self):
+        # Constants
+        cell_height = 0.5
+        cell_widths = [1.5, 1, 1]  # Different widths for each column
+        
+        # Create the base grid
+        rows = 8  # Total rows needed
+        cols = 3  # Three columns: bit 1, bit 2, bit 3
+        
+        # Create all cells
+        grid = VGroup()
+        bit_values = VGroup()
+        
+        # First column (2 large cells)
+        for i in range(2):
+            cell = Rectangle(
+                width=cell_widths[0],
+                height=cell_height * 4,
+                stroke_color=WHITE
+            )
+            if i > 0:
+                cell.next_to(grid[-1], DOWN, buff=0)
+            grid.add(cell)
+            
+            # Add 0 for first cell, 1 for second cell
+            value = Text(str(i), font_size=24)
+            value.move_to(cell.get_center() + LEFT*1.25 + UP*1.25)
+            bit_values.add(value)
+        
+        # Second column (4 cells)
+        second_col = VGroup()
+        for i in range(4):
+            cell = Rectangle(
+                width=cell_widths[1],
+                height=cell_height * 2,
+                stroke_color=WHITE
+            )
+            if i > 0:
+                cell.next_to(second_col[-1], DOWN, buff=0)
+            second_col.add(cell)
+            
+            # Add alternating 0 and 1
+            value = Text(str(i % 2), font_size=24)
+            value.move_to(cell.get_center() + UP*1.75)
+            bit_values.add(value)
+            
+        second_col.next_to(grid, RIGHT, buff=0)
+        grid.add(second_col)
+        
+        # Third column (8 cells)
+        third_col = VGroup()
+        for i in range(8):
+            cell = Rectangle(
+                width=cell_widths[2],
+                height=cell_height,
+                stroke_color=WHITE
+            )
+            if i > 0:
+                cell.next_to(third_col[-1], DOWN, buff=0)
+            third_col.add(cell)
+            
+            # Add alternating 0 and 1
+            value = Text(str(i % 2), font_size=24)
+            value.move_to(cell.get_center() + RIGHT + UP*2)
+            bit_values.add(value)
+            
+        third_col.next_to(second_col, RIGHT, buff=0)
+        grid.add(third_col)
+        
+        # Add column labels
+        labels = VGroup(
+            Text("bit 1", font_size=24),
+            Text("bit 2", font_size=24),
+            Text("bit 3", font_size=24)
+        )
+        
+        # Position labels under each column
+        for i, label in enumerate(labels):
+            if i == 0:
+                label.next_to(grid[:2], DOWN)
+            elif i == 1:
+                label.next_to(second_col, DOWN)
+            else:
+                label.next_to(third_col, DOWN)
+        
+        # Add dotted line on the right
+        dotted_line = DashedLine(
+            grid.get_top(),
+            grid.get_bottom(),
+            stroke_width=2,
+            dash_length=0.1
+        ).next_to(grid, RIGHT, buff=0.5)
+        
+        # Center everything on the screen
+        entire_scene = VGroup(grid, labels, dotted_line)
+        entire_scene.move_to(ORIGIN)
+        
+        # Animations
+        self.play(Create(grid))
+        self.play(Write(bit_values))
+        self.play(Write(labels))
+        self.play(Create(dotted_line))
+        
+        self.wait(2)
+
+        self.play(
+            FadeOut(entire_scene),
+            FadeOut(bit_values),
+        )
+
+        encoded_string = Text("0 0 0 1 0 0 1 1", font_size=30)
+        codewords_text = Text("0 10 0 111", font_size=30)
+        source_text = Text("Pizza Pasta Pizza Soup", font_size=30)
+        
+        # Create rounded rectangles
+        def create_rounded_rect(text, color):
+            return RoundedRectangle(
+                width=text.width + 0.5,
+                height=text.height + 0.3,
+                corner_radius=0.2,
+                fill_color=color,
+                fill_opacity=0.3,
+                stroke_color=WHITE
+            )
+        
+        # Create boxes with colors
+        encoded_box = create_rounded_rect(encoded_string, "#98FB98")  # Light green
+        codewords_box = create_rounded_rect(codewords_text, "#98FB98")
+        source_box = create_rounded_rect(source_text, "#C19EE0")  # Light purple
+        
+        # Create labels
+        encoded_label = Text("encoded string", font_size=30)
+        codewords_label = Text("codewords", font_size=30)
+        source_label = Text("source symbols", font_size=30)
+        
+        # Create groups and position text in boxes
+        encoded_group = VGroup(encoded_box, encoded_string)
+        codewords_group = VGroup(codewords_box, codewords_text)
+        source_group = VGroup(source_box, source_text)
+        
+        encoded_string.move_to(encoded_box)
+        codewords_text.move_to(codewords_box)
+        source_text.move_to(source_box)
+        
+        # Arrange boxes vertically with proper spacing
+        boxes_group = VGroup(encoded_group, codewords_group, source_group).arrange(DOWN, buff=0.5)
+        
+        # Position labels to the right
+        encoded_label.next_to(encoded_box, RIGHT, buff=0.5)
+        codewords_label.next_to(codewords_box, RIGHT, buff=0.5)
+        source_label.next_to(source_box, RIGHT, buff=0.5)
+        
+        # Group everything together
+        entire_visualization = VGroup(
+            encoded_group, encoded_label,
+            codewords_group, codewords_label,
+            source_group, source_label
+        )
+        
+        # Position the visualization
+        entire_visualization.next_to(grid, DOWN, buff=1)  # Assuming 'grid' is your code words table
+        
+        encoding_group = VGroup(encoded_group, codewords_group, source_group, encoded_label, codewords_label, source_label).move_to(ORIGIN)
+
+        # Animate
+        self.play(FadeIn(encoded_group), FadeIn(encoded_label))
+        self.wait(0.5)
+        self.play(FadeIn(codewords_group), FadeIn(codewords_label))
+        self.wait(0.5)
+        self.play(FadeIn(source_group), FadeIn(source_label))
+        self.wait(2)
