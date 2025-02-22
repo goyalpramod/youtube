@@ -1267,21 +1267,30 @@ class CodeWords(Scene):
         
         # Third column (8 cells)
         third_col = VGroup()
+        third_col_fills = VGroup()  # New group for the fills
         for i in range(8):
-            # Only shade the first two cells with grey
-            fill_color = GREY if i < 2 else WHITE
-            fill_opacity = 0.3 if i < 2 else 0
-            
             cell = Rectangle(
                 width=cell_widths[2],
                 height=cell_height,
                 stroke_color=WHITE,
-                fill_color=fill_color,
-                fill_opacity=fill_opacity
+                fill_opacity=0
             )
             if i > 0:
                 cell.next_to(third_col[-1], DOWN, buff=0)
             third_col.add(cell)
+            
+            # Create separate fill rectangles with exact positioning
+            if i < 2:
+                fill = Rectangle(
+                    width=cell_widths[2],
+                    height=cell_height,
+                    stroke_opacity=0,
+                    fill_color=GREY,
+                    fill_opacity=0.3
+                )
+                # Align fill exactly with cell
+                fill.move_to(cell.get_center())
+                third_col_fills.add(fill)
             
             value = Text(str(i % 2), font_size=24)
             value.move_to(cell.get_center() + RIGHT*2.25 + UP*0.75)
@@ -1289,6 +1298,9 @@ class CodeWords(Scene):
             
         third_col.next_to(second_col, RIGHT, buff=0)
         shaded_grid.add(third_col)
+        
+        # Ensure fills stay aligned after moving the third column
+        third_col_fills.next_to(second_col, ORIGIN + LEFT*1.5 + UP*0.1, buff=0.1)
         
         # Add fraction on the right
         fraction = MathTex("\\frac{1}{2^L} = \\frac{1}{4}", font_size=36)
@@ -1325,9 +1337,77 @@ class CodeWords(Scene):
         self.play(FadeIn(shaded_grid))
         self.play(Write(shaded_values))
         self.play(Write(labels))
+        self.play(FadeIn(third_col_fills))  # Add fills after labels
         self.play(
             Create(dotted_line),
             Write(fraction)
         )
+        
+        self.wait(2)
+
+class OptimalEncoding(Scene):
+    def construct(self):
+        # Set background to black
+        self.camera.background_color = BLACK
+        
+        # Create axes without numbers
+        axes = Axes(
+            x_range=[0, 8, 1],
+            y_range=[0, 1.2, 0.2],
+            x_length=6,
+            y_length=3,
+            axis_config={
+                "include_tip": False,
+                "include_numbers": False,
+                "stroke_color": WHITE
+            }
+        )
+
+        # Labels
+        x_label = MathTex("L(x)", color=WHITE).next_to(axes.x_axis, RIGHT)
+        
+        # Create left vertical line and 1 label
+        left_line = Line(
+            axes.c2p(0, 0),
+            axes.c2p(0, 1),
+            color=WHITE
+        )
+        one_label = MathTex("1", color=WHITE).next_to(left_line, LEFT)
+
+        # Create single cost function curve
+        cost_curve = axes.plot(lambda x: 1/(2**x), x_range=[0, 8], color=WHITE)
+
+        # Get areas under different parts of the same curve
+        first_area = axes.get_area(
+            graph=cost_curve,
+            x_range=[0, 2],
+            color=GREY,
+            opacity=0.3
+        )
+
+        second_area = axes.get_area(
+            graph=cost_curve,
+            x_range=[2, 8],
+            color="#9370DB",
+            opacity=0.4
+        )
+
+        # Add Cost = 1/2^L(x) label
+        cost_label = MathTex("Cost = \\frac{1}{2^{L(x)}}", color=WHITE).scale(0.8)
+        cost_label.move_to(
+            axes.c2p(3, 0.5) + UP * 0.5 + RIGHT * 0.5
+        )
+
+        # Animation sequence
+        self.play(Create(axes))
+        self.play(
+            Create(left_line),
+            Write(one_label),
+            Write(x_label)
+        )
+        self.play(Create(cost_curve))
+        self.play(FadeIn(first_area))
+        self.play(FadeIn(second_area))
+        self.play(Write(cost_label))
         
         self.wait(2)
