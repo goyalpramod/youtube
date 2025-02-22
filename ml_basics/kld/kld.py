@@ -1350,12 +1350,12 @@ class OptimalEncoding(Scene):
         # Set background to black
         self.camera.background_color = BLACK
         
-        # Create axes without numbers
+        # Create larger axes
         axes = Axes(
             x_range=[0, 8, 1],
             y_range=[0, 1.2, 0.2],
-            x_length=6,
-            y_length=3,
+            x_length=12,  # Increased length
+            y_length=6,   # Increased height
             axis_config={
                 "include_tip": False,
                 "include_numbers": False,
@@ -1377,17 +1377,36 @@ class OptimalEncoding(Scene):
         # Create single cost function curve
         cost_curve = axes.plot(lambda x: 1/(2**x), x_range=[0, 8], color=WHITE)
 
-        # Get areas under different parts of the same curve
+        # Create rectangle that fits the curve
+        # Width is L(x) = 1 unit, height is p(x) = 0.5 units
+        rect = Rectangle(
+            width=axes.x_length/8,  # 1 unit in x-axis
+            height=axes.y_length/4,  # 0.5 units in y-axis
+            fill_color="#9370DB",
+            fill_opacity=1,
+            stroke_color=WHITE
+        )
+        
+        # Position rectangle to start at x=1
+        rect.move_to(axes.c2p(0.5, 0.15))  # Center at (1, 0.25)
+        
+        # Box text
+        box_text_p = MathTex("p(x)", color=WHITE).scale(0.7)
+        box_text_length = Text("Average\nLength\nContribution", color=WHITE, font_size=15)
+        box_group = VGroup(box_text_p, box_text_length).arrange(DOWN, buff=0.1)
+        box_group.move_to(rect)
+
+        # Get areas under different parts of the curve
         first_area = axes.get_area(
             graph=cost_curve,
-            x_range=[0, 2],
+            x_range=[0, 1],
             color=GREY,
             opacity=0.3
         )
 
         second_area = axes.get_area(
             graph=cost_curve,
-            x_range=[2, 8],
+            x_range=[1, 8],
             color="#9370DB",
             opacity=0.4
         )
@@ -1395,8 +1414,14 @@ class OptimalEncoding(Scene):
         # Add Cost = 1/2^L(x) label
         cost_label = MathTex("Cost = \\frac{1}{2^{L(x)}}", color=WHITE).scale(0.8)
         cost_label.move_to(
-            axes.c2p(3, 0.5) + UP * 0.5 + RIGHT * 0.5
+            axes.c2p(3, 0.8)
         )
+
+        # Rectangle starting position (top right)
+        starting_rect = rect.copy()
+        starting_text = box_group.copy()
+        starting_group = VGroup(starting_rect, starting_text)
+        starting_group.to_corner(UR, buff=0.5)
 
         # Animation sequence
         self.play(Create(axes))
@@ -1409,5 +1434,12 @@ class OptimalEncoding(Scene):
         self.play(FadeIn(first_area))
         self.play(FadeIn(second_area))
         self.play(Write(cost_label))
+        
+        # Animate the box
+        self.play(Create(starting_rect), Write(starting_text))
+        self.wait()
+        self.play(
+            Transform(starting_group, VGroup(rect, box_group))
+        )
         
         self.wait(2)
