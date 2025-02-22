@@ -1926,3 +1926,440 @@ class Entropy(Scene):
         )
         
         self.wait(2)
+
+        # Fade out everything
+        self.play(
+            *[FadeOut(mob) for mob in self.mobjects]
+        )
+        self.wait(0.5)
+
+        # Write cross entropy equation
+        cross_entropy_eq = MathTex(
+            "H_p(q) = \\sum_x q(x) \\log_2 \\left(\\frac{1}{p(x)}\\right)",
+            font_size=48
+        ).move_to(ORIGIN)
+        
+        self.play(Write(cross_entropy_eq))
+        self.wait(2)
+
+        # Fade out equation
+        self.play(FadeOut(cross_entropy_eq))
+        
+        # Constants for the bars
+        BAR_HEIGHT = 4
+        BAR_WIDTH = 1.5
+        
+        # Create p(x) distribution with different heights
+        p_rect = Rectangle(height=BAR_HEIGHT, width=BAR_WIDTH, stroke_width=2)
+        p_parts = VGroup(
+            Rectangle(height=BAR_HEIGHT/2, width=BAR_WIDTH)  # x1 - 1/2
+            .set_fill(color="#C19EE0", opacity=1),
+            Rectangle(height=BAR_HEIGHT/4, width=BAR_WIDTH)  # x2 - 1/4
+            .set_fill(color="#FFB6C1", opacity=1),
+            Rectangle(height=BAR_HEIGHT/8, width=BAR_WIDTH)  # x3 - 1/8
+            .set_fill(color="#FFFFE0", opacity=1),
+            Rectangle(height=BAR_HEIGHT/8, width=BAR_WIDTH)  # x4 - 1/8
+            .set_fill(color="#98FB98", opacity=1),
+        ).arrange(DOWN, buff=0)
+        
+        p_group = VGroup(p_rect, p_parts)
+
+        # Create x labels for p(x)
+        p_labels = VGroup(
+            MathTex("x_1", font_size=24),
+            MathTex("x_2", font_size=24),
+            MathTex("x_3", font_size=24),
+            MathTex("x_4", font_size=24)
+        )
+        
+        for label, part in zip(p_labels, p_parts):
+            label.move_to(part)
+
+        p_x_label = MathTex("p(x)", font_size=36).next_to(p_rect, UP, buff=0.3)
+        p_full_group = VGroup(p_group, p_labels, p_x_label)
+        p_full_group.move_to(LEFT * 4)  # Move more to the left
+
+        # Create q(x) distribution with equal heights
+        q_rect = Rectangle(height=BAR_HEIGHT, width=BAR_WIDTH, stroke_width=2)
+        q_parts = VGroup(
+            Rectangle(height=BAR_HEIGHT/4, width=BAR_WIDTH)  # Equal parts
+            .set_fill(color="#C19EE0", opacity=1),
+            Rectangle(height=BAR_HEIGHT/4, width=BAR_WIDTH)
+            .set_fill(color="#FFB6C1", opacity=1),
+            Rectangle(height=BAR_HEIGHT/4, width=BAR_WIDTH)
+            .set_fill(color="#FFFFE0", opacity=1),
+            Rectangle(height=BAR_HEIGHT/4, width=BAR_WIDTH)
+            .set_fill(color="#98FB98", opacity=1),
+        ).arrange(DOWN, buff=0)
+        
+        q_group = VGroup(q_rect, q_parts)
+
+        # Create x labels for q(x)
+        q_labels = VGroup(
+            MathTex("x_1", font_size=24),
+            MathTex("x_2", font_size=24),
+            MathTex("x_3", font_size=24),
+            MathTex("x_4", font_size=24)
+        )
+        
+        for label, part in zip(q_labels, q_parts):
+            label.move_to(part)
+
+        q_x_label = MathTex("q(x)", font_size=36).next_to(q_rect, UP, buff=0.3)
+        q_full_group = VGroup(q_group, q_labels, q_x_label)
+        q_full_group.next_to(p_full_group, RIGHT, buff=1)
+
+        # Create title and explanation on the right
+        title = Text("Cross-Entropy: Hp(q)", font_size=36)
+        explanation = VGroup(
+            Text("Average Length", font_size=30),
+            Text("of message from q(x)", font_size=30),
+            Text("using code for p(x).", font_size=30)
+        ).arrange(DOWN, buff=0.2)
+        
+        text_group = VGroup(title, explanation).arrange(DOWN, buff=0.5)
+        text_group.next_to(q_full_group, RIGHT, buff=2)  # Position text on the right
+
+        # Animation sequence
+        self.play(
+            Create(p_rect),
+            Create(q_rect)
+        )
+        self.play(
+            FadeIn(p_parts),
+            FadeIn(q_parts)
+        )
+        self.play(
+            Write(p_labels),
+            Write(q_labels)
+        )
+        self.play(
+            Write(p_x_label),
+            Write(q_x_label)
+        )
+        self.play(
+            Write(title),
+            Write(explanation)
+        )
+        
+        self.wait(2)
+
+        # Fade out everything
+        self.play(
+            *[FadeOut(mob) for mob in self.mobjects]
+        )
+        self.wait(0.5)
+
+        # Create the header text
+        header = Text("So, now we have four possibilities:", font_size=36)
+        header.to_edge(UP)
+
+        # Create bullet points
+        bullets = VGroup(
+            # First bullet
+            Text(
+                "• Bob using his own code (H(p) = 1.75 bits)",
+                font_size=30,
+                t2c={"H(p)": BLUE} # Color the equation
+            ),
+            # Second bullet
+            Text(
+                "• Alice using Bob's code (Hp(q) = 2.25 bits)", 
+                font_size=30,
+                t2c={"Hp(q)": BLUE}
+            ),
+            # Third bullet
+            Text(
+                "• Alice using her own code (H(q) = 1.75 bits)",
+                font_size=30,
+                t2c={"H(q)": BLUE}
+            ),
+            # Fourth bullet
+            Text(
+                "• Bob using Alice's code (Hq(p) = 2.375 bits)",
+                font_size=30,
+                t2c={"Hq(p)": BLUE}
+            )
+        ).arrange(DOWN, buff=0.5, aligned_edge=LEFT)
+        
+        bullets.next_to(header, DOWN, buff=0.75)
+
+        # Position everything slightly up
+        entire_group = VGroup(header, bullets)
+        entire_group.move_to(ORIGIN)
+        entire_group.shift(UP * 0.5)
+
+        # Animation sequence
+        self.play(Write(header))
+        self.play(Write(bullets[0]))
+        self.wait(0.3)
+        self.play(Write(bullets[1]))
+        self.wait(0.3)
+        self.play(Write(bullets[2]))
+        self.wait(0.3)
+        self.play(Write(bullets[3]))
+        
+        self.wait(2)
+
+        # After showing the bullets, instead of fading them out, transform them directly
+
+        # Create equations
+        hp_eq = MathTex("H(p) = H_p(p) = 1.75 \\text{ bits}", font_size=36)
+        hpq_eq = MathTex("H_p(q) = 2.25 \\text{ bits}", font_size=36)
+        hqp_eq = MathTex("H_q(p) = 2.375 \\text{ bits}", font_size=36)
+        hq_eq = MathTex("H(q) = H_q(q) = 1.75 \\text{ bits}", font_size=36)
+
+        # Position equations in corners
+        hp_eq.to_corner(UL)
+        hpq_eq.to_corner(DL) 
+        hqp_eq.to_corner(UR)
+        hq_eq.to_corner(DR)
+
+        # Transform bullets to equations and fade out header
+        self.play(
+            Transform(bullets[0], hp_eq),
+            Transform(bullets[1], hpq_eq),
+            Transform(bullets[2], hq_eq),
+            Transform(bullets[3], hqp_eq),
+            FadeOut(header)
+        )
+        self.wait(0.5)
+
+        """
+        FIX BARS
+        """
+
+        # Constants for bars - scaled down
+        BAR_WIDTH = 2  # Reduced from 4 to 2
+        BAR_HEIGHT = 0.25  # Reduced from 0.5 to 0.25
+        LEFT_SHIFT = 3
+
+        # Function to create the bars with left alignment
+        def create_length_bars(colors, lengths, label, eq_text, position):
+            bars = VGroup()
+            max_width = max(lengths) * BAR_WIDTH  # For alignment reference
+            
+            for color, length in zip(colors, lengths):
+                bar = Rectangle(
+                    width=length * BAR_WIDTH,
+                    height=BAR_HEIGHT,
+                    fill_color=color,
+                    fill_opacity=1,
+                    stroke_color=WHITE
+                )
+                # Ensure all bars start from the same left position
+                if len(bars) == 0:
+                    bars.add(bar)
+                else:
+                    bar.next_to(bars[-1], DOWN, buff=0.1)
+                    bar.align_to(bars[0], LEFT)  # Align each bar to the first bar's left edge
+            
+            p_label = Text(label, font_size=24).next_to(bars, LEFT)
+            l_label = Text(eq_text, font_size=24).next_to(bars, DOWN, buff=0.3)
+            
+            group = VGroup(bars, p_label, l_label)
+            group.move_to(position)
+            return group
+
+        # Colors for the bars
+        colors = ["#C19EE0", "#FFB6C1", "#FFFFE0", "#98FB98"]
+
+        # Create the four visualizations with accurate lengths
+        hp = create_length_bars(
+            colors,
+            [1, 2, 2.5, 2.5],  # Hp(p)
+            "p(x)", 
+            "Lp(x)",
+            UP * 1.5 + LEFT * LEFT_SHIFT
+        )
+
+        hpq = create_length_bars(
+            colors,
+            [1, 2.5, 3, 3],  # Hp(q)
+            "q(x)",
+            "Lp(x)", 
+            DOWN * 1.5 + LEFT * LEFT_SHIFT
+        )
+
+        hqp = create_length_bars(
+            colors, 
+            [3, 1.5, 2, 2.5],  # Hq(p)
+            "p(x)",
+            "Lq(x)",
+            UP * 1.5 + RIGHT * LEFT_SHIFT
+        )
+
+        hq = create_length_bars(
+            colors,
+            [2.5, 1.5, 2, 2.5],  # Hq(q)
+            "q(x)",
+            "Lq(x)",
+            DOWN * 1.5 + RIGHT * LEFT_SHIFT
+        )
+
+        # Animation sequence
+        for viz in [hp, hpq, hqp, hq]:
+            self.play(
+                Create(viz[0]),  # bars
+                Write(viz[1]),   # p(x)/q(x) label
+                Write(viz[2])    # L(x) label
+            )
+            self.wait(0.3)
+
+        self.wait(2)
+
+class KLDivergence(Scene):
+    def construct(self):
+        # First set of boxes
+        h_p = Rectangle(width=3, height=0.8, color=RED_A)
+        h_q_p = Rectangle(width=4, height=0.8, color=RED_B)
+        d_q_p = Rectangle(width=1.2, height=0.8, color=PURPLE_A)
+        
+        # Labels for first set
+        h_p_label = MathTex("H(p)").move_to(h_p).shift(UP * 0.1)
+        h_q_p_label = MathTex("H_q(p)").move_to(h_q_p).shift(DOWN * 0.1)
+        d_q_p_label = MathTex("D_q(p)").move_to(d_q_p).shift(UP * 0.1)
+        
+        # Position first set - adjacent
+        h_p.to_edge(LEFT, buff=3)
+        h_q_p.next_to(h_p, RIGHT, buff=0, aligned_edge=LEFT)
+        d_q_p.next_to(h_q_p, RIGHT, buff=0)
+        
+        # Second set of boxes
+        h_q = Rectangle(width=3, height=0.8, color=BLUE_A)
+        h_p_q = Rectangle(width=4, height=0.8, color=BLUE_B)
+        d_p_q = Rectangle(width=1.2, height=0.8, color=PURPLE_A)
+        
+        # Labels for second set
+        h_q_label = MathTex("H(q)").move_to(h_q).shift(UP * 0.1)
+        h_p_q_label = MathTex("H_p(q)").move_to(h_p_q).shift(DOWN * 0.1)
+        d_p_q_label = MathTex("D_p(q)").move_to(d_p_q).shift(UP * 0.1)
+        
+        # Position second set - adjacent
+        second_group = VGroup(h_q, h_p_q, d_p_q)
+        second_group.arrange(RIGHT, buff=0, aligned_edge=LEFT)
+        second_group.next_to(h_q_p, DOWN, buff=2)
+        
+        # Animations
+        self.play(
+            Create(h_p),
+            Create(h_q_p),
+            Create(d_q_p),
+            Write(h_p_label),
+            Write(h_q_p_label),
+            Write(d_q_p_label)
+        )
+        self.wait()
+        
+        self.play(
+            Create(h_q),
+            Create(h_p_q),
+            Create(d_p_q),
+            Write(h_q_label),
+            Write(h_p_q_label),
+            Write(d_p_q_label)
+        )
+        self.wait(2)
+
+class EntropyAndMultiVariables(Scene):
+    def construct(self):
+        # Create initial square visualization (left side)
+        square_size = 4
+        main_square = Square(side_length=square_size, stroke_width=2)
+        main_square.move_to(LEFT * 3)
+        
+        # Create sections with proportions
+        sections = VGroup(
+            # Bottom left (sunny, t-shirt) - 56%
+            Rectangle(height=square_size * 0.92, width=square_size * 0.62)
+            .set_fill(color="#E8E8AA", opacity=1),
+            # Bottom right (sunny, coat) - 19%
+            Rectangle(height=square_size * 0.50, width=square_size * 0.38)
+            .set_fill(color="#C1C178", opacity=1),
+            # Top left (rain, t-shirt) - 6%
+            Rectangle(height=square_size * 0.08, width=square_size * 0.62)
+            .set_fill(color="#9370DB", opacity=1),
+            # Top right (rain, coat) - 19%
+            Rectangle(height=square_size * 0.50, width=square_size * 0.38)
+            .set_fill(color="#9370DB", opacity=1),
+        )
+
+        # Position sections in square
+        sections[0].move_to(main_square.get_bottom(), aligned_edge=DOWN).align_to(main_square, LEFT)
+        sections[1].move_to(main_square.get_bottom(), aligned_edge=DOWN).align_to(main_square, RIGHT)
+        sections[2].move_to(sections[0].get_top(), aligned_edge=DOWN)
+        sections[3].move_to(sections[1].get_top(), aligned_edge=DOWN)
+
+        square_group = VGroup(main_square, sections)
+
+        # Labels for square
+        percentage_labels = VGroup(
+            Text("56%", font_size=36, color=BLACK).move_to(sections[0]),
+            Text("19%", font_size=36, color=BLACK).move_to(sections[1]),
+            Text("6%", font_size=36, color=WHITE).move_to(sections[2]),
+            Text("19%", font_size=36, color=WHITE).move_to(sections[3])
+        )
+
+        original_labels = VGroup(
+            Text("raining\n8%", font_size=24).next_to(main_square, LEFT, buff=0.5),
+            Text("sunny\n92%", font_size=24).next_to(main_square, LEFT, buff=0.5).shift(DOWN*2),
+            Text("raining\n50%", font_size=24).next_to(main_square, RIGHT, buff=0.5),
+            Text("sunny\n50%", font_size=24).next_to(main_square, RIGHT, buff=0.5).shift(DOWN*2),
+            Text("t-shirt\n62%", font_size=24).next_to(main_square, DOWN, buff=0.5).shift(LEFT),
+            Text("coat\n38%", font_size=24).next_to(main_square, DOWN, buff=0.5).shift(RIGHT)
+        )
+
+        # Create arrow
+        arrow = Arrow(ORIGIN, RIGHT * 2, buff=0.3, color=WHITE).move_to(ORIGIN)
+
+        # Create flattened rectangle (right side)
+        rect_height = square_size
+        rect_width = square_size * 0.4
+        flat_sections = VGroup(
+            # Raining & t-shirt (6%)
+            Rectangle(height=rect_height * 0.06, width=rect_width)
+            .set_fill(color="#9370DB", opacity=1),
+            # Raining & coat (19%)
+            Rectangle(height=rect_height * 0.19, width=rect_width)
+            .set_fill(color="#9370DB", opacity=1),
+            # Sunny & t-shirt (56%)
+            Rectangle(height=rect_height * 0.56, width=rect_width)
+            .set_fill(color="#E8E8AA", opacity=1),
+            # Sunny & coat (19%)
+            Rectangle(height=rect_height * 0.19, width=rect_width)
+            .set_fill(color="#C1C178", opacity=1),
+        ).arrange(DOWN, buff=0)
+        
+        flat_rect = Rectangle(height=rect_height, width=rect_width, stroke_width=2)
+        flat_group = VGroup(flat_rect, flat_sections).move_to(RIGHT * 3)
+
+        # Labels for flattened rectangle
+        flat_labels = VGroup(
+            Text("6%   raining & t-shirt", font_size=24),
+            Text("19%  raining & coat", font_size=24),
+            Text("56%  sunny & t-shirt", font_size=24),
+            Text("19%  sunny & coat", font_size=24)
+        )
+
+        # Position flat labels
+        for label, section in zip(flat_labels, flat_sections):
+            label.next_to(section, RIGHT, buff=0.5)
+
+        # Animations
+        self.play(
+            Create(main_square),
+            Create(sections)
+        )
+        self.play(Write(percentage_labels))
+        self.play(Write(original_labels))
+        self.wait()
+
+        self.play(Create(arrow))
+        self.wait()
+
+        self.play(
+            Create(flat_rect),
+            Create(flat_sections)
+        )
+        self.play(Write(flat_labels))
+        self.wait(2)
