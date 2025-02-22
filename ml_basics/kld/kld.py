@@ -685,7 +685,7 @@ class SimpleEncoding(Scene):
         self.wait(2)
 
 """
-Fix structure of the stuff
+Fix structure of the stuff, also make everything smooth.
 """
 
 class VariableLengthEncoding(Scene):
@@ -1028,15 +1028,16 @@ class VariableLengthEncoding(Scene):
 
         entropy_group = VGroup(entropy_title, entropy_equals)
         entropy_group.arrange(DOWN, aligned_edge=LEFT, buff=0.2)
-        entropy_group.next_to(bars, RIGHT, buff=1)
+        entropy_group.next_to(bars, RIGHT*0.5, buff=0)
 
         self.play(
             FadeOut(VGroup(prob_labels, bottom_labels, l_x_label, title_group)),
         )
 
-        VGroup(bars, v_lines, dotted_line, binary_numbers).animate.shift(LEFT*2),
-        # self.play(
-        # )
+        # Fix: Proper animation syntax for shifting the group
+        self.play(
+            VGroup(bars, v_lines, dotted_line, binary_numbers).animate.shift(LEFT*2)
+        )
 
         self.play(
             Write(entropy_group)
