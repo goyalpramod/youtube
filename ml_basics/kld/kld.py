@@ -522,8 +522,8 @@ class ConditionalProbabilityDistributions(Scene):
 
         # Bottom percentages
         bottom_labels = VGroup(
-            Text("62%", font_size=24, color=WHITE).move_to(bottom_sections[0]),
-            Text("38%", font_size=24, color=WHITE).move_to(bottom_sections[1])
+            Text("60%", font_size=24, color=WHITE).move_to(bottom_sections[0]),
+            Text("40%", font_size=24, color=WHITE).move_to(bottom_sections[1])
         )
 
 
@@ -534,16 +534,16 @@ class ConditionalProbabilityDistributions(Scene):
         # Create sections with new proportions
         sections = VGroup(
             # Bottom left (sunny, left) - 56%
-            Rectangle(height=square_size * 0.80, width=square_size * 0.62)
+            Rectangle(height=square_size * 0.80, width=square_size * 0.60)
             .set_fill(color="#D4D0AB", opacity=1),
             # Bottom right (sunny, right) - 19%
-            Rectangle(height=square_size * 0.50, width=square_size * 0.38)
+            Rectangle(height=square_size * 0.50, width=square_size * 0.40)
             .set_fill(color="#D4D0AB", opacity=1),
             # Top left (rain, left) - 6%
-            Rectangle(height=square_size * (1 - 0.80), width=square_size * 0.62)
+            Rectangle(height=square_size * (1 - 0.80), width=square_size * 0.60)
             .set_fill(color="#4FB3BF", opacity=1),
             # Top right (rain, right) - 19%
-            Rectangle(height=square_size * 0.50, width=square_size * 0.38)
+            Rectangle(height=square_size * 0.50, width=square_size * 0.40)
             .set_fill(color="#4FB3BF", opacity=1),
         )
 
@@ -558,18 +558,18 @@ class ConditionalProbabilityDistributions(Scene):
 
         # Percentage labels
         percentage_labels = VGroup(
-            Text("56%", font_size=36, color=WHITE).move_to(sections[0]),
-            Text("19%", font_size=36, color=WHITE).move_to(sections[1]),
+            Text("54%", font_size=36, color=WHITE).move_to(sections[0]),
+            Text("20%", font_size=36, color=WHITE).move_to(sections[1]),
             Text("6%", font_size=36, color=WHITE).move_to(sections[2]),
-            Text("19%", font_size=36, color=WHITE).move_to(sections[3])
+            Text("20%", font_size=36, color=WHITE).move_to(sections[3])
         )
 
         # Side labels for rain/sunny percentages
         side_labels = VGroup(
-            Text("thin\n8%", font_size=24, color=WHITE).next_to(main_square, LEFT, buff=0.5),
-            Text("thick\n92%", font_size=24, color=WHITE).next_to(main_square, LEFT, buff=0.5).shift(DOWN*2),
-            Text("thin\n50%", font_size=24, color=WHITE).next_to(main_square, RIGHT, buff=0.5),
-            Text("thick\n50%", font_size=24, color=WHITE).next_to(main_square, RIGHT, buff=0.5).shift(DOWN*2)
+            Text("thin\n10%", font_size=24, color=WHITE).next_to(main_square, LEFT, buff=0.5).shift(UP*1.5),
+            Text("thick\n90%", font_size=24, color=WHITE).next_to(main_square, LEFT, buff=0.5).shift(DOWN*0.5),
+            Text("thin\n50%", font_size=24, color=WHITE).next_to(main_square, RIGHT, buff=0.5).shift(UP*1),
+            Text("thick\n50%", font_size=24, color=WHITE).next_to(main_square, RIGHT, buff=0.5).shift(DOWN*1)
         )
 
         # Animation sequence for new visualization
@@ -586,19 +586,13 @@ class ConditionalProbabilityDistributions(Scene):
         )
         self.wait()
 
-        self.play(Write(percentage_labels))
-        self.wait()
-
         self.play(Write(side_labels))
         self.wait(2)
 
-class KLDIntroTalk(Scene):
-    def construct(self):
-        pass
+        self.play(Write(percentage_labels))
+        self.wait()
 
-"""
-FIX ALIGNMENT
-"""
+
 class SimpleEncoding(Scene):
    def construct(self):
         # Constants for consistent styling
