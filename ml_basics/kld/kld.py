@@ -51,34 +51,44 @@ Style: {Thin crust (60%), Thick crust (40%)}
 Method: {Oven (55%), Pan (45%)}
 These are dependent because thin crust pizzas are more commonly cooked on stones for crispiness.
 """
+
+"""
+Weather -> crust 
+Clothing -> Utensil
+Sunny -> Thick 
+Rain -> Thin
+Tshirt -> Pan
+coat -> oven
+"""
+
 class IndependentProbabilityDistributions(Scene):
     def construct(self):
         # Constants for probabilities
-        WEATHER_RAIN_PROB = 0.25
-        WEATHER_SUNNY_PROB = 0.75
-        CLOTHING_TSHIRT_PROB = 0.60  # Corrected from 0.60 to 0.62
-        CLOTHING_COAT_PROB = 0.40    # Corrected from 0.40 to 0.38
+        THIN_CRUST_PROB = 0.25
+        THICK_CRUST_PROB = 0.75
+        PAN_PROB = 0.60  # Corrected from 0.60 to 0.62
+        OVEN_PROB = 0.40    # Corrected from 0.40 to 0.38
 
         # Create the first distribution (Weather)
         weather_rect = Rectangle(height=4, width=1, stroke_width=2)
         weather_parts = VGroup(
             # Sunny (bottom)
-            Rectangle(height=4*WEATHER_SUNNY_PROB, width=1)
+            Rectangle(height=4*THICK_CRUST_PROB, width=1)
             .set_fill(color=YELLOW_A, opacity=0.8),
             # Raining (top)
-            Rectangle(height=4*WEATHER_RAIN_PROB, width=1)
+            Rectangle(height=4*THIN_CRUST_PROB, width=1)
             .set_fill(color=BLUE_D, opacity=1),
         ).arrange(UP, buff=0)
         
         weather_group = VGroup(weather_rect, weather_parts)
         
         # Weather labels
-        weather_title = Text("weather", font_size=24)
+        weather_title = Text("crust", font_size=24)
         weather_title.next_to(weather_group, UP, buff=0.3)
         
         weather_labels = VGroup(
-            Text(f"raining\n{int(WEATHER_RAIN_PROB*100)}%", font_size=20),
-            Text(f"sunny\n{int(WEATHER_SUNNY_PROB*100)}%", font_size=20)
+            Text(f"thin\n{int(THIN_CRUST_PROB*100)}%", font_size=20),
+            Text(f"thick\n{int(THICK_CRUST_PROB*100)}%", font_size=20)
         )
         weather_labels[0].next_to(weather_parts[1], LEFT, buff=0.3)
         weather_labels[1].next_to(weather_parts[0], LEFT, buff=0.3)
@@ -90,22 +100,22 @@ class IndependentProbabilityDistributions(Scene):
         clothing_rect = Rectangle(height=4, width=1, stroke_width=2)
         clothing_parts = VGroup(
             # T-shirt (bottom)
-            Rectangle(height=4*CLOTHING_TSHIRT_PROB, width=1)
+            Rectangle(height=4*PAN_PROB, width=1)
             .set_fill(color=YELLOW_A, opacity=0.5),
             # Coat (top)
-            Rectangle(height=4*CLOTHING_COAT_PROB, width=1)
+            Rectangle(height=4*OVEN_PROB, width=1)
             .set_fill(color=YELLOW_B, opacity=0.5),
         ).arrange(UP, buff=0)
         
         clothing_group = VGroup(clothing_rect, clothing_parts)
         
         # Clothing labels
-        clothing_title = Text("clothing", font_size=24)
+        clothing_title = Text("utensil", font_size=24)
         clothing_title.next_to(clothing_group, UP, buff=0.3)
         
         clothing_labels = VGroup(
-            Text(f"coat\n{int(CLOTHING_COAT_PROB*100)}%", font_size=20),
-            Text(f"t-shirt\n{int(CLOTHING_TSHIRT_PROB*100)}%", font_size=20)
+            Text(f"oven\n{int(OVEN_PROB*100)}%", font_size=20),
+            Text(f"pan\n{int(PAN_PROB*100)}%", font_size=20)
         )
         clothing_labels[0].next_to(clothing_parts[1], RIGHT, buff=0.3)
         clothing_labels[1].next_to(clothing_parts[0], RIGHT, buff=0.3)
@@ -192,14 +202,14 @@ class IndependentProbabilityDistributions(Scene):
         
         # 4. Create final square labels
         bottom_labels = VGroup(
-            Text("t-shirt", font_size=20),
-            Text("coat", font_size=20)
+            Text("pan", font_size=20),
+            Text("oven", font_size=20)
         ).arrange(RIGHT, buff=1.5)
         bottom_labels.next_to(clothing_group, DOWN, buff=0.3)
         
         percentages = VGroup(
-            Text(f"{int(CLOTHING_TSHIRT_PROB*100)}%", font_size=16),
-            Text(f"{int(CLOTHING_COAT_PROB*100)}%", font_size=16)
+            Text(f"{int(PAN_PROB*100)}%", font_size=16),
+            Text(f"{int(OVEN_PROB*100)}%", font_size=16)
         )
         percentages[0].next_to(bottom_labels[0], DOWN, buff=0.1)
         percentages[1].next_to(bottom_labels[1], DOWN, buff=0.1)
@@ -299,10 +309,8 @@ Add multiplication equation for forming each box and explain it in greater detai
 class ConditionalProbabilityDistributions(Scene):
     def construct(self):
         # Constants for probabilities
-        WEATHER_RAIN_PROB = 0.25
-        WEATHER_SUNNY_PROB = 0.75
-        CLOTHING_TSHIRT_PROB = 0.75  # Changed to match image
-        CLOTHING_COAT_PROB = 0.25    # Changed to match image
+        THIN_CRUST_PROB = 0.25
+        THICK_CRUST_PROB = 0.75
         
         # Initial distribution (left side)
         weather_height = 4
@@ -313,10 +321,10 @@ class ConditionalProbabilityDistributions(Scene):
             # Main container
             Rectangle(height=weather_height, width=weather_width, stroke_width=2),
             # Sunny part (bottom)
-            Rectangle(height=weather_height*WEATHER_SUNNY_PROB, width=weather_width)
+            Rectangle(height=weather_height*THICK_CRUST_PROB, width=weather_width)
             .set_fill(color="#D4D0AB", opacity=1),
             # Raining part (top)
-            Rectangle(height=weather_height*WEATHER_RAIN_PROB, width=weather_width)
+            Rectangle(height=weather_height*THIN_CRUST_PROB, width=weather_width)
             .set_fill(color="#4FB3BF", opacity=1),
         )
         
@@ -326,8 +334,8 @@ class ConditionalProbabilityDistributions(Scene):
         
         # Weather labels
         weather_labels = VGroup(
-            Text("raining\n25%", font_size=20, color=WHITE),
-            Text("sunny\n75%", font_size=20, color=WHITE)
+            Text("thin\n25%", font_size=20, color=WHITE),
+            Text("thick\n75%", font_size=20, color=WHITE)
         )
         weather_labels[0].next_to(weather_group[2], LEFT, buff=0.3)
         weather_labels[1].next_to(weather_group[1], LEFT, buff=0.3)
@@ -378,8 +386,8 @@ class ConditionalProbabilityDistributions(Scene):
 
         # Bottom labels for t-shirt and coat
         bottom_labels = VGroup(
-            Text("t-shirt", font_size=24, color=WHITE),
-            Text("coat", font_size=24, color=WHITE),
+            Text("pan", font_size=24, color=WHITE),
+            Text("oven", font_size=24, color=WHITE),
             Text("75%", font_size=20, color=WHITE),
             Text("25%", font_size=20, color=WHITE),
         )
@@ -493,10 +501,10 @@ class ConditionalProbabilityDistributions(Scene):
 
         # Side labels for rain/sunny percentages
         side_labels = VGroup(
-            Text("raining\n8%", font_size=24, color=WHITE).next_to(main_square, LEFT, buff=0.5),
-            Text("sunny\n92%", font_size=24, color=WHITE).next_to(main_square, LEFT, buff=0.5).shift(DOWN*2),
-            Text("raining\n50%", font_size=24, color=WHITE).next_to(main_square, RIGHT, buff=0.5),
-            Text("sunny\n50%", font_size=24, color=WHITE).next_to(main_square, RIGHT, buff=0.5).shift(DOWN*2)
+            Text("thin\n8%", font_size=24, color=WHITE).next_to(main_square, LEFT, buff=0.5),
+            Text("thick\n92%", font_size=24, color=WHITE).next_to(main_square, LEFT, buff=0.5).shift(DOWN*2),
+            Text("thin\n50%", font_size=24, color=WHITE).next_to(main_square, RIGHT, buff=0.5),
+            Text("thick\n50%", font_size=24, color=WHITE).next_to(main_square, RIGHT, buff=0.5).shift(DOWN*2)
         )
 
         # Animation sequence for new visualization
@@ -522,16 +530,6 @@ class ConditionalProbabilityDistributions(Scene):
         self.play(Write(side_labels))
         self.wait(2)
 
-"""
-Now I love to cook, and I have a few favorite recipes that I like to make.
-Them being 
-
-Pizza, Pasta, Salad, & Soup
-
-And my sister loves to eat them all. But she would still like to know what I have cooked. 
-But she loves to play games, so she tells me I can only tell the food I have cooked in binary code. 
-
-"""
 class KLDIntroTalk(Scene):
     def construct(self):
         pass
@@ -552,10 +550,10 @@ class SimpleEncoding(Scene):
         # Create the mapping diagram
         # Left side - symbols with food items
         symbols = VGroup(
-            Text("Pizza", font_size=36),
-            Text("Pasta", font_size=36), 
-            Text("Salad", font_size=36),
-            Text("Soup", font_size=36)
+            Text("Flour", font_size=36),
+            Text("Cheese", font_size=36), 
+            Text("Tomato", font_size=36),
+            Text("Oil", font_size=36)
         ).arrange(DOWN, buff=0.5).set_color(SYMBOL_COLOR)
         
         symbols_box = RoundedRectangle(
@@ -599,7 +597,7 @@ class SimpleEncoding(Scene):
         # Create texts first
         encoded_string = Text("0 0 0 1 0 0 1 1", color=CODE_COLOR)
         codewords_text = Text("00 01 00 11", color=CODE_COLOR)
-        source_text = Text("Pizza Pasta Pizza Soup", color=SYMBOL_COLOR)
+        source_text = Text("Flour Cheese Tomato Oil", color=SYMBOL_COLOR)
         
         # Create boxes
         encoded_box = RoundedRectangle(
@@ -709,10 +707,10 @@ class VariableLengthEncoding(Scene):
         
         # Create food word labels
         food_labels = VGroup(
-            Text('"Pizza"', font_size=30),
-            Text('"Pasta"', font_size=30),
-            Text('"Salad"', font_size=30),
-            Text('"Soup"', font_size=30)
+            Text('"Flour"', font_size=30),
+            Text('"Cheese"', font_size=30),
+            Text('"Tomato"', font_size=30),
+            Text('"Oil"', font_size=30)
         )
         
         # Create rectangles (bars)
@@ -857,10 +855,10 @@ class VariableLengthEncoding(Scene):
         
         # Create symbol texts
         symbols = VGroup(
-            Text('"dog"', font_size=30),
-            Text('"cat"', font_size=30),
-            Text('"fish"', font_size=30),
-            Text('"bird"', font_size=30)
+            Text('"Flour"', font_size=30),
+            Text('"Cheese"', font_size=30),
+            Text('"Tomato"', font_size=30),
+            Text('"Oil"', font_size=30)
         ).arrange(DOWN, buff=0.2).move_to(symbols_rect)
         
         # Create codewords
@@ -1164,7 +1162,7 @@ class CodeWords(Scene):
 
         encoded_string = Text("0 0 0 1 0 0 1 1", font_size=30)
         codewords_text = Text("0  10  0  111", font_size=30)
-        source_text = Text("Pizza Pasta Pizza Soup", font_size=30)
+        source_text = Text("Flour Cheese Tomato Oil", font_size=30)
         
         # Create rounded rectangles
         def create_rounded_rect(text, color):
