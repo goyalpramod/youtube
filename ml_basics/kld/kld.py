@@ -63,25 +63,6 @@ class TextCrossEntropy(Scene):
         
 
 
-"""
-Replace the examples with pizza and cooking utensil 
-
-Pizza Style & Cooking Method
-
-Style: {Thin crust (60%), Thick crust (40%)}
-Method: {Oven (55%), Pan (45%)}
-These are dependent because thin crust pizzas are more commonly cooked on stones for crispiness.
-"""
-
-"""
-Weather -> crust 
-Clothing -> Utensil
-Sunny -> Thick 
-Rain -> Thin
-Tshirt -> Pan
-coat -> oven
-"""
-
 class IndependentProbabilityDistributions(Scene):
     def construct(self):
         # Constants for probabilities
@@ -104,12 +85,12 @@ class IndependentProbabilityDistributions(Scene):
         weather_group = VGroup(weather_rect, weather_parts)
         
         # Weather labels
-        weather_title = Text("crust", font_size=24)
+        weather_title = Text("Crust", font_size=24)
         weather_title.next_to(weather_group, UP, buff=0.3)
         
         weather_labels = VGroup(
-            Text(f"thin\n{int(THIN_CRUST_PROB*100)}%", font_size=20),
-            Text(f"thick\n{int(THICK_CRUST_PROB*100)}%", font_size=20)
+            Text(f"Thin\n{int(THIN_CRUST_PROB*100)}%", font_size=20),
+            Text(f"Thick\n{int(THICK_CRUST_PROB*100)}%", font_size=20)
         )
         weather_labels[0].next_to(weather_parts[1], LEFT, buff=0.3)
         weather_labels[1].next_to(weather_parts[0], LEFT, buff=0.3)
@@ -131,12 +112,12 @@ class IndependentProbabilityDistributions(Scene):
         clothing_group = VGroup(clothing_rect, clothing_parts)
         
         # Clothing labels
-        clothing_title = Text("utensil", font_size=24)
+        clothing_title = Text("Utensil", font_size=24)
         clothing_title.next_to(clothing_group, UP, buff=0.3)
         
         clothing_labels = VGroup(
-            Text(f"oven\n{int(OVEN_PROB*100)}%", font_size=20),
-            Text(f"pan\n{int(PAN_PROB*100)}%", font_size=20)
+            Text(f"Oven\n{int(OVEN_PROB*100)}%", font_size=20),
+            Text(f"Pan\n{int(PAN_PROB*100)}%", font_size=20)
         )
         clothing_labels[0].next_to(clothing_parts[1], RIGHT, buff=0.3)
         clothing_labels[1].next_to(clothing_parts[0], RIGHT, buff=0.3)
@@ -223,8 +204,8 @@ class IndependentProbabilityDistributions(Scene):
         
         # 4. Create final square labels
         bottom_labels = VGroup(
-            Text("pan", font_size=20),
-            Text("oven", font_size=20)
+            Text("Pan", font_size=20),
+            Text("Oven", font_size=20)
         ).arrange(RIGHT, buff=1.5)
         bottom_labels.next_to(clothing_group, DOWN, buff=0.3)
         
@@ -407,17 +388,29 @@ class ConditionalProbabilityDistributions(Scene):
 
         # Bottom labels for t-shirt and coat
         bottom_labels = VGroup(
-            Text("pan", font_size=24, color=WHITE),
-            Text("oven", font_size=24, color=WHITE),
             Text("75%", font_size=20, color=WHITE),
             Text("25%", font_size=20, color=WHITE),
+            Text("pan", font_size=24, color=WHITE),
+            Text("oven", font_size=24, color=WHITE),
         )
         
         # Position bottom labels
-        bottom_labels[0].next_to(joint_square, DOWN, buff=0.3).shift(LEFT*1.5)
+        bottom_labels[0].next_to(joint_square, DOWN, buff=0.3).shift(LEFT*0.5)
         bottom_labels[1].next_to(joint_square, DOWN, buff=0.3).shift(RIGHT*1.5)
         bottom_labels[2].next_to(bottom_labels[0], DOWN, buff=0.1)
         bottom_labels[3].next_to(bottom_labels[1], DOWN, buff=0.1)
+
+        top_labels = VGroup(
+            Text("25%", font_size=20, color=WHITE),
+            Text("75%", font_size=20, color=WHITE),
+            Text("pan", font_size=24, color=WHITE),
+            Text("oven", font_size=24, color=WHITE),
+        )
+
+        top_labels[0].next_to(joint_square, UP, buff=0.3).shift(LEFT*1.5)
+        top_labels[1].next_to(joint_square, UP, buff=0.3).shift(RIGHT*0.5)
+        top_labels[2].next_to(top_labels[0], UP, buff=0.1)
+        top_labels[3].next_to(top_labels[1], UP, buff=0.1)
 
         # Formula
         formula = MathTex(
@@ -428,25 +421,83 @@ class ConditionalProbabilityDistributions(Scene):
 
         # Animation sequence
         self.play(
-            Create(weather_group),
-            Write(weather_labels)
+            Create(weather_group, run_time = 3),
+            Write(weather_labels, run_time = 3)
         )
         self.wait()
         
         self.play(
-            Create(joint_square),
-            Create(sections)
+            Create(joint_square, run_time = 3),
+            Create(sections, run_time = 3)
         )
         self.wait()
 
-        self.play(Write(percentage_labels))
-        self.wait()
 
         self.play(Write(bottom_labels))
         self.wait()
+        self.play(Write(top_labels))
+        self.wait()
 
-        self.play(Write(formula))
+        self.play(
+            weather_labels[0].animate.set_color(YELLOW),
+            top_labels[0].animate.set_color(YELLOW),
+            top_labels[2].animate.set_color(YELLOW),
+        )
         self.wait(2)
+        self.play(
+            weather_labels[0].animate.set_color(WHITE),
+            top_labels[0].animate.set_color(WHITE),
+            top_labels[2].animate.set_color(WHITE),
+        )
+
+        self.play(Write(percentage_labels[2]))
+        self.wait()
+
+        self.play(
+            weather_labels[0].animate.set_color(YELLOW),
+            top_labels[1].animate.set_color(YELLOW),
+            top_labels[3].animate.set_color(YELLOW),
+        )
+        self.wait(2)
+        self.play(
+            weather_labels[0].animate.set_color(WHITE),
+            top_labels[1].animate.set_color(WHITE),
+            top_labels[3].animate.set_color(WHITE),
+        )
+
+        self.play(Write(percentage_labels[3]))
+        self.wait()
+
+        self.play(
+            weather_labels[1].animate.set_color(YELLOW),
+            bottom_labels[0].animate.set_color(YELLOW),
+            bottom_labels[2].animate.set_color(YELLOW),
+        )
+        self.wait(2)
+        self.play(
+            weather_labels[1].animate.set_color(WHITE),
+            bottom_labels[0].animate.set_color(WHITE),
+            bottom_labels[2].animate.set_color(WHITE),
+        )
+
+        self.play(Write(percentage_labels[0]))
+        self.wait()
+        
+        self.play(
+            weather_labels[1].animate.set_color(YELLOW),
+            bottom_labels[1].animate.set_color(YELLOW),
+            bottom_labels[3].animate.set_color(YELLOW),
+        )
+        self.wait(2)
+        self.play(
+            weather_labels[1].animate.set_color(WHITE),
+            bottom_labels[1].animate.set_color(WHITE),
+            bottom_labels[3].animate.set_color(WHITE),
+        )
+
+        self.play(Write(percentage_labels[1]))
+        self.wait()
+
 
         # Fade out everything
         self.play(
@@ -475,13 +526,6 @@ class ConditionalProbabilityDistributions(Scene):
             Text("38%", font_size=24, color=WHITE).move_to(bottom_sections[1])
         )
 
-        # Upward arrow
-        arrow = Arrow(
-            bottom_bar.get_top(),
-            ORIGIN + DOWN*0.5,
-            buff=0.2,
-            color=WHITE
-        )
 
         # Square with new proportions
         square_size = 4
@@ -534,9 +578,6 @@ class ConditionalProbabilityDistributions(Scene):
             Create(bottom_sections),
             Write(bottom_labels)
         )
-        self.wait()
-
-        self.play(Create(arrow))
         self.wait()
 
         self.play(
