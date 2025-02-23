@@ -607,28 +607,28 @@ class ConditionalProbabilityDistributions(Scene):
         "p(thick,pan)", "=", "p(thick)", "\\cdot", "p(pan|thick)"
         ).scale(1.2)
 
-        eq1.next_to(title, DOWN, buff=1)
+        eq1.next_to(title, DOWN*3, buff=1)
 
         # Create the general equation
         eq2 = MathTex(
         "p(x,y)", "=", "p(x)", "\\cdot", "p(y|x)"
         ).scale(1.2)
 
-        eq2.next_to(title, DOWN, buff=1)
+        eq2.next_to(title, DOWN*3, buff=1)
 
         # Create underbraces and labels
-        joint_label = Tex("Joint probability").scale(0.8)
-        marginal_label = Tex("Marginal probability").scale(0.8)
-        conditional_label = Tex("Conditional probability").scale(0.8)
+        joint_label = Tex("Joint probability").scale(0.5)
+        marginal_label = Tex("Marginal probability").scale(0.5)
+        conditional_label = Tex("Conditional probability").scale(0.5)
 
         # Add underbraces for second equation
         joint_brace = Brace(eq2[0], DOWN)
-        marginal_brace = Brace(eq2[2], DOWN)
+        marginal_brace = Brace(eq2[2], UP)
         conditional_brace = Brace(eq2[4], DOWN)
 
         # Position labels under braces
         joint_label.next_to(joint_brace, DOWN)
-        marginal_label.next_to(marginal_brace, DOWN)
+        marginal_label.next_to(marginal_brace, UP)
         conditional_label.next_to(conditional_brace, DOWN)
 
         # Animation sequence
@@ -659,6 +659,54 @@ class ConditionalProbabilityDistributions(Scene):
         Write(conditional_label)
         )
         self.wait(2)
+
+        # Save the conditional part
+        conditional_group = VGroup(eq2[4])
+
+        # Fade out everything except conditional
+        self.play(
+            FadeOut(title),
+            FadeOut(eq2[0:4]),  # Fade out everything except conditional part
+            FadeOut(joint_brace),
+            FadeOut(marginal_brace),
+            FadeOut(joint_label),
+            FadeOut(marginal_label),
+            FadeOut(conditional_brace),
+            FadeOut(conditional_label),
+        )
+        self.wait()
+
+        # Move conditional to center
+        self.play(
+        conditional_group.animate.move_to(ORIGIN + UP*2)
+        )
+        self.wait()
+
+        # Create Bayes equation
+        bayes_eq = MathTex(
+        "p(y|x)", "=", "\\frac{p(x|y)p(y)}{p(x)}"
+        ).scale(1.2)
+
+        bayes_eq.next_to(conditional_group, DOWN*1.5, buff=1)
+
+        # Create label
+        bayes_label = Text("Bayes' Rule", font_size=36)
+        bayes_label.next_to(bayes_eq, UP, buff=0.5)
+
+        # Show Bayes equation and label
+        self.play(
+        Write(bayes_label),
+        Write(bayes_eq)
+        )
+        self.wait(2)
+
+        # Fade everything out
+        self.play(
+        *[FadeOut(mob) for mob in self.mobjects]
+        )
+        self.wait()
+
+
 
 
 class SimpleEncoding(Scene):
