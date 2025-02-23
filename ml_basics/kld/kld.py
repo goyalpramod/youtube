@@ -36,11 +36,32 @@ class WobbleTransform(Animation):
                 # Apply distortion
                 points[i] = [x + dx, y + dy, z]
 
-class TextKLD(Scene):
+class TextCrossEntropy(Scene):
     def construct(self):
-        text = Text("Kullback Leibler Divergence", font_size=72)
+        text = Text("Cross Entropy", font_size=72)
         self.play(Write(text), run_time=3)
         self.play(FadeOut(text))
+        equation = MathTex(r"H(p, q) = -\sum_{x} p(x) \log q(x)", font_size=48)
+        self.play(Write(equation))
+        self.wait(5)
+        self.play(FadeOut(equation))
+        text_1 = Text("Understanding the math")
+        text_2 = Text("Understanding Entropy")
+        text_3 = Text("Understanding Cross Entropy")
+        self.play(Write(text_1))
+        self.wait(2)
+        self.play(text_1.animate.shift(UP*3))
+        self.play(FadeOut(text_1))
+        text_2.move_to(UP*3)
+        text_3.move_to(UP*3)
+        self.play(FadeIn(text_2))
+        self.wait(2)
+        self.play(FadeOut(text_2))
+        self.play(FadeIn(text_3))
+        self.wait(2)
+        self.play(FadeOut(text_3))
+        
+
 
 """
 Replace the examples with pizza and cooking utensil 
