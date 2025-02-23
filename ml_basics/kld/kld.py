@@ -592,6 +592,74 @@ class ConditionalProbabilityDistributions(Scene):
         self.play(Write(percentage_labels))
         self.wait()
 
+        self.play(
+            *[FadeOut(mob) for mob in self.mobjects]
+        )
+        self.wait()
+
+        # Add this after your last self.wait():
+
+        # Title
+        title = Text("Joint Probability", font_size=40).to_edge(UP)
+
+        # Create the first equation with specific terms
+        eq1 = MathTex(
+        "p(thick,pan)", "=", "p(thick)", "\\cdot", "p(pan|thick)"
+        ).scale(1.2)
+
+        eq1.next_to(title, DOWN, buff=1)
+
+        # Create the general equation
+        eq2 = MathTex(
+        "p(x,y)", "=", "p(x)", "\\cdot", "p(y|x)"
+        ).scale(1.2)
+
+        eq2.next_to(title, DOWN, buff=1)
+
+        # Create underbraces and labels
+        joint_label = Tex("Joint probability").scale(0.8)
+        marginal_label = Tex("Marginal probability").scale(0.8)
+        conditional_label = Tex("Conditional probability").scale(0.8)
+
+        # Add underbraces for second equation
+        joint_brace = Brace(eq2[0], DOWN)
+        marginal_brace = Brace(eq2[2], DOWN)
+        conditional_brace = Brace(eq2[4], DOWN)
+
+        # Position labels under braces
+        joint_label.next_to(joint_brace, DOWN)
+        marginal_label.next_to(marginal_brace, DOWN)
+        conditional_label.next_to(conditional_brace, DOWN)
+
+        # Animation sequence
+        self.play(Write(title))
+        self.wait()
+
+        # Show first equation
+        self.play(Write(eq1))
+        self.wait(2)
+
+        # Transform to general equation
+        self.play(
+        ReplacementTransform(eq1, eq2)
+        )
+        self.wait()
+
+        # Add braces and labels
+        self.play(
+        Create(joint_brace),
+        Create(marginal_brace),
+        Create(conditional_brace)
+        )
+        self.wait()
+
+        self.play(
+        Write(joint_label),
+        Write(marginal_label),
+        Write(conditional_label)
+        )
+        self.wait(2)
+
 
 class SimpleEncoding(Scene):
    def construct(self):
