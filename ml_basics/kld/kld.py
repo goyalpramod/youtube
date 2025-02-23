@@ -707,8 +707,6 @@ class ConditionalProbabilityDistributions(Scene):
         self.wait()
 
 
-
-
 class SimpleEncoding(Scene):
    def construct(self):
         # Constants for consistent styling
@@ -879,10 +877,10 @@ class VariableLengthEncoding(Scene):
         
         # Create food word labels
         food_labels = VGroup(
-            Text('"Flour"', font_size=30),
-            Text('"Cheese"', font_size=30),
-            Text('"Tomato"', font_size=30),
-            Text('"Oil"', font_size=30)
+            Text("Flour", font_size=30),
+            Text("Cheese", font_size=30),
+            Text("Tomato", font_size=30),
+            Text("Oil", font_size=30)
         )
         
         # Create rectangles (bars)
@@ -1027,10 +1025,10 @@ class VariableLengthEncoding(Scene):
         
         # Create symbol texts
         symbols = VGroup(
-            Text('"Flour"', font_size=30),
-            Text('"Cheese"', font_size=30),
-            Text('"Tomato"', font_size=30),
-            Text('"Oil"', font_size=30)
+            Text("Flour", font_size=30),
+            Text("Cheese", font_size=30),
+            Text("Tomato", font_size=30),
+            Text("Oil", font_size=30)
         ).arrange(DOWN, buff=0.2).move_to(symbols_rect)
         
         # Create codewords
