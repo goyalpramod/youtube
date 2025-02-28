@@ -305,7 +305,7 @@ class IndependentProbabilityDistributions(Scene):
         )
 
 """
-Add multiplication equation for forming each box and explain it in greater detail
+Change color for the second box
 """
 
 class ConditionalProbabilityDistributions(Scene):
@@ -706,9 +706,12 @@ class ConditionalProbabilityDistributions(Scene):
         )
         self.wait()
 
+"""
+Fix things
+"""
 
 class SimpleEncoding(Scene):
-   def construct(self):
+    def construct(self):
         # Constants for consistent styling
         SYMBOL_COLOR = "#C19EE0"  # Light purple
         CODE_COLOR = "#98FB98"    # Light green
@@ -767,7 +770,7 @@ class SimpleEncoding(Scene):
         # Create texts first
         encoded_string = Text("0 0 0 1 0 0 1 1", color=CODE_COLOR)
         codewords_text = Text("00 01 00 11", color=CODE_COLOR)
-        source_text = Text("Flour Cheese Tomato Oil", color=SYMBOL_COLOR)
+        source_text = Text("Flour Cheese Flour Oil", color=SYMBOL_COLOR)
         
         # Create boxes
         encoded_box = RoundedRectangle(
@@ -776,7 +779,7 @@ class SimpleEncoding(Scene):
             corner_radius=0.2,
             color=CODE_COLOR
         )
-        codewords_box = RoundedRectangle(
+        codewords_box_bottom = RoundedRectangle(
             height=codewords_text.height + 0.5,
             width=codewords_text.width + 1,
             corner_radius=0.2,
@@ -789,35 +792,32 @@ class SimpleEncoding(Scene):
             color=SYMBOL_COLOR
         )
         
-        # Create labels
-        encoded_label = Text("encoded string", color=WHITE)
-        codewords_label = Text("codewords", color=WHITE)
-        source_label = Text("source symbols", color=WHITE)
-        
-        # Create groups and align them
-        encoded_group = VGroup(encoded_box, encoded_string)
-        codewords_group = VGroup(codewords_box, codewords_text)
-        source_group = VGroup(source_box, source_text)
-        
         # Move texts to their boxes
         encoded_string.move_to(encoded_box)
-        codewords_text.move_to(codewords_box)
+        codewords_text.move_to(codewords_box_bottom)
         source_text.move_to(source_box)
         
-        # Arrange boxes vertically
-        boxes_group = VGroup(encoded_group, codewords_group, source_group).arrange(DOWN, buff=0.5)
+        # Create groups
+        encoded_group = VGroup(encoded_box, encoded_string)
+        codewords_group_bottom = VGroup(codewords_box_bottom, codewords_text)
+        source_group = VGroup(source_box, source_text)
         
-        # Align labels to the right of their respective boxes
-        encoded_label.next_to(encoded_box, RIGHT, buff=0.5)
-        codewords_label.next_to(codewords_box, RIGHT, buff=0.5)
-        source_label.next_to(source_box, RIGHT, buff=0.5)
+        # Position the bottom elements
+        encoded_group.move_to(ORIGIN).to_edge(DOWN, buff=2)
+        codewords_group_bottom.next_to(encoded_group, UP, buff=0.75)
+        source_group.next_to(codewords_group_bottom, UP, buff=0.75)
+        
+        # Create labels for bottom elements
+        encoded_label = Text("encoded string", font_size=30, color=WHITE).next_to(encoded_group, RIGHT, buff=0.5)
+        codewords_label_bottom = Text("codewords", font_size=30, color=WHITE).next_to(codewords_group_bottom, RIGHT, buff=0.5)
+        source_label = Text("source symbols", font_size=30, color=WHITE).next_to(source_group, RIGHT, buff=0.5)
         
         # Create final groups for animation
         bottom_group = VGroup(
             VGroup(encoded_group, encoded_label),
-            VGroup(codewords_group, codewords_label),
+            VGroup(codewords_group_bottom, codewords_label_bottom),
             VGroup(source_group, source_label)
-        ).move_to(ORIGIN)
+        )
         
         # Animation sequence
         self.play(FadeIn(binary_string))
@@ -1097,46 +1097,53 @@ class VariableLengthEncoding(Scene):
         bars.arrange(DOWN, buff=0)
         bars.next_to(title_group, DOWN, buff=1)
         
-        # Create vertical lines
+        # Calculate the exact coordinates for the lines
+        bar_top = bars.get_top()
+        bar_bottom = bars.get_bottom()
+        bar_left = bars.get_left()
+        bar_right = bars.get_right()
+        
+        # Create vertical lines that stay within the boxes
         v_lines = VGroup()
         line_positions = [BAR_WIDTH/3, 2*BAR_WIDTH/3]  # Positions for solid lines
         
         for x_pos in line_positions:
             line = Line(
-                start=bars.get_top() + UP * 0.1,
-                end=bars.get_bottom() + DOWN * 0.1,
+                start=bar_top,
+                end=bar_bottom,
                 stroke_width=2
             ).set_opacity(0.5)
-            line.move_to(bars.get_left() + RIGHT * x_pos)
+            line.move_to(bar_left + RIGHT * x_pos)
             v_lines.add(line)
         
-        # Add dotted line
+        # Add dotted line at the right edge
         dotted_line = DashedLine(
-            start=bars.get_top() + UP * 0.1,
-            end=bars.get_bottom() + DOWN * 0.1,
+            start=bar_top,
+            end=bar_bottom,
             stroke_width=2,
             dash_length=0.1
         ).set_opacity(0.5)
-        dotted_line.move_to(bars.get_right())
+        dotted_line.move_to(bar_right)
         
-        # Binary numbers positioning
-        binary_values = [
-            ["0"],
-            ["1", "0"],
-            ["1", "1", "0"],
-            ["1", "1", "1"]
+        # Binary numbers positioning - only put numbers where shown in the image
+        binary_positions = [
+            [(0, 0)],  # First bar has 0 in first cell
+            [(0, 1), (1, 1)],  # Second bar has 1 in first cell, 0 in second
+            [(0, 2), (1, 2), (2, 2)],  # Third bar has 1 in first and second cells, 0 in third
+            [(0, 3), (1, 3), (2, 3)]  # Fourth bar has 1 in all three cells
         ]
         
         binary_numbers = VGroup()
         
-        for bar, values in zip(bars, binary_values):
+        for bar_idx, positions in enumerate(binary_positions):
             section_width = BAR_WIDTH / 3  # Width of each section
             
-            for i, value in enumerate(values):
-                number = Text(value, font_size=36, color=WHITE)
+            for cell_idx, value in positions:
+                number = Text("0" if value == 0 else "1", font_size=36, color=WHITE)
                 # Position in the center of each section
-                x_pos = bar.get_left() + RIGHT * (i * section_width + section_width/2)
-                number.move_to(x_pos)
+                x_pos = bar_left + RIGHT * (cell_idx * section_width + section_width/2)
+                y_pos = bars[bar_idx].get_center()[1]  # Get y-coordinate of the bar center
+                number.move_to([x_pos[0], y_pos, 0])
                 binary_numbers.add(number)
         
         # Add labels at bottom
@@ -1148,9 +1155,8 @@ class VariableLengthEncoding(Scene):
         
         # Position bottom labels
         for i, label in enumerate(bottom_labels):
-            label.next_to(v_lines[0] if i == 0 else v_lines[1] if i == 1 else dotted_line, 
-                        DOWN, buff=0.3)
-            label.shift(LEFT * label.width/2 if i == 0 else RIGHT * label.width/2 if i == 2 else 0)
+            x_pos = bar_left[0] + (i + 0.5) * BAR_WIDTH/3
+            label.move_to([x_pos, bar_bottom[1] - 0.5, 0])
         
         # Add probability labels on left
         prob_labels = VGroup(
@@ -1195,7 +1201,7 @@ class VariableLengthEncoding(Scene):
         entropy_title_2 = Text("= Optimal Average Length", font_size=36)
         entropy_equals = Text("= Area = 1.75 bits", font_size=36)
 
-        entropy_group = VGroup(entropy_title,entropy_title_2, entropy_equals)
+        entropy_group = VGroup(entropy_title, entropy_title_2, entropy_equals)
         entropy_group.arrange(DOWN, aligned_edge=LEFT, buff=0.2)
         entropy_group.next_to(bars, RIGHT + LEFT*0.2, buff=1)
 
@@ -1215,9 +1221,13 @@ class VariableLengthEncoding(Scene):
         self.wait(2)
 
         self.play(
-            FadeOut(entropy_group, bars, v_lines, dotted_line, binary_numbers),
+            FadeOut(VGroup(entropy_group, bars, v_lines, dotted_line, binary_numbers)),
         )
         self.wait(2)
+
+"""
+The boxes are messed up fix that, also the encoding sizes are different 
+"""
 
 class CodeWords(Scene):
     def construct(self):
