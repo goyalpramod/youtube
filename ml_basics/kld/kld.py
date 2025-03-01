@@ -910,7 +910,10 @@ class VariableLengthEncoding(Scene):
         for i in range(len(bars)):
             self.play(
                 Create(bars[i]),
-                Write(food_labels[i])
+            )
+            self.wait(0.2)
+            self.play(
+                Write(food_labels[i]),
             )
             self.wait(0.5)
             
@@ -928,11 +931,11 @@ class VariableLengthEncoding(Scene):
         
         # Create the vertical dividing line
         vertical_line = Line(
-            bars.get_top() + UP * 0.1,
-            bars.get_bottom() + DOWN * 0.1,
+            start=bars.get_top(),  # Start exactly at the top of bars
+            end=bars.get_bottom(),  # End exactly at the bottom of bars
             stroke_width=2
         ).set_opacity(0.5)
-        vertical_line.move_to(bars.get_center())
+        vertical_line.move_to(bars.get_center())  # Center horizontally
         
         # Binary numbers
         binary_numbers = VGroup()
@@ -950,7 +953,7 @@ class VariableLengthEncoding(Scene):
         
         # Create L(x) label at bottom
         l_x_label = MathTex("L(x)", font_size=36)
-        l_x_label.next_to(bars, DOWN, buff=0.5)
+        l_x_label.next_to(bars, DOWN*2, buff=0.5)
         
         # Create bit labels
         bit1_label = Text("1 bit", font_size=24)
@@ -985,18 +988,18 @@ class VariableLengthEncoding(Scene):
         self.wait(2)
 
         symbols_rect = RoundedRectangle(
-            height=2, width=1.5,
+            height=3, width=2,
             corner_radius=0.2,
             fill_color="#E6E6FA",
-            fill_opacity=1,
+            fill_opacity=0.4,
             stroke_color=WHITE
         )
         
         codewords_rect = RoundedRectangle(
-            height=2, width=1.5,
+            height=3, width=2,
             corner_radius=0.2,
             fill_color="#90EE90",
-            fill_opacity=1,
+            fill_opacity=0.4,
             stroke_color=WHITE
         )
         
