@@ -1223,9 +1223,6 @@ class VariableLengthEncoding(Scene):
         )
         self.wait(2)
 
-"""
-The boxes are messed up fix that, also the encoding sizes are different 
-"""
 
 class CodeWords(Scene):
     def construct(self):
@@ -1312,24 +1309,15 @@ class CodeWords(Scene):
                 label.next_to(second_col, DOWN)
             else:
                 label.next_to(third_col, DOWN)
-        
-        # Add dotted line on the right
-        dotted_line = DashedLine(
-            grid.get_top(),
-            grid.get_bottom(),
-            stroke_width=2,
-            dash_length=0.1
-        ).next_to(grid, RIGHT, buff=0.5)
-        
+
         # Center everything on the screen
-        entire_scene = VGroup(grid, labels, dotted_line)
+        entire_scene = VGroup(grid, labels)
         entire_scene.move_to(ORIGIN)
         
         # Animations
         self.play(Create(grid))
         self.play(Write(bit_values))
         self.play(Write(labels))
-        self.play(Create(dotted_line))
         
         self.wait(2)
 
@@ -1443,7 +1431,6 @@ class CodeWords(Scene):
         
         # Third column (8 cells)
         third_col = VGroup()
-        third_col_fills = VGroup()  # New group for the fills
         for i in range(8):
             cell = Rectangle(
                 width=cell_widths[2],
@@ -1455,32 +1442,66 @@ class CodeWords(Scene):
                 cell.next_to(third_col[-1], DOWN, buff=0)
             third_col.add(cell)
             
-            # Create separate fill rectangles with exact positioning
-            if i < 2:
-                fill = Rectangle(
-                    width=cell_widths[2],
-                    height=cell_height,
-                    stroke_opacity=0,
-                    fill_color=GREY,
-                    fill_opacity=0.3
-                )
-                # Align fill exactly with cell
-                fill.move_to(cell.get_center())
-                third_col_fills.add(fill)
-            
             value = Text(str(i % 2), font_size=24)
             value.move_to(cell.get_center() + RIGHT*2.25 + UP*0.75)
             shaded_values.add(value)
             
         third_col.next_to(second_col, RIGHT, buff=0)
         shaded_grid.add(third_col)
-        
-        # Ensure fills stay aligned after moving the third column
-        third_col_fills.next_to(second_col, ORIGIN + LEFT*1.5 + UP*0.1, buff=0.1)
-        
+
+        # entire_scene = VGroup(shaded_grid, shaded_values)
+        shaded_grid.move_to(ORIGIN)
+        shaded_values.move_to(ORIGIN)
+
+
+        # For the first column (shade the second large cell)
+        first_col_fill = Rectangle(
+            width=cell_widths[0],
+            height=cell_height * 4,
+            fill_color=GREY,
+            fill_opacity=0.3,
+            stroke_opacity=0
+        )
+        first_col_fill.move_to(shaded_grid[0].get_center())
+
+        # For the second column (shade cells 0 and 2)
+        second_col_fills = VGroup()
+        for i in [1]:
+            fill = Rectangle(
+                width=cell_widths[1],
+                height=cell_height * 2,
+                fill_color=GREY,
+                fill_opacity=0.3,
+                stroke_opacity=0
+            )
+            fill.move_to(second_col[i].get_center())
+            second_col_fills.add(fill)
+
+        # For the third column (shade cells 2 and 3 with darker color)
+        third_col_fills = Rectangle(
+            width=cell_widths[2],
+            height=cell_height * 2,
+            fill_color=DARK_GREY,
+            fill_opacity=0.9,
+            stroke_opacity=0
+        )
+        # Position to cover cells 2 and 3
+        # third_col_fills.move_to(third_col[2].get_center() + DOWN * cell_height/2)
+
+        # Group all fills for animation
+        all_fills = VGroup(first_col_fill, second_col_fills, third_col_fills)
+
         # Add fraction on the right
+        side_values = VGroup()
+        for i in range(8):
+            side_value = Text(str(i % 2), font_size=24)
+            side_value.next_to(third_col[i], RIGHT, buff=0.5)
+            side_values.add(side_value)
+
+        # Add fraction
         fraction = MathTex("\\frac{1}{2^L} = \\frac{1}{4}", font_size=36)
-        fraction.next_to(shaded_grid, RIGHT, buff=1)
+        third_col_fills.move_to(third_col.get_center() + UP*0.5)
+        fraction.next_to(third_col_fills, RIGHT, buff=0.5)
         
         # Add labels
         labels = VGroup(
@@ -1497,25 +1518,15 @@ class CodeWords(Scene):
             else:
                 label.next_to(third_col, DOWN)
         
-        # Add dotted line
-        dotted_line = DashedLine(
-            shaded_grid.get_top(),
-            shaded_grid.get_bottom(),
-            stroke_width=2,
-            dash_length=0.1
-        ).next_to(shaded_grid, RIGHT, buff=0.5)
-        
-        # Group everything
-        final_scene = VGroup(shaded_grid, shaded_values, labels, dotted_line, fraction)
-        final_scene.move_to(ORIGIN)
         
         # Animate
         self.play(FadeIn(shaded_grid))
         self.play(Write(shaded_values))
         self.play(Write(labels))
+        self.play(FadeIn(first_col_fill), FadeIn(second_col_fills))
+        self.wait(3)
         self.play(FadeIn(third_col_fills))  # Add fills after labels
         self.play(
-            Create(dotted_line),
             Write(fraction)
         )
         
