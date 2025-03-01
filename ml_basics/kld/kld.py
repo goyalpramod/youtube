@@ -302,10 +302,6 @@ class IndependentProbabilityDistributions(Scene):
             FadeOut(weather_title),
         )
 
-"""
-Change color for the second box
-"""
-
 class ConditionalProbabilityDistributions(Scene):
     def construct(self):
         # Constants for probabilities
@@ -703,10 +699,6 @@ class ConditionalProbabilityDistributions(Scene):
         )
         self.wait()
 
-"""
-Fix things
-"""
-
 class SimpleEncoding(Scene):
     def construct(self):
         # Constants for consistent styling
@@ -715,7 +707,7 @@ class SimpleEncoding(Scene):
         
         # Create the binary string at top
         binary_string = Text("1 0 0 1 1 0...", color=CODE_COLOR)
-        binary_string.to_edge(UP, buff=1)
+        binary_string.move_to(ORIGIN)
         
         # Create the mapping diagram
         # Left side - symbols with food items
@@ -765,9 +757,9 @@ class SimpleEncoding(Scene):
         
         # Bottom part - example encoding
         # Create texts first
-        encoded_string = Text("0 0 0 1 0 0 1 1", color=CODE_COLOR)
-        codewords_text = Text("00 01 00 11", color=CODE_COLOR)
-        source_text = Text("Flour Cheese Flour Oil", color=SYMBOL_COLOR)
+        encoded_string = Text("0 0 0 1 0 0 1 1", font_size=40,  color=CODE_COLOR)
+        codewords_text = Text("00  01  00  11", font_size=42 , color=CODE_COLOR)
+        source_text = Text("Flour Cheese Flour Oil",font_size=24 ,color=SYMBOL_COLOR)
         
         # Create boxes
         encoded_box = RoundedRectangle(
@@ -800,9 +792,9 @@ class SimpleEncoding(Scene):
         source_group = VGroup(source_box, source_text)
         
         # Position the bottom elements
-        encoded_group.move_to(ORIGIN).to_edge(DOWN, buff=2)
-        codewords_group_bottom.next_to(encoded_group, UP, buff=0.75)
-        source_group.next_to(codewords_group_bottom, UP, buff=0.75)
+        encoded_group.move_to(ORIGIN).to_edge(UP, buff=2)
+        codewords_group_bottom.next_to(encoded_group, DOWN, buff=0.75)
+        source_group.next_to(codewords_group_bottom, DOWN, buff=0.75)
         
         # Create labels for bottom elements
         encoded_label = Text("encoded string", font_size=30, color=WHITE).next_to(encoded_group, RIGHT, buff=0.5)
