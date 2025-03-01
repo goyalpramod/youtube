@@ -879,7 +879,7 @@ class VariableLengthEncoding(Scene):
                 height=heights[i],
                 width=BAR_WIDTH,
                 fill_color=BAR_COLORS[i],
-                fill_opacity=1,
+                fill_opacity=0.8,
                 stroke_color=WHITE
             )
             bars.add(rect)
@@ -931,11 +931,11 @@ class VariableLengthEncoding(Scene):
         
         # Create the vertical dividing line
         vertical_line = Line(
-            start=bars.get_top(),  # Start exactly at the top of bars
-            end=bars.get_bottom(),  # End exactly at the bottom of bars
+            start=bars.get_top(),
+            end=bars.get_bottom(),
             stroke_width=2
         ).set_opacity(0.5)
-        vertical_line.move_to(bars.get_center())  # Center horizontally
+        vertical_line.move_to(bars.get_center())
         
         # Binary numbers
         binary_numbers = VGroup()
@@ -1118,25 +1118,26 @@ class VariableLengthEncoding(Scene):
         dotted_line.move_to(bar_right)
         
         # Binary numbers positioning - only put numbers where shown in the image
-        binary_positions = [
-            [(0, 0)],  # First bar has 0 in first cell
-            [(0, 1), (1, 1)],  # Second bar has 1 in first cell, 0 in second
-            [(0, 2), (1, 2), (2, 2)],  # Third bar has 1 in first and second cells, 0 in third
-            [(0, 3), (1, 3), (2, 3)]  # Fourth bar has 1 in all three cells
-        ]
-        
         binary_numbers = VGroup()
         
-        for bar_idx, positions in enumerate(binary_positions):
-            section_width = BAR_WIDTH / 3  # Width of each section
+        # Define which cells should have numbers (1-based indexing for cell and bar)
+        number_positions = [
+            (1, 1, "0"),           # First bar, first cell: "0"
+            (1, 2, "1"), (2, 2, "0"),  # Second bar: "1" in first cell, "0" in second cell
+            (1, 3, "1"), (2, 3, "1"), (3, 3, "0"),  # Third bar
+            (1, 4, "1"), (2, 4, "1"), (3, 4, "1")   # Fourth bar
+        ]
+
+        for cell, bar_idx, value in number_positions:
+            number = Text(value, font_size=36, color=WHITE)
+            section_width = BAR_WIDTH / 3
             
-            for cell_idx, value in positions:
-                number = Text("0" if value == 0 else "1", font_size=36, color=WHITE)
-                # Position in the center of each section
-                x_pos = bar_left + RIGHT * (cell_idx * section_width + section_width/2)
-                y_pos = bars[bar_idx].get_center()[1]  # Get y-coordinate of the bar center
-                number.move_to([x_pos[0], y_pos, 0])
-                binary_numbers.add(number)
+            # Calculate proper positioning
+            x_pos = bars[bar_idx-1].get_left() + RIGHT * ((cell-1) * section_width + section_width/2)
+            y_pos = bars[bar_idx-1].get_center()[1]
+            
+            number.move_to([x_pos[0], y_pos, 0])
+            binary_numbers.add(number)
         
         # Add labels at bottom
         bottom_labels = VGroup(
@@ -1188,26 +1189,31 @@ class VariableLengthEncoding(Scene):
         
         self.wait()
 
-        # Create entropy labels
-        entropy_title = Text("Entropy", font_size=36)
-        entropy_title_2 = Text("= Optimal Average Length", font_size=36)
-        entropy_equals = Text("= Area = 1.75 bits", font_size=36)
+        # Create entropy labels with better positioning and size
+        entropy_title = Text("Entropy", font_size=32)
+        entropy_title_2 = Text("= Optimal Average Length", font_size=30)
+        entropy_equals = Text("= Area", font_size=32)
+        entropy_equation = MathTex("= \sum_{i=1}^{n} p(x_i) \cdot L(x_i)", font_size=40)
+        entropy_equation_values = MathTex("= 1/2 \cdot 1 + 1/4 \cdot 2 + 1/8 \cdot 3 + 1/8 \cdot 3", font_size=28)
+        entropy_value = Text("= 1.75 bits", font_size=32)
 
-        entropy_group = VGroup(entropy_title, entropy_title_2, entropy_equals)
+        entropy_group = VGroup(entropy_title, entropy_title_2, entropy_equals, entropy_equation, entropy_equation_values ,entropy_value)
         entropy_group.arrange(DOWN, aligned_edge=LEFT, buff=0.2)
-        entropy_group.next_to(bars, RIGHT + LEFT*0.2, buff=1)
+
+        # Position it more carefully to avoid being cut off
+        entropy_group.next_to(bars, RIGHT*0.1, buff=0.1)
 
         self.play(
-            FadeOut(VGroup(prob_labels, bottom_labels, l_x_label, title_group)),
+            FadeOut(VGroup(l_x_label, title_group)),
         )
 
-        # Fix: Proper animation syntax for shifting the group
+        # Shift the bars less to the left to make more room for entropy text
         self.play(
-            VGroup(bars, v_lines, dotted_line, binary_numbers).animate.shift(LEFT*2)
+            VGroup(bars, prob_labels, bottom_labels, v_lines, dotted_line, binary_numbers).animate.shift(LEFT*2)
         )
 
         self.play(
-            Write(entropy_group)
+            Write(entropy_group, run_time=4)
         )
 
         self.wait(2)
