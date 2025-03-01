@@ -60,8 +60,6 @@ class TextCrossEntropy(Scene):
         self.play(FadeIn(text_3))
         self.wait(2)
         self.play(FadeOut(text_3))
-        
-
 
 class IndependentProbabilityDistributions(Scene):
     def construct(self):
@@ -510,11 +508,11 @@ class ConditionalProbabilityDistributions(Scene):
         bottom_bar = Rectangle(height=0.5, width=4, stroke_width=2)
         bottom_sections = VGroup(
             # Left section (62%)
-            Rectangle(height=0.5, width=4 * 0.62)
+            Rectangle(height=0.5, width=4 * 0.60)
             .set_fill(color="#D4D0AB", opacity=1),
             # Right section (38%)
-            Rectangle(height=0.5, width=4 * 0.38)
-            .set_fill(color="#D4D0AB", opacity=1),
+            Rectangle(height=0.5, width=4 * 0.40)
+            .set_fill(color="#4FB3BF", opacity=1),
         ).arrange(RIGHT, buff=0)
         
         bottom_group = VGroup(bottom_bar, bottom_sections)
@@ -538,10 +536,10 @@ class ConditionalProbabilityDistributions(Scene):
             .set_fill(color="#D4D0AB", opacity=1),
             # Bottom right (sunny, right) - 19%
             Rectangle(height=square_size * 0.50, width=square_size * 0.40)
-            .set_fill(color="#D4D0AB", opacity=1),
+            .set_fill(color="#4FB3BF", opacity=1),
             # Top left (rain, left) - 6%
             Rectangle(height=square_size * (1 - 0.80), width=square_size * 0.60)
-            .set_fill(color="#4FB3BF", opacity=1),
+            .set_fill(color="#D4D0AB", opacity=1),
             # Top right (rain, right) - 19%
             Rectangle(height=square_size * 0.50, width=square_size * 0.40)
             .set_fill(color="#4FB3BF", opacity=1),
@@ -597,7 +595,6 @@ class ConditionalProbabilityDistributions(Scene):
         )
         self.wait()
 
-        # Add this after your last self.wait():
 
         # Title
         title = Text("Joint Probability", font_size=40).to_edge(UP)
