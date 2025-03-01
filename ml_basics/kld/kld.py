@@ -1326,9 +1326,9 @@ class CodeWords(Scene):
             FadeOut(bit_values),
         )
 
-        encoded_string = Text("0 0 0 1 0 0 1 1", font_size=30)
-        codewords_text = Text("0  10  0  111", font_size=30)
-        source_text = Text("Flour Cheese Tomato Oil", font_size=30)
+        encoded_string = Text("0 0 0 1 0 0 1 1", font_size=38)
+        codewords_text = Text("0  10  0  111", font_size=50)
+        source_text = Text("Flour Cheese Tomato Oil", font_size=22)
         
         # Create rounded rectangles
         def create_rounded_rect(text, color):
