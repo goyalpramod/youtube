@@ -1549,9 +1549,13 @@ class OptimalEncoding(Scene):
                 "stroke_color": WHITE
             }
         )
+        axes.shift(UP * 0.5)
 
         # Labels
-        x_label = MathTex("L(x)", color=WHITE).next_to(axes.x_axis, RIGHT)
+        # Fix 1: Position L(x) label below x-axis with braces
+        x_label = MathTex("L(x)", color=WHITE)
+        brace = Brace(Line(axes.c2p(0, 0), axes.c2p(1, 0)), DOWN)
+        x_label.next_to(brace, DOWN)
         
         # Create left vertical line and 1 label
         left_line = Line(
@@ -1568,21 +1572,25 @@ class OptimalEncoding(Scene):
         # Width is L(x) = 1 unit, height is p(x) = 0.5 units
         rect = Rectangle(
             width=axes.x_length/8,  # 1 unit in x-axis
-            height=axes.y_length/4,  # 0.5 units in y-axis
+            height=axes.y_length/2.4,  # 0.5 units in y-axis
             fill_color="#9370DB",
             fill_opacity=1,
             stroke_color=WHITE
         )
         
         # Position rectangle to start at x=1
-        rect.move_to(axes.c2p(0.5, 0.15))  # Center at (1, 0.25)
+        rect.move_to(axes.c2p(0.5, 0.25))  # Center at (0.5, 0.25)
         
-        # Box text
-        box_text_p = MathTex("p(x)", color=WHITE).scale(0.7)
-        box_text_length = Text("Average\nLength\nContribution", color=WHITE, font_size=15)
-        box_group = VGroup(box_text_p, box_text_length).arrange(DOWN, buff=0.1)
-        box_group.move_to(rect)
-
+        # Fix 2: Box text with p(x) on left and L(x) below
+        box_text_p = MathTex("p(x)", color=WHITE).scale(0.8)
+        box_text_p.next_to(rect, LEFT)
+        
+        box_text_length = MathTex("L(x)", color=WHITE).scale(0.8)
+        box_text_length.next_to(rect, DOWN)
+        
+        box_text = Text("Average\nLength\nContribution", color=WHITE, font_size=16)
+        box_text.move_to(rect)
+        
         # Get areas under different parts of the curve
         first_area = axes.get_area(
             graph=cost_curve,
@@ -1599,15 +1607,17 @@ class OptimalEncoding(Scene):
         )
 
         # Add Cost = 1/2^L(x) label
-        cost_label = MathTex("Cost = \\frac{1}{2^{L(x)}}", color=WHITE).scale(0.8)
+        cost_label = MathTex("Cost = \\frac{1}{2^{L(x)}}", color=WHITE).scale(0.7)
         cost_label.move_to(
-            axes.c2p(3, 0.8)
+            axes.c2p(1.76, 0.13)
         )
 
         # Rectangle starting position (top right)
         starting_rect = rect.copy()
-        starting_text = box_group.copy()
-        starting_group = VGroup(starting_rect, starting_text)
+        starting_text = box_text.copy()
+        starting_p = box_text_p.copy().next_to(starting_rect, LEFT)
+        starting_l = box_text_length.copy().next_to(starting_rect, DOWN)
+        starting_group = VGroup(starting_rect, starting_text, starting_p, starting_l)
         starting_group.to_corner(UR, buff=0.5)
 
         # Animation sequence
@@ -1615,18 +1625,28 @@ class OptimalEncoding(Scene):
         self.play(
             Create(left_line),
             Write(one_label),
-            Write(x_label)
         )
         self.play(Create(cost_curve))
         self.play(FadeIn(first_area))
         self.play(FadeIn(second_area))
         self.play(Write(cost_label))
-        
+        self.play(
+            Create(brace),
+            Write(x_label),
+        )
         # Animate the box
-        self.play(Create(starting_rect), Write(starting_text))
+        self.play(
+            Create(starting_rect), 
+            Write(starting_text),
+            Write(starting_p),
+            Write(starting_l)
+        )
         self.wait()
         self.play(
-            Transform(starting_group, VGroup(rect, box_group))
+            Transform(starting_rect, rect),
+            Transform(starting_text, box_text),
+            Transform(starting_p, box_text_p),
+            FadeOut(starting_l)
         )
         
         self.wait(2)
@@ -1636,29 +1656,30 @@ class OptimalEncoding(Scene):
         )
         
         # Create two smaller axes for the split view
+        # Fix 4: Better positioning for split view
         left_axes = Axes(
             x_range=[0, 4, 1],
             y_range=[0, 1.2, 0.2],
             x_length=5,
-            y_length=3,  # Changed from y_height to y_length
+            y_length=3,
             axis_config={
                 "include_tip": False,
                 "include_numbers": False,
                 "stroke_color": WHITE
             }
-        ).shift(LEFT * 3)
+        ).shift(LEFT * 3.5 + UP * 0.5)
 
         right_axes = Axes(
             x_range=[0, 4, 1],
             y_range=[0, 1.2, 0.2],
             x_length=5,
-            y_length=3,  # Changed from y_height to y_length
+            y_length=3,
             axis_config={
                 "include_tip": False,
                 "include_numbers": False,
                 "stroke_color": WHITE
             }
-        ).shift(RIGHT * 3)
+        ).shift(RIGHT * 3.5 + UP * 0.5)
 
         # Create curves
         left_curve = left_axes.plot(lambda x: 1/(2**x), x_range=[0, 4], color=WHITE)
@@ -1683,46 +1704,44 @@ class OptimalEncoding(Scene):
         # Areas under the curve - modified for partial shading
         left_area = left_axes.get_area(
             left_curve,
-            x_range=[0.5, 4],  # Grey area starts after purple rectangle
+            x_range=[0.2, 4],  # Grey area
             color=GREY,
             opacity=0.5
         )
 
         right_area = right_axes.get_area(
             right_curve,
-            x_range=[3, 4],  # Grey area starts after purple rectangle
+            x_range=[3, 4],  # Grey area
             color=GREY,
             opacity=0.5
         )
 
+        # Fix rectangles to match image 4
         left_rect = Rectangle(
-            width=0.5 * left_axes.x_length / 4,  # 0.5 units in x direction
-            height=left_axes.y_length*0.5,  # Full height
+            width=0.2 * left_axes.x_length,
+            height=left_axes.y_length / 3,
             fill_color="#9370DB",
-            fill_opacity=0.4,
+            fill_opacity=0.8,
             stroke_color=WHITE
-        ).move_to(left_axes.c2p(0.25, 0.3))  # Position at x=0.25 (half of width)
-        left_rect.align_to(left_axes.c2p(0, 0), LEFT)  # Align to left edge
-
+        )
+        left_rect.move_to(left_axes.c2p(0.1, 0.5))
+        
         right_rect = Rectangle(
-            width=0.75*right_axes.x_length,  # 0.5 units in x direction
-            height=right_axes.y_length / 8,  # 0.25 height
+            width=3 * right_axes.x_length / 4,
+            height=right_axes.y_length / 6,
             fill_color="#9370DB",
-            fill_opacity=0.4,
+            fill_opacity=0.8,
             stroke_color=WHITE
-        ).move_to(right_axes.c2p(0.4, 0.125))  # Position at x=2.75
+        )
+        right_rect.move_to(right_axes.c2p(1.5, 0.085))
 
         # Labels
         left_title = Text("Short Codeword,\nHigh Cost", 
                          color=WHITE, 
-                         font_size=24).next_to(left_axes, UP)
+                         font_size=24).next_to(left_axes, UP, buff=0.3)
         right_title = Text("Long Codeword,\nSmall Cost", 
                           color=WHITE, 
-                          font_size=24).next_to(right_axes, UP)
-
-        # x-axis labels
-        left_x_label = MathTex("L(x)", color=WHITE).next_to(left_axes.x_axis, RIGHT)
-        right_x_label = MathTex("L(x)", color=WHITE).next_to(right_axes.x_axis, RIGHT)
+                          font_size=24).next_to(right_axes, UP, buff=0.3)
 
         # Animation sequence
         self.play(
@@ -1733,9 +1752,7 @@ class OptimalEncoding(Scene):
             Create(left_vertical_line),
             Create(right_vertical_line),
             Write(left_one_label),
-            Write(right_one_label),
-            Write(left_x_label),
-            Write(right_x_label)
+            Write(right_one_label)
         )
         self.play(
             Create(left_curve),
@@ -1755,12 +1772,13 @@ class OptimalEncoding(Scene):
         )
         
         self.wait(2)
-# Fade out previous scene
+        # Fade out previous scene
         self.play(
             *[FadeOut(mob) for mob in self.mobjects]
         )
         
         # Create axis
+        # Fix 5: Better positioning for final scene
         axes = Axes(
             x_range=[0, 8, 1],
             y_range=[-1.2, 1.2, 0.2],  # Modified to include negative y-values
@@ -1777,57 +1795,49 @@ class OptimalEncoding(Scene):
         upper_curve = axes.plot(lambda x: 1/(2**x), x_range=[0, 8], color=WHITE)
         lower_curve = axes.plot(lambda x: -1/(2**x), x_range=[0, 8], color=WHITE)
 
-        # Create rectangles for length contributions
+        # Create rectangles for length contributions matching image 5
         upper_length = Rectangle(
-            width=2,
-            height=0.5,
+            width=2 * axes.x_length / 8,  # 2 units wide
+            height=axes.y_length / 6,  # Appropriate height
             fill_color="#9370DB",  # Purple
-            fill_opacity=1,
+            fill_opacity=0.8,
             stroke_color=WHITE
-        ).move_to(axes.c2p(1, 0.25))
-
+        )
+        upper_length.move_to(axes.c2p(1, 0.5))  # Position at x=1, y=0.5
+        
         lower_length = Rectangle(
-            width=4,
-            height=0.5,
+            width=4 * axes.x_length / 8,  # 4 units wide
+            height=axes.y_length / 12,  # Appropriate height
             fill_color="#DEB887",  # Tan
-            fill_opacity=1,
+            fill_opacity=0.8,
             stroke_color=WHITE
-        ).move_to(axes.c2p(2, -0.25))
+        )
+        lower_length.move_to(axes.c2p(2, -0.25))  # Position at x=2, y=-0.25
 
-        # Create shaded cost areas - modified approach
-        upper_cost_points = [
-            *[axes.c2p(x, 1/(2**x)) for x in np.linspace(2, 8, 100)],
-            axes.c2p(8, 0),
-            axes.c2p(2, 0)
-        ]
-        upper_cost = Polygon(
-            *upper_cost_points,
-            fill_color=GREY,
-            fill_opacity=0.5,
-            stroke_width=0
+        # Create shaded cost areas
+        upper_cost_area = axes.get_area(
+            upper_curve,
+            x_range=[2, 8],
+            color=GREY,
+            opacity=0.5
         )
 
-        lower_cost_points = [
-            *[axes.c2p(x, -1/(2**x)) for x in np.linspace(4, 8, 100)],
-            axes.c2p(8, 0),
-            axes.c2p(4, 0)
-        ]
-        lower_cost = Polygon(
-            *lower_cost_points,
-            fill_color=GREY,
-            fill_opacity=0.3,
-            stroke_width=0
+        lower_cost_area = axes.get_area(
+            lower_curve,
+            x_range=[4, 8],
+            color=GREY,
+            opacity=0.3
         )
 
         # Labels
         pa_label = MathTex("p(a)", color=WHITE).next_to(axes.c2p(0, 0.5), LEFT)
-        pb_label = MathTex("p(b)", color=WHITE).next_to(axes.c2p(0, -0.5), LEFT)
+        pb_label = MathTex("p(b)", color=WHITE).next_to(axes.c2p(0, -0.25), LEFT)
 
         upper_length_label = Text("Length\nContribution", color=WHITE, font_size=20).move_to(upper_length)
-        upper_cost_label = Text("Cost", color=WHITE, font_size=20).move_to(axes.c2p(4, 0.5))
+        upper_cost_label = Text("Cost", color=WHITE, font_size=20).move_to(axes.c2p(5, 0.15))
 
         lower_length_label = Text("Length\nContribution", color=WHITE, font_size=20).move_to(lower_length)
-        lower_cost_label = Text("Cost", color=WHITE, font_size=20).move_to(axes.c2p(6, -0.5))
+        lower_cost_label = Text("Cost", color=WHITE, font_size=20).move_to(axes.c2p(6, -0.15))
 
         # Animation sequence
         self.play(Create(axes))
@@ -1843,7 +1853,7 @@ class OptimalEncoding(Scene):
             Write(upper_length_label)
         )
         self.play(
-            FadeIn(upper_cost),
+            FadeIn(upper_cost_area),
             Write(upper_cost_label)
         )
         
@@ -1854,7 +1864,7 @@ class OptimalEncoding(Scene):
             Write(lower_length_label)
         )
         self.play(
-            FadeIn(lower_cost),
+            FadeIn(lower_cost_area),
             Write(lower_cost_label)
         )
         
