@@ -1797,36 +1797,36 @@ class OptimalEncoding(Scene):
 
         # Create rectangles for length contributions matching image 5
         upper_length = Rectangle(
-            width=2 * axes.x_length / 8,  # 2 units wide
-            height=axes.y_length / 6,  # Appropriate height
+            width=axes.x_length / 8,  # 2 units wide
+            height=axes.y_length / 6 + 0.25,  # Appropriate height
             fill_color="#9370DB",  # Purple
             fill_opacity=0.8,
             stroke_color=WHITE
         )
-        upper_length.move_to(axes.c2p(1, 0.5))  # Position at x=1, y=0.5
+        upper_length.move_to(axes.c2p(0.5, 0.25))  # Position at x=1, y=0.5
         
         lower_length = Rectangle(
-            width=4 * axes.x_length / 8,  # 4 units wide
-            height=axes.y_length / 12,  # Appropriate height
+            width=4 * axes.x_length / 8 - 1.5,  # 4 units wide
+            height=axes.y_length / 12 - 0.2,  # Appropriate height
             fill_color="#DEB887",  # Tan
             fill_opacity=0.8,
             stroke_color=WHITE
         )
-        lower_length.move_to(axes.c2p(2, -0.25))  # Position at x=2, y=-0.25
+        lower_length.move_to(axes.c2p(1.5, -0.07))  # Position at x=2, y=-0.25
 
         # Create shaded cost areas
         upper_cost_area = axes.get_area(
             upper_curve,
-            x_range=[2, 8],
+            x_range=[1, 8],
             color=GREY,
             opacity=0.5
         )
 
         lower_cost_area = axes.get_area(
             lower_curve,
-            x_range=[4, 8],
+            x_range=[3, 8],
             color=GREY,
-            opacity=0.3
+            opacity=0.5
         )
 
         # Labels
