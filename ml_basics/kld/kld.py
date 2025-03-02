@@ -1704,36 +1704,36 @@ class OptimalEncoding(Scene):
         # Areas under the curve - modified for partial shading
         left_area = left_axes.get_area(
             left_curve,
-            x_range=[0.2, 4],  # Grey area
+            x_range=[0.8, 4],  # Grey area
             color=GREY,
             opacity=0.5
         )
 
         right_area = right_axes.get_area(
             right_curve,
-            x_range=[3, 4],  # Grey area
+            x_range=[2.5, 4],  # Grey area
             color=GREY,
             opacity=0.5
         )
 
         # Fix rectangles to match image 4
         left_rect = Rectangle(
-            width=0.2 * left_axes.x_length,
-            height=left_axes.y_length / 3,
+            width=1,
+            height=1,
             fill_color="#9370DB",
             fill_opacity=0.8,
             stroke_color=WHITE
         )
-        left_rect.move_to(left_axes.c2p(0.1, 0.5))
+        left_rect.move_to(left_axes.c2p(0.4, 0.2))
         
         right_rect = Rectangle(
-            width=3 * right_axes.x_length / 4,
-            height=right_axes.y_length / 6,
+            width=3 * right_axes.x_length / 4 - 0.7,
+            height=right_axes.y_length / 6 - 0.15,
             fill_color="#9370DB",
             fill_opacity=0.8,
             stroke_color=WHITE
         )
-        right_rect.move_to(right_axes.c2p(1.5, 0.085))
+        right_rect.move_to(right_axes.c2p(1.25, 0.085))
 
         # Labels
         left_title = Text("Short Codeword,\nHigh Cost", 
