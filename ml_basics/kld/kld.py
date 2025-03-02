@@ -1833,11 +1833,11 @@ class OptimalEncoding(Scene):
         pa_label = MathTex("p(a)", color=WHITE).next_to(axes.c2p(0, 0.5), LEFT)
         pb_label = MathTex("p(b)", color=WHITE).next_to(axes.c2p(0, -0.25), LEFT)
 
-        upper_length_label = Text("Length\nContribution", color=WHITE, font_size=20).move_to(upper_length)
+        upper_length_label = Text("Length\nContribution", color=WHITE, font_size=16).move_to(upper_length)
         upper_cost_label = Text("Cost", color=WHITE, font_size=20).move_to(axes.c2p(5, 0.15))
 
-        lower_length_label = Text("Length\nContribution", color=WHITE, font_size=20).move_to(lower_length)
-        lower_cost_label = Text("Cost", color=WHITE, font_size=20).move_to(axes.c2p(6, -0.15))
+        lower_length_label = Text("Length Contribution", color=WHITE, font_size=16).move_to(lower_length)
+        lower_cost_label = Text("Cost", color=WHITE, font_size=20).move_to(axes.c2p(5, -0.15))
 
         # Animation sequence
         self.play(Create(axes))
