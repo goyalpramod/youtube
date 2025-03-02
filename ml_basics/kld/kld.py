@@ -1061,166 +1061,183 @@ class VariableLengthEncoding(Scene):
         
         self.play(FadeOut(everything_new))
         
-        # Constants for the bars
-        BAR_HEIGHT = 0.75
-        BAR_WIDTH = 4
+        # Constants
+        BAR_WIDTH = 4  # Total width for all bars
+        BASE_HEIGHT = 1  # Base height unit
         
-        # Title
-        new_title = Text("New Code", font_size=36)
-        title_group = VGroup(new_title).arrange(RIGHT, buff=0.5)
-        title_group.to_edge(UP)
+        # Create the main rectangle
+        rect = Rectangle(height=4, width=BAR_WIDTH, stroke_width=2)
         
-        # Create bars
-        bars = VGroup()
-        heights = [BAR_HEIGHT * 3, BAR_HEIGHT * 1.5, BAR_HEIGHT * 0.75, BAR_HEIGHT * 0.75]
-        colors = ["#C19EE0", "#FFB6C1", "#98FB98", "#87CEEB"]
+        # Create bars with different heights based on probability
+        # 1/2 - Flour (top bar)
+        flour_bar = Rectangle(
+            height=BASE_HEIGHT * 2,  # 1/2 probability = 2 units
+            width=BAR_WIDTH/3,       # 1 bit
+            fill_color="#B19CFF",    # Light purple
+            fill_opacity=0.5,
+            stroke_color=WHITE
+        )
         
-        for height, color in zip(heights, colors):
-            rect = Rectangle(
-                height=height,
-                width=BAR_WIDTH,
-                fill_color=color,
-                fill_opacity=1,
-                stroke_color=WHITE
-            )
-            bars.add(rect)
+        # 1/4 - Cheese (second bar)
+        cheese_bar = Rectangle(
+            height=BASE_HEIGHT,      # 1/4 probability = 1 unit
+            width=2*BAR_WIDTH/3,     # 2 bits
+            fill_color="#FFB6C1",    # Pink
+            fill_opacity=0.5,
+            stroke_color=WHITE
+        )
         
-        # Stack bars vertically
-        bars.arrange(DOWN, buff=0)
-        bars.next_to(title_group, DOWN, buff=1)
+        # 1/8 - Tomato (third bar)
+        tomato_bar = Rectangle(
+            height=BASE_HEIGHT/2,    # 1/8 probability = 0.5 unit
+            width=BAR_WIDTH,         # 3 bits
+            fill_color="#FFFFE0",    # Light yellow
+            fill_opacity=0.5,
+            stroke_color=WHITE
+        )
         
-        # Calculate the exact coordinates for the lines
-        bar_top = bars.get_top()
-        bar_bottom = bars.get_bottom()
-        bar_left = bars.get_left()
-        bar_right = bars.get_right()
+        # 1/8 - Oil (bottom bar)
+        oil_bar = Rectangle(
+            height=BASE_HEIGHT/2,    # 1/8 probability = 0.5 unit
+            width=BAR_WIDTH,         # 3 bits
+            fill_color="#98FB98",    # Light green
+            fill_opacity=0.5,
+            stroke_color=WHITE
+        )
         
-        # Create vertical lines that stay within the boxes
+        # Position bars from top to bottom, aligned left
+        bars = VGroup(flour_bar, cheese_bar, tomato_bar, oil_bar)
+        
+        # First align the top bar to the top of the rectangle and to the left
+        flour_bar.move_to(rect.get_top() + DOWN * flour_bar.height/2)
+        flour_bar.align_to(rect, LEFT)
+        
+        # Position each subsequent bar below the previous one
+        cheese_bar.next_to(flour_bar, DOWN, buff=0)
+        cheese_bar.align_to(rect, LEFT)
+        
+        tomato_bar.next_to(cheese_bar, DOWN, buff=0)
+        tomato_bar.align_to(rect, LEFT)
+        
+        oil_bar.next_to(tomato_bar, DOWN, buff=0)
+        oil_bar.align_to(rect, LEFT)
+        
+        # Create vertical dashed lines at 1/3 and 2/3 of width
         v_lines = VGroup()
-        line_positions = [BAR_WIDTH/3, 2*BAR_WIDTH/3]  # Positions for solid lines
+        line_positions = [BAR_WIDTH/3, 2*BAR_WIDTH/3]  # Positions for dotted lines
         
         for x_pos in line_positions:
-            line = Line(
-                start=bar_top,
-                end=bar_bottom,
-                stroke_width=2
-            ).set_opacity(0.5)
-            line.move_to(bar_left + RIGHT * x_pos)
+            line = DashedLine(
+                start=rect.get_top(),
+                end=rect.get_bottom(),
+                stroke_width=1,
+                dash_length=0.1
+            ).set_opacity(0.7)
+            line.move_to(rect.get_left() + RIGHT * x_pos)
             v_lines.add(line)
         
-        # Add dotted line at the right edge
-        dotted_line = DashedLine(
-            start=bar_top,
-            end=bar_bottom,
-            stroke_width=2,
+        # Add right edge dotted line
+        right_line = DashedLine(
+            start=rect.get_top(),
+            end=rect.get_bottom(),
+            stroke_width=1,
             dash_length=0.1
-        ).set_opacity(0.5)
-        dotted_line.move_to(bar_right)
+        ).set_opacity(0.7)
+        right_line.move_to(rect.get_right())
+        v_lines.add(right_line)
         
-        # Binary numbers positioning - only put numbers where shown in the image
+        # Binary numbers exactly as shown in the image
         binary_numbers = VGroup()
         
-        # Define which cells should have numbers (1-based indexing for cell and bar)
-        number_positions = [
-            (1, 1, "0"),           # First bar, first cell: "0"
-            (1, 2, "1"), (2, 2, "0"),  # Second bar: "1" in first cell, "0" in second cell
-            (1, 3, "1"), (2, 3, "1"), (3, 3, "0"),  # Third bar
-            (1, 4, "1"), (2, 4, "1"), (3, 4, "1")   # Fourth bar
-        ]
-
-        for cell, bar_idx, value in number_positions:
-            number = Text(value, font_size=36, color=WHITE)
-            section_width = BAR_WIDTH / 3
-            
-            # Calculate proper positioning
-            x_pos = bars[bar_idx-1].get_left() + RIGHT * ((cell-1) * section_width + section_width/2)
-            y_pos = bars[bar_idx-1].get_center()[1]
-            
-            number.move_to([x_pos[0], y_pos, 0])
-            binary_numbers.add(number)
+        # First bar - "0" (in first section only)
+        zero1 = Text("0", font_size=30).move_to(flour_bar.get_center())
         
-        # Add labels at bottom
-        bottom_labels = VGroup(
+        # Second bar - "1", "0" (in first and second sections)
+        one1 = Text("1", font_size=30).move_to(cheese_bar.get_center() + LEFT * 0.7)
+        zero2 = Text("0", font_size=30).move_to(cheese_bar.get_center() + RIGHT*0.7)
+        
+        # Third bar - "1", "1", "0" (in all three sections)
+        one2 = Text("1", font_size=30).move_to(tomato_bar.get_center() + LEFT * BAR_WIDTH/3)
+        one3 = Text("1", font_size=30).move_to(tomato_bar.get_center())
+        zero3 = Text("0", font_size=30).move_to(tomato_bar.get_center() + RIGHT * BAR_WIDTH/3)
+        
+        # Fourth bar - "1", "1", "1" (in all three sections)
+        one4 = Text("1", font_size=30).move_to(oil_bar.get_center() + LEFT * BAR_WIDTH/3)
+        one5 = Text("1", font_size=30).move_to(oil_bar.get_center())
+        one6 = Text("1", font_size=30).move_to(oil_bar.get_center() + RIGHT * BAR_WIDTH/3)
+        
+        binary_numbers.add(zero1, one1, zero2, one2, one3, zero3, one4, one5, one6)
+        
+        # Create bit labels at bottom
+        bit_labels = VGroup(
             Text("1 bit", font_size=24),
             Text("2 bit", font_size=24),
             Text("3 bit", font_size=24)
         )
         
-        # Position bottom labels
-        for i, label in enumerate(bottom_labels):
-            x_pos = bar_left[0] + (i + 0.5) * BAR_WIDTH/3
-            label.move_to([x_pos, bar_bottom[1] - 0.5, 0])
+        # Position bit labels at the bottom - matching image
+        bit_positions = [BAR_WIDTH/6, BAR_WIDTH/2, 5*BAR_WIDTH/6]
+        for label, pos in zip(bit_labels, bit_positions):
+            label.move_to(rect.get_bottom() + DOWN * 0.5 + LEFT * (BAR_WIDTH/2) + RIGHT * pos)
         
-        # Add probability labels on left
+        # Create probability labels
         prob_labels = VGroup(
-            MathTex("{1/2}", font_size=30),
-            MathTex("{1/4}", font_size=30),
-            MathTex("{1/8}", font_size=30),
-            MathTex("{1/8}", font_size=30)
+            MathTex("1/2", font_size=28),
+            MathTex("1/4", font_size=28),
+            MathTex("1/8", font_size=28),
+            MathTex("1/8", font_size=28)
         )
         
-        for label, bar in zip(prob_labels, bars):
+        # Position probability labels
+        for label, bar in zip(prob_labels, [flour_bar, cheese_bar, tomato_bar, oil_bar]):
             label.next_to(bar, LEFT, buff=0.5)
         
-        # Add L(x) label
-        l_x_label = MathTex("L(x)", font_size=36)
-        l_x_label.next_to(bottom_labels[1], DOWN, buff=0.5)
+        # Group all elements
+        all_elements = VGroup(
+            rect, bars, v_lines, binary_numbers, 
+            bit_labels, prob_labels
+        )
+        all_elements.move_to(ORIGIN)
+        
+        # Title
+        title = Text("New Code", font_size=36)
+        title.to_edge(UP)
         
         # Animation sequence
-        self.play(
-            Write(title_group)
-        )
+        self.play(Write(title))
+        self.wait(0.5)
         
-        self.play(
-            Create(bars),
-            Write(prob_labels)
-        )
+        self.play(Create(rect))
+        self.play(FadeIn(bars))
+        self.play(Create(v_lines))
         
-        self.play(
-            Create(v_lines),
-            Create(dotted_line)
-        )
-        
+        self.play(Write(prob_labels))
         self.play(Write(binary_numbers))
+        self.play(Write(bit_labels))
         
-        self.play(
-            Write(VGroup(bottom_labels, l_x_label))
-        )
+        # L(x) label at the bottom
+        l_x_label = MathTex("L(x)", font_size=36)
+        l_x_label.next_to(bit_labels, DOWN, buff=0.3)
+        self.play(Write(l_x_label))
         
-        self.wait()
-
-        # Create entropy labels with better positioning and size
+        # Entropy information
         entropy_title = Text("Entropy", font_size=32)
-        entropy_title_2 = Text("= Optimal Average Length", font_size=30)
-        entropy_equals = Text("= Area", font_size=32)
-        entropy_equation = MathTex("= \sum_{i=1}^{n} p(x_i) \cdot L(x_i)", font_size=40)
-        entropy_equation_values = MathTex("= 1/2 \cdot 1 + 1/4 \cdot 2 + 1/8 \cdot 3 + 1/8 \cdot 3", font_size=28)
+        entropy_equals = Text("= Optimal Average Length", font_size=30)
+        entropy_equation = MathTex("= \\sum_{i=1}^{n} p(x_i) \\cdot L(x_i)", font_size=36)
+        entropy_equation_values = MathTex("= 1/2 \\cdot 1 + 1/4 \\cdot 2 + 1/8 \\cdot 3 + 1/8 \\cdot 3", font_size=28)
         entropy_value = Text("= 1.75 bits", font_size=32)
 
-        entropy_group = VGroup(entropy_title, entropy_title_2, entropy_equals, entropy_equation, entropy_equation_values ,entropy_value)
+        entropy_group = VGroup(entropy_title, entropy_equals, entropy_equation, entropy_equation_values, entropy_value)
         entropy_group.arrange(DOWN, aligned_edge=LEFT, buff=0.2)
+        
+        # Shift everything to the left to make room for entropy info
+        self.play(all_elements.animate.shift(LEFT * 2))
+        
+        # Position entropy group on the right
+        entropy_group.next_to(all_elements, RIGHT, buff=0.5)
 
-        # Position it more carefully to avoid being cut off
-        entropy_group.next_to(bars, RIGHT*0.1, buff=0.1)
-
-        self.play(
-            FadeOut(VGroup(l_x_label, title_group)),
-        )
-
-        # Shift the bars less to the left to make more room for entropy text
-        self.play(
-            VGroup(bars, prob_labels, bottom_labels, v_lines, dotted_line, binary_numbers).animate.shift(LEFT*2)
-        )
-
-        self.play(
-            Write(entropy_group, run_time=4)
-        )
-
-        self.wait(2)
-
-        self.play(
-            FadeOut(VGroup(entropy_group, bars, v_lines, dotted_line, binary_numbers)),
-        )
+        self.play(Write(entropy_group, run_time=3))
+        
         self.wait(2)
 
 
