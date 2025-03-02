@@ -1876,376 +1876,402 @@ class OptimalEncoding(Scene):
 
 class Entropy(Scene):
     def construct(self):
-        # Create main rectangle and bars
-        BAR_WIDTH = 4
-        BAR_HEIGHT = 4
+        # # Create main rectangle and bars
+        # BAR_WIDTH = 4  # Total width for all bars
+        # BAR_HEIGHT = 4
         
-        # Create the first distribution (Weather)
-        rect = Rectangle(height=BAR_HEIGHT, width=BAR_WIDTH, stroke_width=2)
+        # # Create the first distribution with horizontal bars
+        # rect = Rectangle(height=BAR_HEIGHT, width=BAR_WIDTH, stroke_width=2)
         
-        # Create bars with different heights and colors
-        bars = VGroup(
-            # 1/2
-            Rectangle(height=BAR_HEIGHT/2, width=BAR_WIDTH)
-            .set_fill(color="#C19EE0", opacity=1),
-            # 1/4
-            Rectangle(height=BAR_HEIGHT/4, width=BAR_WIDTH)
-            .set_fill(color="#FFB6C1", opacity=1),
-            # 1/8
-            Rectangle(height=BAR_HEIGHT/8, width=BAR_WIDTH)
-            .set_fill(color="#FFFFE0", opacity=1),
-            # 1/8
-            Rectangle(height=BAR_HEIGHT/8, width=BAR_WIDTH)
-            .set_fill(color="#98FB98", opacity=1),
-        ).arrange(DOWN, buff=0)
+        # # Create bars with different heights and widths
+        # # 1/2 - Flour - 1 bit wide
+        # flour_bar = Rectangle(
+        #     height=BAR_HEIGHT/2, 
+        #     width=BAR_WIDTH/3
+        # ).set_fill(color="#C19EE0", opacity=1)
         
-        bars_group = VGroup(rect, bars)
+        # # 1/4 - Cheese - 2 bits wide
+        # cheese_bar = Rectangle(
+        #     height=BAR_HEIGHT/4, 
+        #     width=2*BAR_WIDTH/3
+        # ).set_fill(color="#FFB6C1", opacity=1)
         
-        # Create vertical lines
-        v_lines = VGroup()
-        line_positions = [BAR_WIDTH/3, 2*BAR_WIDTH/3]  # Positions for solid lines
+        # # 1/8 - Tomato - 3 bits wide
+        # tomato_bar = Rectangle(
+        #     height=BAR_HEIGHT/8, 
+        #     width=BAR_WIDTH
+        # ).set_fill(color="#FFFFE0", opacity=1)
         
-        for x_pos in line_positions:
-            line = Line(
-                start=UP * BAR_HEIGHT/2,
-                end=DOWN * BAR_HEIGHT/2,
-                stroke_width=2
-            )
-            line.move_to(LEFT * BAR_WIDTH/2 + RIGHT * x_pos)
-            v_lines.add(line)
+        # # 1/8 - Oil - 3 bits wide
+        # oil_bar = Rectangle(
+        #     height=BAR_HEIGHT/8, 
+        #     width=BAR_WIDTH
+        # ).set_fill(color="#98FB98", opacity=1)
         
-        # Add dotted line at the end
-        dotted_line = DashedLine(
-            start=UP * BAR_HEIGHT/2,
-            end=DOWN * BAR_HEIGHT/2,
-            stroke_width=2,
-            dash_length=0.1
-        )
-        dotted_line.move_to(LEFT * BAR_WIDTH/2 + RIGHT * BAR_WIDTH)
-        v_lines.add(dotted_line)
+        # # Position bars from top to bottom
+        # flour_bar.move_to(rect.get_top() + DOWN * BAR_HEIGHT/4)
+        # flour_bar.align_to(rect, LEFT)
         
-        # Probability labels
-        prob_labels = VGroup(
-            MathTex("\\frac{1}{2}", font_size=36),
-            MathTex("\\frac{1}{4}", font_size=36),
-            MathTex("\\frac{1}{8}", font_size=36),
-            MathTex("\\frac{1}{8}", font_size=36)
-        )
+        # cheese_bar.next_to(flour_bar, DOWN, buff=0)
+        # cheese_bar.align_to(rect, LEFT)
         
-        for label, bar in zip(prob_labels, bars):
-            label.next_to(bar, LEFT, buff=0.5)
+        # tomato_bar.next_to(cheese_bar, DOWN, buff=0)
+        # tomato_bar.align_to(rect, LEFT)
         
-        # Create bit labels
-        bit_labels = VGroup(
-            Text("1 bit", font_size=24),
-            Text("2 bit", font_size=24),
-            Text("3 bit", font_size=24)
-        )
+        # oil_bar.next_to(tomato_bar, DOWN, buff=0)
+        # oil_bar.align_to(rect, LEFT)
         
-        # Position bit labels
-        bit_positions = [-BAR_WIDTH/6, BAR_WIDTH/6, BAR_WIDTH/2]
-        for label, x_pos in zip(bit_labels, bit_positions):
-            label.move_to(LEFT * BAR_WIDTH/2 + RIGHT * x_pos)
-            label.shift(DOWN * (BAR_HEIGHT/2 + 0.5))
+        # bars = VGroup(flour_bar, cheese_bar, tomato_bar, oil_bar)
         
-        # p(x) label
-        p_x_label = MathTex("p(x)", font_size=36).next_to(prob_labels, LEFT, buff=0.5)
+        # # Create vertical lines
+        # v_lines = VGroup()
+        # line_positions = [BAR_WIDTH/3, 2*BAR_WIDTH/3]  # Positions for solid lines
         
-        # L(x) formula
-        l_x_formula = MathTex(
-            "L(x) = \\log_2 \\left(\\frac{1}{p(x)}\\right)",
-            font_size=36
-        )
-        l_x_formula.next_to(bars_group, RIGHT, buff=2)
+        # for x_pos in line_positions:
+        #     line = DashedLine(
+        #         start=rect.get_top(),
+        #         end=rect.get_bottom(),
+        #         stroke_width=2,
+        #         dash_length=0.1
+        #     )
+        #     line.move_to(rect.get_left() + RIGHT * x_pos)
+        #     v_lines.add(line)
         
-        # Align everything to center and shift left
-        full_viz = VGroup(bars_group, v_lines, prob_labels, bit_labels, p_x_label)
-        full_viz.move_to(LEFT * 2)
+        # # Probability labels using 1/2 format instead of fractions
+        # prob_labels = VGroup(
+        #     Text("1/2", font_size=24),
+        #     Text("1/4", font_size=24),
+        #     Text("1/8", font_size=24),
+        #     Text("1/8", font_size=24)
+        # )
         
-        # Animation sequence
-        self.play(
-            Create(rect),
-            FadeIn(bars),
-            Create(v_lines)
-        )
-        self.play(
-            Write(prob_labels),
-            Write(p_x_label)
-        )
-        self.play(Write(bit_labels))
-        self.play(Write(l_x_formula))
+        # for label, bar in zip(prob_labels, bars):
+        #     label.next_to(bar, LEFT, buff=0.5)
         
-        self.wait(2)
+        # # Create bit labels
+        # bit_labels = VGroup(
+        #     Text("1 bit", font_size=24),
+        #     Text("2 bit", font_size=24),
+        #     Text("3 bit", font_size=24)
+        # )
+        
+        # # Position bit labels at the bottom - fixed positioning
+        # bit_positions = [BAR_WIDTH/6, BAR_WIDTH/2, 5*BAR_WIDTH/6]
+        # for label, x_pos in zip(bit_labels, bit_positions):
+        #     # Align to the rect position, then offset by x_pos from left edge
+        #     label.move_to(rect.get_bottom() + DOWN * 0.5 + LEFT * (BAR_WIDTH/2) + RIGHT * x_pos)
+        
+        # # L(x) label at the bottom
+        # l_x_label = Text("L(x)", font_size=30)
+        # l_x_label.next_to(bit_labels, DOWN, buff=0.3)
+        
+        # # p(x) label
+        # p_x_label = Text("p(x)", font_size=36).next_to(prob_labels, LEFT, buff=0.5)
+        
+        # # L(x) formula and derivation on the right - updated based on colah's blog
+        # l_x_derivation = VGroup(
+        #     MathTex("\\text{Cost} = \\frac{1}{2^{L(x)}}", font_size=36),
+        #     MathTex("2^{L(x)} = \\frac{1}{\\text{Cost}}", font_size=36),
+        #     MathTex("L(x) = \\log_2 \\left(\\frac{1}{\\text{Cost}}\\right)", font_size=36),
+        #     MathTex("L(x) = \\log_2 \\left(\\frac{1}{p(x)}\\right)", font_size=36),
+        #     MathTex("= -\\log_2 p(x)", font_size=36)
+        # ).arrange(DOWN, aligned_edge=LEFT, buff=0.5)
+        
+        # l_x_derivation.next_to(rect, RIGHT, buff=0)
+        
+        # # Align everything to center and shift left
+        # full_viz = VGroup(rect, bars, v_lines, prob_labels, bit_labels, p_x_label, l_x_label)
+        # full_viz.move_to(LEFT * 2)
+        
+        # # Animation sequence
+        # self.play(
+        #     Create(rect),
+        # )
+        # self.play(
+        #     FadeIn(bars),
+        # )
+        # self.play(
+        #     Create(v_lines)
+        # )
+        # self.play(
+        #     Write(prob_labels),
+        #     Write(p_x_label)
+        # )
+        # self.play(Write(bit_labels))
+        # self.play(Write(l_x_label))
+        # self.play(Write(l_x_derivation[0]))
+        # self.play(Write(l_x_derivation[1]))
+        # self.play(Write(l_x_derivation[2]))
+        # self.play(Write(l_x_derivation[3]))
+        # self.play(Write(l_x_derivation[4]))
+        
+        # self.wait(2)
 
-        # Fade out everything
-        self.play(
-            *[FadeOut(mob) for mob in self.mobjects]
-        )
-        
-        # Write entropy equation
-        entropy_eq = MathTex(
-            "H(p) = \\sum_{x} p(x) \\log_2 \\left(\\frac{1}{p(x)}\\right)",
-            font_size=48
-        ).move_to(ORIGIN)
-        
-        self.play(Write(entropy_eq))
-        self.wait(2)
+        # # Fade out everything
+        # self.play(
+        #     *[FadeOut(mob) for mob in self.mobjects]
+        # )
 
-        # Fade out the entropy equation first
-        self.play(
-            *[FadeOut(mob) for mob in self.mobjects]
-        )
-        self.wait(0.5)
+        # """Derive the cross entropy equation as avg contribution = p(x)*l(x) = this is equation"""
+        
+        # # Write entropy equation
+        # entropy_eq = MathTex(
+        #     "H(p) = \\sum_{x} p(x) \\log_2 \\left(\\frac{1}{p(x)}\\right)",
+        #     font_size=48
+        # ).move_to(ORIGIN)
+        
+        # self.play(Write(entropy_eq))
+        # self.wait(2)
 
-        # Create title text
-        dog_title = Text("Dog Lover's\nWord Frequency", font_size=24).to_edge(DOWN)
-        cat_title = Text("Cat Lover's\nWord Frequency", font_size=24).to_edge(DOWN)
+        # # Fade out the entropy equation first
+        # self.play(
+        #     *[FadeOut(mob) for mob in self.mobjects]
+        # )
+        # self.wait(0.5)
+
+        # # Create title text
+        # thick_title = Text("Thick Crust\nIngredient List", font_size=24).to_edge(DOWN)
+        # thin_title = Text("Thin Crust\nIngredient List", font_size=24).to_edge(DOWN)
         
-        # Constants for consistent styling
-        BAR_HEIGHT = 4
-        BAR_WIDTH = 1.5
-        LEFT_SHIFT = 3
+        # # Constants for consistent styling
+        # BAR_HEIGHT = 4
+        # BAR_WIDTH = 1.5
+        # LEFT_SHIFT = 3
         
-        # Create dog lover's distribution (keeping order: dog, cat, fish, bird)
-        dog_rect = Rectangle(height=BAR_HEIGHT, width=BAR_WIDTH, stroke_width=2)
-        dog_parts = VGroup(
-            # Dog (1/2)
-            Rectangle(height=BAR_HEIGHT/2, width=BAR_WIDTH)
-            .set_fill(color="#C19EE0", opacity=1),
-            # Cat (1/4) 
-            Rectangle(height=BAR_HEIGHT/4, width=BAR_WIDTH)
-            .set_fill(color="#FFB6C1", opacity=1),
-            # Fish (1/8)
-            Rectangle(height=BAR_HEIGHT/8, width=BAR_WIDTH)
-            .set_fill(color="#FFFFE0", opacity=1),
-            # Bird (1/8)
-            Rectangle(height=BAR_HEIGHT/8, width=BAR_WIDTH)
-            .set_fill(color="#98FB98", opacity=1),
-        ).arrange(DOWN, buff=0)
+        # # Create thick crust distribution (now correctly labeled)
+        # thick_rect = Rectangle(height=BAR_HEIGHT, width=BAR_WIDTH, stroke_width=2)
+        # thick_parts = VGroup(
+        #     # Flour (1/2)
+        #     Rectangle(height=BAR_HEIGHT/2, width=BAR_WIDTH)
+        #     .set_fill(color="#C19EE0", opacity=0.5),
+        #     # Cheese (1/4) 
+        #     Rectangle(height=BAR_HEIGHT/4, width=BAR_WIDTH)
+        #     .set_fill(color="#FFB6C1", opacity=0.5),
+        #     # Tomato (1/8)
+        #     Rectangle(height=BAR_HEIGHT/8, width=BAR_WIDTH)
+        #     .set_fill(color="#FFFFE0", opacity=0.5),
+        #     # Oil (1/8)
+        #     Rectangle(height=BAR_HEIGHT/8, width=BAR_WIDTH)
+        #     .set_fill(color="#98FB98", opacity=0.5),
+        # ).arrange(DOWN, buff=0)
         
-        dog_group = VGroup(dog_rect, dog_parts)
+        # thick_group = VGroup(thick_rect, thick_parts)
         
-        # Dog labels in same order
-        dog_labels = VGroup(
-            Text('"dog"', font_size=20),
-            Text('"cat"', font_size=20),
-            Text('"fish"', font_size=20),
-            Text('"bird"', font_size=20)
-        )
+        # # Thick crust labels
+        # thick_labels = VGroup(
+        #     Text("Flour", font_size=20),
+        #     Text("Cheese", font_size=20),
+        #     Text("Tomato", font_size=20),
+        #     Text("Oil", font_size=20)
+        # )
         
-        dog_prob_labels = VGroup(
-            Text("1/2", font_size=20),
-            Text("1/4", font_size=20), 
-            Text("1/8", font_size=20),
-            Text("1/8", font_size=20)
-        )
+        # thick_prob_labels = VGroup(
+        #     Text("1/2", font_size=20),
+        #     Text("1/4", font_size=20), 
+        #     Text("1/8", font_size=20),
+        #     Text("1/8", font_size=20)
+        # )
         
-        for label, prob, part in zip(dog_labels, dog_prob_labels, dog_parts):
-            label.move_to(part)
-            prob.next_to(part, LEFT, buff=0.3)
+        # for label, prob, part in zip(thick_labels, thick_prob_labels, thick_parts):
+        #     label.move_to(part)
+        #     prob.next_to(part, LEFT, buff=0.3)
             
-        p_x_label = MathTex("p(x)", font_size=36).next_to(dog_prob_labels, LEFT, buff=0.5)
+        # p_x_label = Text("p(x)", font_size=36).next_to(thick_prob_labels, LEFT, buff=0.5)
         
-        dog_full_group = VGroup(dog_group, dog_labels, dog_prob_labels, p_x_label, dog_title)
-        dog_full_group.move_to(LEFT * LEFT_SHIFT)
+        # thick_full_group = VGroup(thick_group, thick_labels, thick_prob_labels, p_x_label, thick_title)
+        # thick_full_group.move_to(LEFT * LEFT_SHIFT)
         
-        # Create cat lover's distribution (keeping same order: dog, cat, fish, bird)
-        cat_rect = Rectangle(height=BAR_HEIGHT, width=BAR_WIDTH, stroke_width=2)
-        cat_parts = VGroup(
-            # Dog (1/8)
-            Rectangle(height=BAR_HEIGHT/8, width=BAR_WIDTH)
-            .set_fill(color="#C19EE0", opacity=1),
-            # Cat (1/2)
-            Rectangle(height=BAR_HEIGHT/2, width=BAR_WIDTH)
-            .set_fill(color="#FFB6C1", opacity=1),
-            # Fish (1/4)
-            Rectangle(height=BAR_HEIGHT/4, width=BAR_WIDTH)
-            .set_fill(color="#FFFFE0", opacity=1),
-            # Bird (1/8)
-            Rectangle(height=BAR_HEIGHT/8, width=BAR_WIDTH)
-            .set_fill(color="#98FB98", opacity=1),
-        ).arrange(DOWN, buff=0)
+        # # Create thin crust distribution (now correctly labeled)
+        # thin_rect = Rectangle(height=BAR_HEIGHT, width=BAR_WIDTH, stroke_width=2)
+        # thin_parts = VGroup(
+        #     # Flour (1/8)
+        #     Rectangle(height=BAR_HEIGHT/8, width=BAR_WIDTH)
+        #     .set_fill(color="#C19EE0", opacity=0.5),
+        #     # Cheese (1/2)
+        #     Rectangle(height=BAR_HEIGHT/2, width=BAR_WIDTH)
+        #     .set_fill(color="#FFB6C1", opacity=0.5),
+        #     # Tomato (1/4)
+        #     Rectangle(height=BAR_HEIGHT/4, width=BAR_WIDTH)
+        #     .set_fill(color="#FFFFE0", opacity=0.5),
+        #     # Oil (1/8)
+        #     Rectangle(height=BAR_HEIGHT/8, width=BAR_WIDTH)
+        #     .set_fill(color="#98FB98", opacity=0.5),
+        # ).arrange(DOWN, buff=0)
         
-        cat_group = VGroup(cat_rect, cat_parts)
+        # thin_group = VGroup(thin_rect, thin_parts)
         
-        # Cat labels in same order
-        cat_labels = VGroup(
-            Text('"dog"', font_size=20),
-            Text('"cat"', font_size=20),
-            Text('"fish"', font_size=20),
-            Text('"bird"', font_size=20)
-        )
+        # # Thin crust labels
+        # thin_labels = VGroup(
+        #     Text("Flour", font_size=20),
+        #     Text("Cheese", font_size=20),
+        #     Text("Tomato", font_size=20),
+        #     Text("Oil", font_size=20)
+        # )
         
-        cat_prob_labels = VGroup(
-            Text("1/8", font_size=20),
-            Text("1/2", font_size=20),
-            Text("1/4", font_size=20),
-            Text("1/8", font_size=20)
-        )
+        # thin_prob_labels = VGroup(
+        #     Text("1/8", font_size=20),
+        #     Text("1/2", font_size=20),
+        #     Text("1/4", font_size=20),
+        #     Text("1/8", font_size=20)
+        # )
         
-        for label, prob, part in zip(cat_labels, cat_prob_labels, cat_parts):
-            label.move_to(part)
-            prob.next_to(part, LEFT, buff=0.3)
+        # for label, prob, part in zip(thin_labels, thin_prob_labels, thin_parts):
+        #     label.move_to(part)
+        #     prob.next_to(part, LEFT, buff=0.3)
             
-        q_x_label = MathTex("q(x)", font_size=36).next_to(cat_prob_labels, LEFT, buff=0.5)
+        # q_x_label = Text("q(x)", font_size=36).next_to(thin_prob_labels, LEFT, buff=0.5)
         
-        cat_full_group = VGroup(cat_group, cat_labels, cat_prob_labels, q_x_label, cat_title)
-        cat_full_group.move_to(RIGHT * LEFT_SHIFT)
+        # thin_full_group = VGroup(thin_group, thin_labels, thin_prob_labels, q_x_label, thin_title)
+        # thin_full_group.move_to(RIGHT * LEFT_SHIFT)
 
-        # Add KL divergence equation in the middle
-        kl_eq = MathTex(
-            "\\sum_x p(x) \\log_2 \\left(\\frac{1}{p(x)}\\right)",
-            font_size=36
-        ).move_to(ORIGIN)
+        # # Animation sequence
+        # self.play(
+        #     Create(thick_rect),
+        #     Create(thin_rect)
+        # )
+        # self.play(
+        #     FadeIn(thick_parts),
+        #     FadeIn(thin_parts)
+        # )
+        # self.play(
+        #     Write(thick_labels),
+        #     Write(thin_labels)
+        # )
+        # self.play(
+        #     Write(thick_prob_labels),
+        #     Write(thin_prob_labels),
+        #     Write(p_x_label),
+        #     Write(q_x_label)
+        # )
+        # self.play(
+        #     Write(thick_title),
+        #     Write(thin_title)
+        # )
         
-        # Animation sequence
-        self.play(
-            Create(dog_rect),
-            Create(cat_rect)
-        )
-        self.play(
-            FadeIn(dog_parts),
-            FadeIn(cat_parts)
-        )
-        self.play(
-            Write(dog_labels),
-            Write(cat_labels)
-        )
-        self.play(
-            Write(dog_prob_labels),
-            Write(cat_prob_labels),
-            Write(p_x_label),
-            Write(q_x_label)
-        )
-        self.play(
-            Write(dog_title),
-            Write(cat_title)
-        )
+        # self.wait(2)
+
+        # # Fade out everything
+        # self.play(
+        #     *[FadeOut(mob) for mob in self.mobjects]
+        # )
+        # self.wait(0.5)
+
+        # # Write cross entropy equation
+        # cross_entropy_eq = MathTex(
+        #     "H_p(q) = \\sum_x q(x) \\log_2 \\left(\\frac{1}{p(x)}\\right)",
+        #     font_size=48
+        # ).move_to(ORIGIN)
         
-        self.wait(2)
+        # self.play(Write(cross_entropy_eq))
+        # self.wait(2)
 
-        # Fade out everything
-        self.play(
-            *[FadeOut(mob) for mob in self.mobjects]
-        )
-        self.wait(0.5)
-
-        # Write cross entropy equation
-        cross_entropy_eq = MathTex(
-            "H_p(q) = \\sum_x q(x) \\log_2 \\left(\\frac{1}{p(x)}\\right)",
-            font_size=48
-        ).move_to(ORIGIN)
+        # # Fade out equation
+        # self.play(FadeOut(cross_entropy_eq))
         
-        self.play(Write(cross_entropy_eq))
-        self.wait(2)
-
-        # Fade out equation
-        self.play(FadeOut(cross_entropy_eq))
+        # # Constants for the bars
+        # BAR_HEIGHT = 4
+        # BAR_WIDTH = 1.5
         
-        # Constants for the bars
-        BAR_HEIGHT = 4
-        BAR_WIDTH = 1.5
+        # # Create p(x) distribution - thick crust (with correct heights)
+        # p_rect = Rectangle(height=BAR_HEIGHT, width=BAR_WIDTH, stroke_width=2)
+        # p_parts = VGroup(
+        #     Rectangle(height=BAR_HEIGHT/2, width=BAR_WIDTH)  # Flour - 1/2
+        #     .set_fill(color="#C19EE0", opacity=0.5),
+        #     Rectangle(height=BAR_HEIGHT/4, width=BAR_WIDTH)  # Cheese - 1/4
+        #     .set_fill(color="#FFB6C1", opacity=0.5),
+        #     Rectangle(height=BAR_HEIGHT/8, width=BAR_WIDTH)  # Tomato - 1/8
+        #     .set_fill(color="#FFFFE0", opacity=0.5),
+        #     Rectangle(height=BAR_HEIGHT/8, width=BAR_WIDTH)  # Oil - 1/8
+        #     .set_fill(color="#98FB98", opacity=0.5),
+        # ).arrange(DOWN, buff=0)
         
-        # Create p(x) distribution with different heights
-        p_rect = Rectangle(height=BAR_HEIGHT, width=BAR_WIDTH, stroke_width=2)
-        p_parts = VGroup(
-            Rectangle(height=BAR_HEIGHT/2, width=BAR_WIDTH)  # x1 - 1/2
-            .set_fill(color="#C19EE0", opacity=1),
-            Rectangle(height=BAR_HEIGHT/4, width=BAR_WIDTH)  # x2 - 1/4
-            .set_fill(color="#FFB6C1", opacity=1),
-            Rectangle(height=BAR_HEIGHT/8, width=BAR_WIDTH)  # x3 - 1/8
-            .set_fill(color="#FFFFE0", opacity=1),
-            Rectangle(height=BAR_HEIGHT/8, width=BAR_WIDTH)  # x4 - 1/8
-            .set_fill(color="#98FB98", opacity=1),
-        ).arrange(DOWN, buff=0)
+        # p_group = VGroup(p_rect, p_parts)
+
+        # # Create x labels for p(x)
+        # p_labels = VGroup(
+        #     Text("Flour", font_size=24),
+        #     Text("Cheese", font_size=24),
+        #     Text("Tomato", font_size=24),
+        #     Text("Oil", font_size=24)
+        # )
         
-        p_group = VGroup(p_rect, p_parts)
+        # for label, part in zip(p_labels, p_parts):
+        #     label.move_to(part)
 
-        # Create x labels for p(x)
-        p_labels = VGroup(
-            MathTex("x_1", font_size=24),
-            MathTex("x_2", font_size=24),
-            MathTex("x_3", font_size=24),
-            MathTex("x_4", font_size=24)
-        )
+        # p_x_label = Text("p(x)", font_size=36).next_to(p_rect, UP, buff=0.3)
+        # p_full_group = VGroup(p_group, p_labels, p_x_label)
+        # p_full_group.move_to(LEFT * 4)
+
+        # # Create q(x) distribution with equal heights
+        # q_rect = Rectangle(height=BAR_HEIGHT, width=BAR_WIDTH, stroke_width=2)
+        # q_parts = VGroup(
+        #     Rectangle(height=BAR_HEIGHT/4, width=BAR_WIDTH)  # Equal parts
+        #     .set_fill(color="#C19EE0", opacity=0.5),
+        #     Rectangle(height=BAR_HEIGHT/4, width=BAR_WIDTH)
+        #     .set_fill(color="#FFB6C1", opacity=0.5),
+        #     Rectangle(height=BAR_HEIGHT/4, width=BAR_WIDTH)
+        #     .set_fill(color="#FFFFE0", opacity=0.5),
+        #     Rectangle(height=BAR_HEIGHT/4, width=BAR_WIDTH)
+        #     .set_fill(color="#98FB98", opacity=0.5),
+        # ).arrange(DOWN, buff=0)
         
-        for label, part in zip(p_labels, p_parts):
-            label.move_to(part)
+        # q_group = VGroup(q_rect, q_parts)
 
-        p_x_label = MathTex("p(x)", font_size=36).next_to(p_rect, UP, buff=0.3)
-        p_full_group = VGroup(p_group, p_labels, p_x_label)
-        p_full_group.move_to(LEFT * 4)  # Move more to the left
-
-        # Create q(x) distribution with equal heights
-        q_rect = Rectangle(height=BAR_HEIGHT, width=BAR_WIDTH, stroke_width=2)
-        q_parts = VGroup(
-            Rectangle(height=BAR_HEIGHT/4, width=BAR_WIDTH)  # Equal parts
-            .set_fill(color="#C19EE0", opacity=1),
-            Rectangle(height=BAR_HEIGHT/4, width=BAR_WIDTH)
-            .set_fill(color="#FFB6C1", opacity=1),
-            Rectangle(height=BAR_HEIGHT/4, width=BAR_WIDTH)
-            .set_fill(color="#FFFFE0", opacity=1),
-            Rectangle(height=BAR_HEIGHT/4, width=BAR_WIDTH)
-            .set_fill(color="#98FB98", opacity=1),
-        ).arrange(DOWN, buff=0)
+        # # Create x labels for q(x)
+        # q_labels = VGroup(
+        #     Text("Flour", font_size=24),
+        #     Text("Cheese", font_size=24),
+        #     Text("Tomato", font_size=24),
+        #     Text("Oil", font_size=24)
+        # )
         
-        q_group = VGroup(q_rect, q_parts)
+        # for label, part in zip(q_labels, q_parts):
+        #     label.move_to(part)
 
-        # Create x labels for q(x)
-        q_labels = VGroup(
-            MathTex("x_1", font_size=24),
-            MathTex("x_2", font_size=24),
-            MathTex("x_3", font_size=24),
-            MathTex("x_4", font_size=24)
-        )
+        # q_x_label = Text("q(x)", font_size=36).next_to(q_rect, UP, buff=0.3)
+        # q_full_group = VGroup(q_group, q_labels, q_x_label)
+        # q_full_group.next_to(p_full_group, RIGHT, buff=1)
+
+        # # Create title and explanation on the right
+        # title = Text("Cross-Entropy: Hp(q)", font_size=36)
+        # explanation = VGroup(
+        #     Text("Average Length", font_size=30),
+        #     Text("of message from q(x)", font_size=30),
+        #     Text("using code for p(x).", font_size=30)
+        # ).arrange(DOWN, buff=0.2)
         
-        for label, part in zip(q_labels, q_parts):
-            label.move_to(part)
+        # text_group = VGroup(title, explanation).arrange(DOWN, buff=0.5)
+        # text_group.next_to(q_full_group, RIGHT, buff=2)  # Position text on the right
 
-        q_x_label = MathTex("q(x)", font_size=36).next_to(q_rect, UP, buff=0.3)
-        q_full_group = VGroup(q_group, q_labels, q_x_label)
-        q_full_group.next_to(p_full_group, RIGHT, buff=1)
-
-        # Create title and explanation on the right
-        title = Text("Cross-Entropy: Hp(q)", font_size=36)
-        explanation = VGroup(
-            Text("Average Length", font_size=30),
-            Text("of message from q(x)", font_size=30),
-            Text("using code for p(x).", font_size=30)
-        ).arrange(DOWN, buff=0.2)
+        # # Animation sequence
+        # self.play(
+        #     Create(p_rect),
+        #     Create(q_rect)
+        # )
+        # self.play(
+        #     FadeIn(p_parts),
+        #     FadeIn(q_parts)
+        # )
+        # self.play(
+        #     Write(p_labels),
+        #     Write(q_labels)
+        # )
+        # self.play(
+        #     Write(p_x_label),
+        #     Write(q_x_label)
+        # )
+        # self.play(
+        #     Write(title),
+        #     Write(explanation)
+        # )
         
-        text_group = VGroup(title, explanation).arrange(DOWN, buff=0.5)
-        text_group.next_to(q_full_group, RIGHT, buff=2)  # Position text on the right
+        # self.wait(2)
 
-        # Animation sequence
-        self.play(
-            Create(p_rect),
-            Create(q_rect)
-        )
-        self.play(
-            FadeIn(p_parts),
-            FadeIn(q_parts)
-        )
-        self.play(
-            Write(p_labels),
-            Write(q_labels)
-        )
-        self.play(
-            Write(p_x_label),
-            Write(q_x_label)
-        )
-        self.play(
-            Write(title),
-            Write(explanation)
-        )
-        
-        self.wait(2)
-
-        # Fade out everything
-        self.play(
-            *[FadeOut(mob) for mob in self.mobjects]
-        )
-        self.wait(0.5)
+        # # Fade out everything
+        # self.play(
+        #     *[FadeOut(mob) for mob in self.mobjects]
+        # )
+        # self.wait(0.5)
 
         # Create the header text
         header = Text("So, now we have four possibilities:", font_size=36)
@@ -2255,25 +2281,25 @@ class Entropy(Scene):
         bullets = VGroup(
             # First bullet
             Text(
-                "• Bob using his own code (H(p) = 1.75 bits)",
+                "• Thick crust using thick crust code (H(p) = 1.75 bits)",
                 font_size=30,
                 t2c={"H(p)": BLUE} # Color the equation
             ),
             # Second bullet
             Text(
-                "• Alice using Bob's code (Hp(q) = 2.25 bits)", 
+                "• Thin crust using thick crust code (Hp(q) = 2.25 bits)", 
                 font_size=30,
                 t2c={"Hp(q)": BLUE}
             ),
             # Third bullet
             Text(
-                "• Alice using her own code (H(q) = 1.75 bits)",
+                "• Thin crust using thin crust code (H(q) = 1.75 bits)",
                 font_size=30,
                 t2c={"H(q)": BLUE}
             ),
             # Fourth bullet
             Text(
-                "• Bob using Alice's code (Hq(p) = 2.375 bits)",
+                "• Thick crust using thin crust code (Hq(p) = 2.375 bits)",
                 font_size=30,
                 t2c={"Hq(p)": BLUE}
             )
@@ -2298,8 +2324,6 @@ class Entropy(Scene):
         
         self.wait(2)
 
-        # After showing the bullets, instead of fading them out, transform them directly
-
         # Create equations
         hp_eq = MathTex("H(p) = H_p(p) = 1.75 \\text{ bits}", font_size=36)
         hpq_eq = MathTex("H_p(q) = 2.25 \\text{ bits}", font_size=36)
@@ -2307,10 +2331,10 @@ class Entropy(Scene):
         hq_eq = MathTex("H(q) = H_q(q) = 1.75 \\text{ bits}", font_size=36)
 
         # Position equations in corners
-        hp_eq.to_corner(UL)
-        hpq_eq.to_corner(DL) 
-        hqp_eq.to_corner(UR)
-        hq_eq.to_corner(DR)
+        hp_eq.to_corner(UL, buff=0.5)
+        hpq_eq.to_corner(DL, buff=0.5) 
+        hqp_eq.to_corner(UR, buff=0.5)
+        hq_eq.to_corner(DR, buff=0.5)
 
         # Transform bullets to equations and fade out header
         self.play(
@@ -2322,82 +2346,96 @@ class Entropy(Scene):
         )
         self.wait(0.5)
 
-        """
-        FIX BARS
-        """
+        # Fix bars positioning and dimensions
+        BAR_WIDTH = 1.0  # Base width multiplier
+        BAR_HEIGHT = 1.5  # Base height for the bars
+        LEFT_SHIFT = 5
+        BAR_SPACING = 0  # Space between bars
 
-        # Constants for bars - scaled down
-        BAR_WIDTH = 2  # Reduced from 4 to 2
-        BAR_HEIGHT = 0.25  # Reduced from 0.5 to 0.25
-        LEFT_SHIFT = 3
-
-        # Function to create the bars with left alignment
-        def create_length_bars(colors, lengths, label, eq_text, position):
+        # Function to create the bars with proper horizontal layout and varying heights
+        def create_length_bars(colors, lengths, probs, label, eq_text, position):
             bars = VGroup()
-            max_width = max(lengths) * BAR_WIDTH  # For alignment reference
             
-            for color, length in zip(colors, lengths):
+            # Create the four bars (one for each ingredient/color)
+            for i, (color, length, prob) in enumerate(zip(colors, lengths, probs)):
                 bar = Rectangle(
                     width=length * BAR_WIDTH,
-                    height=BAR_HEIGHT,
+                    height=BAR_HEIGHT * prob,  # Adjust height based on probability
                     fill_color=color,
                     fill_opacity=1,
                     stroke_color=WHITE
                 )
-                # Ensure all bars start from the same left position
-                if len(bars) == 0:
-                    bars.add(bar)
+                
+                # Position bars vertically with correct spacing based on height
+                if i == 0:
+                    bar.move_to(position + UP * (BAR_HEIGHT + BAR_SPACING) * 1.2)
+                elif i == 1:
+                    bar.next_to(bars[0], DOWN, buff=0)
+                elif i == 2:
+                    bar.next_to(bars[1], DOWN, buff=0)
                 else:
-                    bar.next_to(bars[-1], DOWN, buff=0.1)
-                    bar.align_to(bars[0], LEFT)  # Align each bar to the first bar's left edge
+                    bar.next_to(bars[2], DOWN, buff=0)
+                
+                # Align all bars to the left
+                bar.align_to(position, LEFT)
+                bars.add(bar)
             
-            p_label = Text(label, font_size=24).next_to(bars, LEFT)
-            l_label = Text(eq_text, font_size=24).next_to(bars, DOWN, buff=0.3)
+            # Add labels
+            p_label = Text(label, font_size=24).next_to(bars, LEFT, buff=0.5)
+            l_label = Text(eq_text, font_size=24).next_to(bars, DOWN*0.5, buff=0.5)
             
+            # Group everything together
             group = VGroup(bars, p_label, l_label)
-            group.move_to(position)
             return group
 
         # Colors for the bars
         colors = ["#C19EE0", "#FFB6C1", "#FFFFE0", "#98FB98"]
 
-        # Create the four visualizations with accurate lengths
+        # Probability values for thick crust (p) and thin crust (q)
+        p_probs = [0.5, 0.25, 0.125, 0.125]  # thick crust probabilities
+        q_probs = [0.125, 0.5, 0.25, 0.125]  # thin crust probabilities
+
+        # Create the four visualizations with accurate lengths and heights
         hp = create_length_bars(
             colors,
-            [1, 2, 2.5, 2.5],  # Hp(p)
+            [1, 2, 3, 3],  # Hp(p) - lengths match the bits required for each ingredient
+            p_probs,       # Heights based on p's probabilities
             "p(x)", 
             "Lp(x)",
-            UP * 1.5 + LEFT * LEFT_SHIFT
+            UP * 0.5 + LEFT * LEFT_SHIFT
         )
 
         hpq = create_length_bars(
             colors,
-            [1, 2.5, 3, 3],  # Hp(q)
+            [1, 2, 3, 3],  # Hp(q) - using p's codes for q's distribution
+            q_probs,       # Heights based on q's probabilities
             "q(x)",
             "Lp(x)", 
-            DOWN * 1.5 + LEFT * LEFT_SHIFT
+            DOWN * 2.5 + LEFT * LEFT_SHIFT
         )
 
         hqp = create_length_bars(
             colors, 
-            [3, 1.5, 2, 2.5],  # Hq(p)
+            [3, 1, 2, 3],  # Hq(p) - using q's codes for p's distribution
+            p_probs,       # Heights based on p's probabilities
             "p(x)",
             "Lq(x)",
-            UP * 1.5 + RIGHT * LEFT_SHIFT
+            UP * 0.5 + RIGHT*3
         )
 
         hq = create_length_bars(
             colors,
-            [2.5, 1.5, 2, 2.5],  # Hq(q)
+            [3, 1, 2, 3],  # Hq(q) - q's optimal encoding
+            q_probs,       # Heights based on q's probabilities
             "q(x)",
             "Lq(x)",
-            DOWN * 1.5 + RIGHT * LEFT_SHIFT
+            DOWN * 2.5 + RIGHT*3
         )
 
         # Animation sequence
         for viz in [hp, hpq, hqp, hq]:
             self.play(
-                Create(viz[0]),  # bars
+                *[Create(bar) for bar in viz[0]],  # Create each bar individually
                 Write(viz[1]),   # p(x)/q(x) label
                 Write(viz[2])    # L(x) label
             )
