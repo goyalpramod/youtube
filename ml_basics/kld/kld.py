@@ -2630,7 +2630,7 @@ class EntropyDerivation(Scene):
     def construct(self):
         # First show the average length contribution formula
         avg_length_title = Text("Average Length Contribution", font_size=36)
-        avg_length_title.move_to(UP)
+        avg_length_title.move_to(UP * 2)  # Moved up to create more space
         
         # Break equations into groups using {} for separate transformations
         avg_length_eq1 = MathTex(
@@ -2640,7 +2640,7 @@ class EntropyDerivation(Scene):
             r"\text{cost}", 
             font_size=36
         )
-        avg_length_eq1.next_to(avg_length_title, DOWN, buff=0.5)
+        avg_length_eq1.next_to(avg_length_title, DOWN, buff=2)  # Increased buffer
         
         # Group the p(x)*L(x) equation
         avg_length_eq1_5 = MathTex(
@@ -2669,22 +2669,22 @@ class EntropyDerivation(Scene):
         
         # Transform only the specific parts that change
         self.play(
-            ReplacementTransform(avg_length_eq1[0], avg_length_eq1_5[0]),  # Keep the title part
-            ReplacementTransform(avg_length_eq1[1], avg_length_eq1_5[1]),  # occurrence → p(x)
-            ReplacementTransform(avg_length_eq1[2], avg_length_eq1_5[2]),  # × remains the same
-            ReplacementTransform(avg_length_eq1[3], avg_length_eq1_5[3])   # cost → L(x)
+            ReplacementTransform(avg_length_eq1[0], avg_length_eq1_5[0]),
+            ReplacementTransform(avg_length_eq1[1], avg_length_eq1_5[1]),
+            ReplacementTransform(avg_length_eq1[2], avg_length_eq1_5[2]),
+            ReplacementTransform(avg_length_eq1[3], avg_length_eq1_5[3])
         )
         self.wait(1.5)
         
         # Transform only the L(x) part to logarithmic form
         self.play(
-            *[ReplacementTransform(avg_length_eq1_5[i], avg_length_eq2[i]) for i in range(3)],  # Keep first parts
-            ReplacementTransform(avg_length_eq1_5[3], avg_length_eq2[3])  # Only L(x) → log formula
+            *[ReplacementTransform(avg_length_eq1_5[i], avg_length_eq2[i]) for i in range(3)],
+            ReplacementTransform(avg_length_eq1_5[3], avg_length_eq2[3])
         )
         self.wait(2)
         
         # For the entropy transition, transform the whole thing
-        entropy_title = Text("Entropy", font_size=36).move_to(UP * 2)
+        entropy_title = Text("Entropy", font_size=36).move_to(UP * 3)  # Moved higher up
         
         # Group the entropy equation
         entropy_eq1 = MathTex(
@@ -2699,8 +2699,8 @@ class EntropyDerivation(Scene):
         # Full transform for the title change
         self.play(
             ReplacementTransform(avg_length_title, entropy_title),
-            ReplacementTransform(avg_length_eq2[0], entropy_eq1[0]),  # Change title part
-            *[ReplacementTransform(avg_length_eq2[i], entropy_eq1[i]) for i in range(1, 4)]  # Keep the rest
+            ReplacementTransform(avg_length_eq2[0], entropy_eq1[0]),
+            *[ReplacementTransform(avg_length_eq2[i], entropy_eq1[i]) for i in range(1, 4)]
         )
         self.wait(2)
 
@@ -2710,19 +2710,96 @@ class EntropyDerivation(Scene):
         
         # Full transform for the final equation
         self.play(ReplacementTransform(entropy_eq1, entropy_final))
-        self.wait(3)
+        self.wait(2)
         
         # Alternative form with negative
-        entropy_final_2 = MathTex(r"H(p) = -\sum_{x} p(x) \log_2 \left({p(x)}\right)", font_size=40)
+        entropy_final_2 = MathTex(
+            r"H(p) = -\sum_{x} ", 
+            r"p(x)",
+            r" \log_2 ",
+            r"\left({p(x)}\right)", 
+            font_size=40
+        )
         entropy_final_2.move_to(entropy_final.get_center())
         
-        # Split the negative form into parts for more granular transforms if needed
-        # Or keep as full transform
         self.play(ReplacementTransform(entropy_final, entropy_final_2))
+        self.wait(2)
+        
+        # Add braces with explanations - LEFT brace on BOTTOM, RIGHT brace on TOP
+        # Using yellow color from the start
+        prob_brace = Brace(entropy_final_2[1], DOWN, color=YELLOW)  # Left brace on bottom
+        prob_text = Text("probability of each element\nin the distribution", font_size=24, color=YELLOW)
+        prob_text.next_to(prob_brace, DOWN, buff=0.2)
+        
+        log_brace = Brace(entropy_final_2[3], UP, color=YELLOW)  # Right brace on top
+        log_text = Text("cost of encoding each\nelement in the distribution", font_size=24, color=YELLOW)
+        log_text.next_to(log_brace, UP, buff=0.2)
+        
+        self.play(
+            GrowFromCenter(prob_brace),
+            Write(prob_text)
+        )
+        self.wait(1)
+        
+        self.play(
+            GrowFromCenter(log_brace),
+            Write(log_text)
+        )
+        self.wait(2)
+        
+        # Transition to Cross Entropy
+        cross_entropy_title = Text("Cross Entropy", font_size=36).move_to(UP * 3)  # Moved higher up
+        
+        cross_entropy_eq = MathTex(
+            r"H(p,q) = -\sum_{x} ", 
+            r"p(x)",
+            r" \log_2 ",
+            r"\left({q(x)}\right)", 
+            font_size=40
+        )
+        cross_entropy_eq.move_to(entropy_final_2.get_center())
+        
+        # Transform titles and equations
+        self.play(
+            ReplacementTransform(entropy_title, cross_entropy_title),
+            ReplacementTransform(entropy_final_2[0], cross_entropy_eq[0]),
+            ReplacementTransform(entropy_final_2[1], cross_entropy_eq[1]),
+            ReplacementTransform(entropy_final_2[2], cross_entropy_eq[2]),
+            ReplacementTransform(entropy_final_2[3], cross_entropy_eq[3]),
+            FadeOut(prob_brace), FadeOut(prob_text),
+            FadeOut(log_brace), FadeOut(log_text)
+        )
+        self.wait(1.5)
+        
+        # Add new braces for cross entropy - LEFT brace on BOTTOM, RIGHT brace on TOP
+        # All with yellow color from the start
+        cross_prob_brace = Brace(cross_entropy_eq[1], DOWN, color=YELLOW)  # Left brace on bottom
+        cross_prob_text = Text("probability of each element\nin the distribution", font_size=24, color=YELLOW)
+        cross_prob_text.next_to(cross_prob_brace, DOWN, buff=0.2)
+        
+        cross_log_brace = Brace(cross_entropy_eq[3], UP, color=YELLOW)  # Right brace on top
+        cross_log_text = Text("cost using model's representation\nof the distribution (q)", font_size=24, color=YELLOW)
+        cross_log_text.next_to(cross_log_brace, UP, buff=0.2)
+        
+        self.play(
+            GrowFromCenter(cross_prob_brace),
+            Write(cross_prob_text)
+        )
+        self.wait(1)
+        
+        self.play(
+            GrowFromCenter(cross_log_brace),
+            Write(cross_log_text)
+        )
         self.wait(3)
         
-        # Fade out
-        self.play(FadeOut(entropy_final_2), FadeOut(entropy_title))
+        # Fade out everything
+        self.play(
+            FadeOut(cross_entropy_title),
+            FadeOut(cross_entropy_eq),
+            FadeOut(cross_prob_brace), FadeOut(cross_prob_text),
+            FadeOut(cross_log_brace), FadeOut(cross_log_text)
+        )
 
 """
 Below this not required for KLD or cross entropy
