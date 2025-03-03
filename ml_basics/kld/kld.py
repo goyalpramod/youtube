@@ -1192,10 +1192,12 @@ class VariableLengthEncoding(Scene):
         for label, bar in zip(prob_labels, [flour_bar, cheese_bar, tomato_bar, oil_bar]):
             label.next_to(bar, LEFT, buff=0.5)
         
+        l_x_label.next_to(bit_labels, DOWN, buff=0.3)
+
         # Group all elements
         all_elements = VGroup(
             rect, bars, v_lines, binary_numbers, 
-            bit_labels, prob_labels
+            bit_labels, prob_labels, l_x_label
         )
         all_elements.move_to(ORIGIN)
         
@@ -1214,20 +1216,16 @@ class VariableLengthEncoding(Scene):
         self.play(Write(prob_labels))
         self.play(Write(binary_numbers))
         self.play(Write(bit_labels))
-        
-        # L(x) label at the bottom
-        l_x_label = MathTex("L(x)", font_size=36)
-        l_x_label.next_to(bit_labels, DOWN, buff=0.3)
         self.play(Write(l_x_label))
         
         # Entropy information
-        entropy_title = Text("Entropy", font_size=32)
-        entropy_equals = Text("= Optimal Average Length", font_size=30)
+        # entropy_title = Text("Entropy", font_size=32)
+        entropy_equals = Text("Optimal Average Length", font_size=30)
         entropy_equation = MathTex("= \\sum_{i=1}^{n} p(x_i) \\cdot L(x_i)", font_size=36)
         entropy_equation_values = MathTex("= 1/2 \\cdot 1 + 1/4 \\cdot 2 + 1/8 \\cdot 3 + 1/8 \\cdot 3", font_size=28)
         entropy_value = Text("= 1.75 bits", font_size=32)
 
-        entropy_group = VGroup(entropy_title, entropy_equals, entropy_equation, entropy_equation_values, entropy_value)
+        entropy_group = VGroup(entropy_equals, entropy_equation, entropy_equation_values, entropy_value)
         entropy_group.arrange(DOWN, aligned_edge=LEFT, buff=0.2)
         
         # Shift everything to the left to make room for entropy info
@@ -2632,12 +2630,36 @@ class EntropyDerivation(Scene):
     def construct(self):
         # First show the average length contribution formula
         avg_length_title = Text("Average Length Contribution", font_size=36)
-        avg_length_title.move_to(UP * 2)
+        avg_length_title.move_to(UP)
         
-        avg_length_eq1 = MathTex(r"\text{Average Length Contribution} = \text{occurrence} \times \text{cost}", font_size=36)
+        # Break equations into groups using {} for separate transformations
+        avg_length_eq1 = MathTex(
+            r"\text{Average Length Contribution} = ", 
+            r"\text{occurrence}", 
+            r" \times ", 
+            r"\text{cost}", 
+            font_size=36
+        )
         avg_length_eq1.next_to(avg_length_title, DOWN, buff=0.5)
         
-        avg_length_eq2 = MathTex(r"\text{Average Length Contribution} = p(x) \times \log_2 \left(\frac{1}{p(x)}\right)", font_size=36)
+        # Group the p(x)*L(x) equation
+        avg_length_eq1_5 = MathTex(
+            r"\text{Average Length Contribution} = ", 
+            r"p(x)", 
+            r" \times ", 
+            r"L(x)", 
+            font_size=36
+        )
+        avg_length_eq1_5.move_to(avg_length_eq1.get_center())
+        
+        # Group the log equation
+        avg_length_eq2 = MathTex(
+            r"\text{Average Length Contribution} = ", 
+            r"p(x)", 
+            r" \times ", 
+            r"\log_2 \left(\frac{1}{p(x)}\right)", 
+            font_size=36
+        )
         avg_length_eq2.move_to(avg_length_eq1.get_center())
         
         # Show first equation
@@ -2645,36 +2667,62 @@ class EntropyDerivation(Scene):
         self.play(Write(avg_length_eq1))
         self.wait(1.5)
         
-        # Transform to logarithmic form with 1/p(x)
-        self.play(ReplacementTransform(avg_length_eq1, avg_length_eq2))
-        self.wait(2)
-        
-        # Transform to Entropy
-        entropy_eq1 = MathTex(r"\text{Entropy} = p(x) \times \log_2 \left(\frac{1}{p(x)}\right)", font_size=36)
-        entropy_eq1.move_to(avg_length_eq2.get_center())
-        
+        # Transform only the specific parts that change
         self.play(
-            ReplacementTransform(avg_length_title, Text("Entropy", font_size=36).move_to(UP * 2)),
-            ReplacementTransform(avg_length_eq2, entropy_eq1)
+            ReplacementTransform(avg_length_eq1[0], avg_length_eq1_5[0]),  # Keep the title part
+            ReplacementTransform(avg_length_eq1[1], avg_length_eq1_5[1]),  # occurrence → p(x)
+            ReplacementTransform(avg_length_eq1[2], avg_length_eq1_5[2]),  # × remains the same
+            ReplacementTransform(avg_length_eq1[3], avg_length_eq1_5[3])   # cost → L(x)
+        )
+        self.wait(1.5)
+        
+        # Transform only the L(x) part to logarithmic form
+        self.play(
+            *[ReplacementTransform(avg_length_eq1_5[i], avg_length_eq2[i]) for i in range(3)],  # Keep first parts
+            ReplacementTransform(avg_length_eq1_5[3], avg_length_eq2[3])  # Only L(x) → log formula
         )
         self.wait(2)
         
-        # Transform to formal entropy notation
-        entropy_eq2 = MathTex(r"H(p) = \sum_{x} p(x) \times \log_2 \left(\frac{1}{p(x)}\right)", font_size=36)
-        entropy_eq2.move_to(entropy_eq1.get_center())
+        # For the entropy transition, transform the whole thing
+        entropy_title = Text("Entropy", font_size=36).move_to(UP * 2)
         
-        self.play(ReplacementTransform(entropy_eq1, entropy_eq2))
+        # Group the entropy equation
+        entropy_eq1 = MathTex(
+            r"\text{Entropy} = ", 
+            r"p(x)", 
+            r" \times ", 
+            r"\log_2 \left(\frac{1}{p(x)}\right)", 
+            font_size=36
+        )
+        entropy_eq1.move_to(avg_length_eq2.get_center())
+        
+        # Full transform for the title change
+        self.play(
+            ReplacementTransform(avg_length_title, entropy_title),
+            ReplacementTransform(avg_length_eq2[0], entropy_eq1[0]),  # Change title part
+            *[ReplacementTransform(avg_length_eq2[i], entropy_eq1[i]) for i in range(1, 4)]  # Keep the rest
+        )
         self.wait(2)
-        
-        # Final version matching the image
+
+        # Final summation form
         entropy_final = MathTex(r"H(p) = \sum_{x} p(x) \log_2 \left(\frac{1}{p(x)}\right)", font_size=40)
-        entropy_final.move_to(entropy_eq2.get_center())
+        entropy_final.move_to(entropy_eq1.get_center())
         
-        self.play(ReplacementTransform(entropy_eq2, entropy_final))
+        # Full transform for the final equation
+        self.play(ReplacementTransform(entropy_eq1, entropy_final))
+        self.wait(3)
+        
+        # Alternative form with negative
+        entropy_final_2 = MathTex(r"H(p) = -\sum_{x} p(x) \log_2 \left({p(x)}\right)", font_size=40)
+        entropy_final_2.move_to(entropy_final.get_center())
+        
+        # Split the negative form into parts for more granular transforms if needed
+        # Or keep as full transform
+        self.play(ReplacementTransform(entropy_final, entropy_final_2))
         self.wait(3)
         
         # Fade out
-        self.play(FadeOut(entropy_final))
+        self.play(FadeOut(entropy_final_2), FadeOut(entropy_title))
 
 """
 Below this not required for KLD or cross entropy
