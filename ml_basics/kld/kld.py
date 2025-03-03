@@ -2513,6 +2513,121 @@ class KLDivergence(Scene):
         )
         self.wait(2)
 
+class VariableLengthAmbiguity(Scene):
+    def construct(self):
+        # Define our code words
+        code_words = VGroup(
+            Text("Apple → 1", font_size=36),
+            Text("Banana → 01", font_size=36),
+            Text("Cherry → 010", font_size=36)
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.5)
+        code_words.move_to(ORIGIN)
+        
+        # First show the code words
+        self.play(Write(code_words))
+        self.wait(2)
+        
+        # Instead of fading out, scale and move to upper left
+        self.play(
+            code_words.animate.scale(0.5).to_corner(UL, buff=0.5)
+        )
+        self.wait(0.5)
+        
+        # First example - unambiguous decoding
+        example1 = Text("Encoded string: 011", font_size=40)
+        example1.move_to(ORIGIN + UP*2)
+        
+        # Decoding step by step
+        decode1_step1 = Text("011", font_size=48).move_to(ORIGIN)
+        decode1_step2 = VGroup(
+            Text("01", font_size=48),
+            Text("1", font_size=48)
+        ).arrange(RIGHT, buff=0.5).move_to(ORIGIN)
+        
+        decode1_words = VGroup(
+            Text("Banana", font_size=40),
+            Text("Apple", font_size=40)
+        ).arrange(RIGHT, buff=1).move_to(ORIGIN + DOWN*1.5)
+        
+        # Show first example
+        self.play(Write(example1))
+        self.play(Write(decode1_step1))
+        self.wait(1)
+        self.play(Transform(decode1_step1, decode1_step2))
+        self.wait(1)
+        self.play(Write(decode1_words))
+        self.wait(2)
+        
+        # Fade out first example
+        self.play(
+            FadeOut(example1),
+            FadeOut(decode1_step1),
+            FadeOut(decode1_words)
+        )
+        self.wait(0.5)
+        
+        # Second example - ambiguous decoding
+        example2 = Text("Encoded string: 0101", font_size=40)
+        example2.move_to(ORIGIN + UP*2)
+        
+        decode2_step1 = Text("0101", font_size=48).move_to(ORIGIN)
+        
+        # Option 1
+        option1_title = Text("Option 1:", font_size=36).move_to(LEFT*5)
+        option1_decode = VGroup(
+            Text("01", font_size=48),
+            Text("01", font_size=48)
+        ).arrange(RIGHT, buff=0.5).next_to(option1_title, RIGHT, buff=0.5)
+        
+        option1_words = VGroup(
+            Text("Banana", font_size=36),
+            Text("Banana", font_size=36)
+        ).arrange(RIGHT, buff=0.5).move_to(LEFT*2.5 + DOWN)
+        
+        option1_group = VGroup(option1_title, option1_decode, option1_words)
+        
+        # Option 2
+        option2_title = Text("Option 2:", font_size=36).move_to(RIGHT*2)
+        option2_decode = VGroup(
+            Text("010", font_size=48),
+            Text("1", font_size=48)
+        ).arrange(RIGHT, buff=0.5).next_to(option2_title, RIGHT, buff=0.5)
+        
+        option2_words = VGroup(
+            Text("Cherry", font_size=36),
+            Text("Apple", font_size=36)
+        ).arrange(RIGHT, buff=0.5).move_to(RIGHT*4.5 + DOWN)
+        
+        option2_group = VGroup(option2_title, option2_decode, option2_words)
+        
+        # Show second example
+        self.play(Write(example2))
+        self.play(Write(decode2_step1))
+        self.wait(1)
+        
+        # Move the original encoded string up
+        self.play(FadeOut(example2))
+        self.play(decode2_step1.animate.move_to(ORIGIN + UP*2))
+        
+        # Show both options
+        self.play(
+            Write(option1_group),
+            Write(option2_group)
+        )
+        self.wait(2)
+        
+        # Add text highlighting the ambiguity
+        ambiguity_text = Text("Ambiguous Decoding!", font_size=40, color=YELLOW)
+        ambiguity_text.move_to(ORIGIN + DOWN*2)
+        self.play(Write(ambiguity_text))
+        self.wait(2)
+        
+        # Fade everything out
+        self.play(
+            *[FadeOut(mob) for mob in self.mobjects]
+        )
+        self.wait(1)
+
 """
 Below this not required for KLD or cross entropy
 """
