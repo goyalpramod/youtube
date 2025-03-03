@@ -2628,6 +2628,54 @@ class VariableLengthAmbiguity(Scene):
         )
         self.wait(1)
 
+class EntropyDerivation(Scene):
+    def construct(self):
+        # First show the average length contribution formula
+        avg_length_title = Text("Average Length Contribution", font_size=36)
+        avg_length_title.move_to(UP * 2)
+        
+        avg_length_eq1 = MathTex(r"\text{Average Length Contribution} = \text{occurrence} \times \text{cost}", font_size=36)
+        avg_length_eq1.next_to(avg_length_title, DOWN, buff=0.5)
+        
+        avg_length_eq2 = MathTex(r"\text{Average Length Contribution} = p(x) \times \log_2 \left(\frac{1}{p(x)}\right)", font_size=36)
+        avg_length_eq2.move_to(avg_length_eq1.get_center())
+        
+        # Show first equation
+        self.play(Write(avg_length_title))
+        self.play(Write(avg_length_eq1))
+        self.wait(1.5)
+        
+        # Transform to logarithmic form with 1/p(x)
+        self.play(ReplacementTransform(avg_length_eq1, avg_length_eq2))
+        self.wait(2)
+        
+        # Transform to Entropy
+        entropy_eq1 = MathTex(r"\text{Entropy} = p(x) \times \log_2 \left(\frac{1}{p(x)}\right)", font_size=36)
+        entropy_eq1.move_to(avg_length_eq2.get_center())
+        
+        self.play(
+            ReplacementTransform(avg_length_title, Text("Entropy", font_size=36).move_to(UP * 2)),
+            ReplacementTransform(avg_length_eq2, entropy_eq1)
+        )
+        self.wait(2)
+        
+        # Transform to formal entropy notation
+        entropy_eq2 = MathTex(r"H(p) = \sum_{x} p(x) \times \log_2 \left(\frac{1}{p(x)}\right)", font_size=36)
+        entropy_eq2.move_to(entropy_eq1.get_center())
+        
+        self.play(ReplacementTransform(entropy_eq1, entropy_eq2))
+        self.wait(2)
+        
+        # Final version matching the image
+        entropy_final = MathTex(r"H(p) = \sum_{x} p(x) \log_2 \left(\frac{1}{p(x)}\right)", font_size=40)
+        entropy_final.move_to(entropy_eq2.get_center())
+        
+        self.play(ReplacementTransform(entropy_eq2, entropy_final))
+        self.wait(3)
+        
+        # Fade out
+        self.play(FadeOut(entropy_final))
+
 """
 Below this not required for KLD or cross entropy
 """
