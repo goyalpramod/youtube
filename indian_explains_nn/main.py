@@ -11,8 +11,8 @@ class NNMediaMixin:
         self.big_hidden_node = SVGMobject(r"media/excalidraw_exports/big_hidden_node.svg").scale(2.5)
         self.black_dot = SVGMobject(r"media/excalidraw_exports/black_dot.svg").scale(3)
         self.hidden_node = SVGMobject(r"media/excalidraw_exports/hidden_node.svg").scale(3)
-        self.input_node = SVGMobject(r"media/excalidraw_exports/input_node.svg").scale(3)
-        self.output_node = SVGMobject(r"media/excalidraw_exports/output_node.svg").scale(3)
+        self.input_node = SVGMobject(r"media/excalidraw_exports/input_node.svg")
+        self.output_node = SVGMobject(r"media/excalidraw_exports/output_node.svg")
         self.white_dot = SVGMobject(r"media/excalidraw_exports/white_dot.svg").scale(3)
 
         # Style all the mobjects in one go
@@ -43,130 +43,170 @@ class ComplexToSimpleNN(NNMediaMixin, Scene):
         self.wait(2)
 
 
-# MODIFIED: The class now inherits from the mixin
+class ExplainingInputNode(NNMediaMixin, Scene):
+    def construct(self):
+        # Call the setup method from the mixin to load SVGs
+        self.setup_svgs()
+        
+        # --- Part 1: The Problem (Visual Input) ---
+
+        # Create and position the initial objects
+        input_node = self.input_node.copy().move_to(ORIGIN)
+        black_dot = self.black_dot.copy().scale(0.3).next_to(input_node, LEFT, buff=1.5)
+        arrow = Arrow(black_dot.get_right(), input_node.get_left(), buff=0.2, color=BLACK)
+        q_mark = Text("?", font="Virgil 3 YOFF", font_size=96, color=BLACK).next_to(input_node, RIGHT, buff=1.5)
+
+        # Animate the appearance
+        self.play(FadeIn(input_node), FadeIn(black_dot))
+        self.play(GrowArrow(arrow))
+        self.play(Write(q_mark))
+        self.wait(2)
+
+        # Clear the scene for the next part
+        problem_group = VGroup(black_dot, arrow, input_node, q_mark)
+        self.play(FadeOut(problem_group))
+        self.wait(1)
+
+        # --- Part 2: The Solution (Mapping to Numbers) ---
+        
+        title = Text("Pixels: Color to Number", font="Virgil 3 YOFF", color=BLACK).to_edge(UP)
+        self.play(Write(title))
+
+        # Black dot mapping
+        black_dot_small = self.black_dot.copy().scale(0.3)
+        num_255 = Text("255", color=BLACK, font="Virgil 3 YOFF").scale(1.5)
+        arrow_b = Arrow(black_dot_small.get_right(), num_255.get_left(), buff=0.2, color=BLACK)
+        black_mapping = VGroup(black_dot_small, arrow_b, num_255).arrange(RIGHT, buff=0.5)
+
+        # White dot mapping
+        white_dot_small = self.white_dot.copy().scale(0.3)
+        num_0 = Text("0", color=BLACK, font="Virgil 3 YOFF").scale(1.5)
+        arrow_w = Arrow(white_dot_small.get_right(), num_0.get_left(), buff=0.2, color=BLACK)
+        white_mapping = VGroup(white_dot_small, arrow_w, num_0).arrange(RIGHT, buff=0.5)
+
+        # Group and position the mappings
+        mappings = VGroup(black_mapping, white_mapping).arrange(DOWN, buff=1).move_to(ORIGIN)
+        
+        # Animate the mappings
+        self.play(FadeIn(black_dot_small))
+        self.play(GrowArrow(arrow_b), FadeIn(num_255))
+        self.wait(0.5)
+        self.play(FadeIn(white_dot_small))
+        self.play(GrowArrow(arrow_w), FadeIn(num_0))
+        self.wait(2)
+
+        # Clear the scene, but keep the number 255
+        self.play(FadeOut(title, white_mapping, black_dot_small, arrow_b))
+        self.wait(1)
+
+        # --- Part 3: The Correct Input (Numerical Input) ---
+        
+        # Create the final input node
+        input_node_final = self.input_node.copy().move_to(RIGHT * 2)
+
+        # Animate the number moving into position and the node appearing
+        self.play(num_255.animate.move_to(LEFT * 2))
+        self.play(FadeIn(input_node_final))
+
+        # Final arrow showing correct input
+        final_arrow = Arrow(num_255.get_right(), input_node_final.get_left(), buff=0.2, color=BLACK)
+        self.play(GrowArrow(final_arrow))
+        self.wait(3)
+        
+
 class ExplainingHiddenNodes(NNMediaMixin, Scene):
     def construct(self):
-        # MODIFIED: Call the setup method from the mixin
+        # Call the mixin to set up SVGs
         self.setup_svgs()
         
-        # The scene starts with big_hidden_node already on screen
-        self.add(self.big_hidden_node)
+        # --- Phase 1: Setup ---
+        
+        node = self.big_hidden_node
+        self.add(node)
 
-        # Label the Node Halves
         linear_label = Text("Linear\nFunction", font="Virgil 3 YOFF", font_size=24, color=BLACK)
         activation_label = Text("Activation\nFunction", font="Virgil 3 YOFF", font_size=24, color=BLACK)
-
-        linear_label.move_to(self.big_hidden_node.get_center() + LEFT * 1)
-        activation_label.move_to(self.big_hidden_node.get_center() + RIGHT * 1)
-
-        self.play(Write(linear_label))
-        self.wait(1)
-        self.play(Write(activation_label))
+        linear_label.move_to(node.get_center() + LEFT * 1)
+        activation_label.move_to(node.get_center() + RIGHT * 1)
+        self.play(Write(linear_label), Write(activation_label))
         self.wait(1)
 
-        # Display the Linear Equation
-        linear_eq = MathTex("y = w \\cdot x + b", color=BLACK).scale(1)
-        linear_eq.next_to(self.big_hidden_node, LEFT, buff=1)
-        self.play(Write(linear_eq))
+        # Using Tex to avoid LaTeX issues
+        generic_linear_eq = Tex("$y = w \\cdot x + b$", color=BLACK).next_to(node, LEFT, buff=1)
+        generic_activation_eq = Tex("$Z(y)$", color=BLACK).next_to(node, RIGHT, buff=1)
+
+        self.play(Write(generic_linear_eq))
+        self.play(Write(generic_activation_eq))
         self.wait(1)
 
-        acitvation_function = MathTex("Z(y)", color=BLACK).scale(1)
+        # --- Phase 2: Animate the Linear Calculation ---
 
-        acitvation_function.next_to(self.big_hidden_node, RIGHT, buff=1)
-        self.play(Write(acitvation_function))
-        self.wait(2)
-
-        # # Display the Activation Rule
-        # rule_text = Text(
-        #     "if y > 127: out = 1\nelse: out = 0",
-        #     font="Virgil 3 YOFF", font_size=24, line_spacing=1, color=BLACK
-        # )
-        # rule_text.next_to(self.big_hidden_node, RIGHT, buff=0.7)
-        # self.play(Write(rule_text))
-        # self.wait(1)
-
-        # # Draw the Step Function Plot
-        # axes = Axes(
-        #     x_range=[0, 260, 50],
-        #     y_range=[-0.2, 1.2, 1],
-        #     x_length=4,
-        #     y_length=2,
-        #     # MODIFIED: Set axis and label colors to BLACK
-        #     axis_config={"include_tip": False, "color": BLACK},
-        #     x_axis_config={},
-        #     y_axis_config={},
-        # ).next_to(rule_text, UP, buff=0.5)
-
-        # axis_labels = axes.get_axis_labels(x_label="y", y_label="out").set_color(BLACK)
+        # Introduce the input value
+        input_text = Text("Input: x = 255", font="Virgil 3 YOFF", color=BLACK, font_size=36)
+        input_text.to_edge(LEFT, buff=1).align_to(generic_linear_eq, UP)
+        self.play(FadeIn(input_text, shift=RIGHT))
         
-        # # MODIFIED: Set color for Tex objects
-        # t_127 = Tex("127", color=BLACK).next_to(axes.c2p(127, 0), DOWN, buff=0.1).scale(0.4)
-        # t_1 = Tex("1", color=BLACK).next_to(axes.c2p(0, 1), LEFT, buff=0.1).scale(0.4)
-
-        # step_function = axes.plot(
-        #     lambda x: 1 if x >= 127 else 0, 
-        #     x_range=[0, 255], 
-        #     use_smoothing=False
-        # )
-        # step_function.set_color(YELLOW)
-
-        # self.play(Create(axes), Write(axis_labels))
-        # self.play(Write(t_127), Write(t_1))
-        # self.play(Create(step_function))
-        # self.wait(3)
-
-class ExampleWithDots(NNMediaMixin, Scene):
-    def construct(self):
-        # MODIFIED: Call the setup method from the mixin
-        self.setup_svgs()
+        # Create the specific equation and values
+        specific_linear_eq = Tex("$y = 1 \\cdot 255 + 0$", color=BLACK).move_to(generic_linear_eq)
         
-        # The scene starts with simplest_nn already on screen
-        self.add(self.simplest_nn)
-
-        # Introduce Input Node
-        input_node = self.input_node.copy().move_to(self.simplest_nn.get_left() + LEFT * 1)
-        self.play(DrawBorderThenFill(input_node))
+        # Transform the generic equation into the specific one
+        self.play(ReplacementTransform(generic_linear_eq, specific_linear_eq))
         self.wait(1)
 
-        input_label = Text("Input Node", font="Virgil 3 YOFF", font_size=24, color=BLACK)
-        input_label.next_to(input_node, DOWN, buff=0.2)
-        self.play(Write(input_label))
+        # Simplify the equation
+        result_linear_eq = Tex("$y = 255$", color=BLACK).move_to(specific_linear_eq)
+        self.play(ReplacementTransform(specific_linear_eq, result_linear_eq))
         self.wait(1)
 
-        # Introduce Output Node
-        output_node = self.output_node.copy().move_to(self.simplest_nn.get_right() + RIGHT * 1)
-        self.play(DrawBorderThenFill(output_node))
+        # --- Phase 3: Animate the Activation Function ---
+
+        # Extract the number 255 to move it
+        y_value = Text("255", font="Virgil 3 YOFF", color=BLUE, font_size=48)
+        y_value.move_to(result_linear_eq.get_right() + RIGHT*0.2)
+        self.play(FadeOut(result_linear_eq), FadeIn(y_value))
+
+        # Move the result to the activation side
+        self.play(y_value.animate.move_to(node.get_center() + RIGHT*0.1))
         self.wait(1)
 
-        output_label = Text("Output Node", font="Virgil 3 YOFF", font_size=24, color=BLACK)
-        output_label.next_to(output_node, DOWN, buff=0.2)
-        self.play(Write(output_label))
+        # Define the activation rule
+        rule_text = Text(
+            "if y > 127: out = 1\nelse: out = 0",
+            font="Virgil 3 YOFF", font_size=28, line_spacing=1, color=BLACK
+        )
+        rule_text.move_to(generic_activation_eq)
+        
+        # Transform the generic function into the specific rule
+        self.play(ReplacementTransform(generic_activation_eq, rule_text))
         self.wait(1)
 
-        # Introduce Hidden Node
-        hidden_node = self.hidden_node.copy().move_to(self.simplest_nn.get_center())
-        self.play(DrawBorderThenFill(hidden_node))
+        # Show the result of the activation
+        output_value = Text("1", font="Virgil 3 YOFF", color=RED, font_size=48)
+        output_value.next_to(rule_text, DOWN, buff=0.5)
+        self.play(FadeOut(y_value, shift=DOWN), FadeIn(output_value, shift=UP))
         self.wait(1)
+        
+        # --- Phase 4: Visualize the Result ---
 
-        hidden_label = Text("Hidden Node", font="Virgil 3 YOFF", font_size=24, color=BLACK)
-        hidden_label.next_to(hidden_node, DOWN, buff=0.2)
-        self.play(Write(hidden_label))
+        axes = Axes(
+            x_range=[0, 260, 50], y_range=[-0.2, 1.2, 1],
+            x_length=4, y_length=2,
+            axis_config={"include_tip": False, "color": BLACK}
+        ).next_to(rule_text, UP, buff=0.5)
+        axis_labels = axes.get_axis_labels(x_label="y", y_label="out").set_color(BLACK)
+        
+        step_function = axes.plot(lambda x: 1 if x >= 127 else 0, x_range=[0, 255], use_smoothing=False)
+        step_function.set_color(YELLOW)
+
+        # Add a dot to show our specific example on the graph
+        dot = Dot(axes.c2p(255, 1), color=RED)
+        dot_label = Tex("(255, 1)", color=RED, font_size=36).next_to(dot, UR, buff=0.1)
+
+        self.play(Create(axes), Write(axis_labels))
+        self.play(Create(step_function))
+        self.play(FadeIn(dot), Write(dot_label))
         self.wait(2)
 
-        # Show Data Flow with Dots
-        dot_path_1 = Line(input_node.get_right(), hidden_node.get_left(), stroke_width=2)
-        dot_path_2 = Line(hidden_node.get_right(), output_node.get_left(), stroke_width=2)
-
-        dot1 = self.black_dot.copy().scale(0.5).move_to(input_node.get_right())
-        dot2 = self.white_dot.copy().scale(0.5).move_to(hidden_node.get_right())
-
-        self.play(MoveAlongPath(dot1, dot_path_1), run_time=2)
-        self.play(MoveAlongPath(dot2, dot_path_2), run_time=2)
-        self.wait(2)
-
-
-class Default(Scene):
-    def construct(self):
-        text = Text("Indian Explains Neural Networks", font_size=48, color=BLACK, font="Virgil 3 YOFF")
-        self.play(Write(text))
-        self.wait(2)
+        # Move the final output off to the side
+        self.play(output_value.animate.next_to(node, RIGHT, buff=2.0))
+        self.wait(3)
