@@ -128,7 +128,9 @@ class ExplainingHiddenNodes(NNMediaMixin, Scene):
         activation_label = Text("Activation\nFunction", font="Virgil 3 YOFF", font_size=24, color=BLACK)
         linear_label.move_to(node.get_center() + LEFT * 1)
         activation_label.move_to(node.get_center() + RIGHT * 1)
-        self.play(Write(linear_label), Write(activation_label))
+        self.play(Write(linear_label))
+        self.wait(1)
+        self.play(Write(activation_label))
         self.wait(1)
 
         # Using Tex to avoid LaTeX issues
@@ -210,3 +212,130 @@ class ExplainingHiddenNodes(NNMediaMixin, Scene):
         # Move the final output off to the side
         self.play(output_value.animate.next_to(node, RIGHT, buff=2.0))
         self.wait(3)
+
+class ExplainingSimpleNN(NNMediaMixin, Scene):
+    def construct(self):
+        # Using Tex and Text to avoid LaTeX dependency issues.
+        
+        # --- Phase 1: Build the Network & Forward Pass Intuition ---
+
+        # Create the network diagram natively
+        nn = Graph(
+            [1, 2, 3, 4, 5, 6],
+            [(1, 3), (1, 4), (1, 5), (2, 3), (2, 4), (2, 5), (3, 6), (4, 6), (5, 6)],
+            layout={
+                1: [-4, 1, 0], 2: [-4, -1, 0],
+                3: [0, 2, 0], 4: [0, 0, 0], 5: [0, -2, 0],
+                6: [4, 0, 0]
+            },
+            vertex_config={"radius": 0.4, "color": BLACK},
+            edge_config={"color": GRAY, "stroke_width": 3}
+        )
+        
+        # Labels for nodes
+        inputs = VGroup(Tex("$x_1$", color=BLACK), Tex("$x_2$", color=BLACK))
+        hidden = VGroup(Tex("$h_1$", color=BLACK), Tex("$h_2$", color=BLACK), Tex("$h_3$", color=BLACK))
+        output = Tex("$\\hat{y}$", color=BLACK)
+
+        for i, label in enumerate(inputs): label.next_to(nn.vertices[i+1], LEFT)
+        for i, label in enumerate(hidden): label.next_to(nn.vertices[i+3], RIGHT)
+        output.next_to(nn.vertices[6], RIGHT)
+        
+        self.play(Create(nn), Write(inputs), Write(hidden), Write(output))
+        self.wait(1)
+
+        # Focus on the first hidden node
+        h1_group = VGroup(nn.vertices[1], nn.vertices[2], nn.vertices[3])
+        h1_edges = VGroup(nn.edges[(1,3)], nn.edges[(2,3)])
+        self.play(h1_group.animate.set_color(BLUE), h1_edges.animate.set_color(BLUE))
+
+        w11 = Tex("$w_{11}$", color=BLUE, font_size=36).next_to(nn.edges[(1,3)], UP, buff=-0.6)
+        w12 = Tex("$w_{12}$", color=BLUE, font_size=36).next_to(nn.edges[(2,3)], DOWN, buff=-0.7)
+        b1 = Tex("$b_1$", color=BLUE, font_size=36).move_to(nn.vertices[3])
+        self.play(Write(w11), Write(w12), Write(b1))
+        self.wait(2)
+
+        # --- Phase 2: From Single Equation to Matrix Form ---
+
+        # Show single node equation
+        single_eq = Tex("$h_1 = Z(w_{11}x_1 + w_{12}x_2 + b_1)$", color=BLACK)
+        single_eq.to_edge(UP)
+        self.play(Write(single_eq))
+        self.wait(2)
+
+        # Revert colors and fade weights
+        self.play(
+            h1_group.animate.set_color(BLACK), h1_edges.animate.set_color(GRAY),
+            FadeOut(w11), FadeOut(w12), FadeOut(b1)
+        )
+        
+        # Transform to matrix equation
+        matrix_eq = Tex("$\\vec{h} = Z(W \\cdot \\vec{x} + \\vec{b})$", color=BLACK).to_edge(UP)
+        self.play(ReplacementTransform(single_eq, matrix_eq))
+        self.wait(1)
+
+        # Show the matrices
+        x_mat = Matrix([["x_1"], ["x_2"]], h_buff=1.5, color=BLACK).scale(0.8)
+        w_mat = Matrix([["w_{11}", "w_{12}"], ["w_{21}", "w_{22}"], ["w_{31}", "w_{32}"]],color=BLACK, h_buff=1.8).scale(0.8)
+        b_mat = Matrix([["b_1"], ["b_2"], ["b_3"]], h_buff=1.5, color=BLACK).scale(0.8)
+        
+        x_label = Tex("$\\vec{x}$", color=BLACK).next_to(x_mat, DOWN)
+        w_label = Tex("$W$", color=BLACK).next_to(w_mat, DOWN)
+        b_label = Tex("$\\vec{b}$", color=BLACK).next_to(b_mat, DOWN)
+
+        matrices = VGroup(x_mat, w_mat, b_mat, x_label, w_label, b_label).arrange(RIGHT, buff=1).to_edge(DOWN)
+        self.play(Write(matrices))
+        self.wait(3)
+
+        # --- Phase 3: The Gist of Backpropagation ---
+
+        # Fade out equations and matrices to focus on the network
+        self.play(FadeOut(matrix_eq), FadeOut(matrices))
+
+        # Show prediction vs target
+        prediction = Tex("$\\hat{y}=0.2$", color=RED).next_to(nn.vertices[6], UP, buff=0.5)
+        target = Tex("$y=1$", color=GREEN).next_to(prediction, RIGHT, buff=0.5)
+        self.play(Write(prediction), Write(target))
+        
+        loss_text = Text("High Loss!", color=RED).next_to(VGroup(prediction, target), UP)
+        self.play(Write(loss_text))
+        self.wait(1)
+        
+        # Animate backward flow
+        arrow1 = Arrow(loss_text.get_bottom(), output.get_top(), color=RED, buff=0.2)
+        self.play(GrowArrow(arrow1))
+        
+        output_edges = VGroup(nn.edges[(3,6)], nn.edges[(4,6)], nn.edges[(5,6)])
+        self.play(output_edges.animate.set_color(RED), Wiggle(output_edges))
+
+        arrow2 = Arrow(output.get_left(), hidden.get_right(), color=RED, buff=0.2)
+        self.play(ReplacementTransform(arrow1, arrow2))
+        
+        hidden_edges = VGroup(nn.edges[(1,3)], nn.edges[(1,4)], nn.edges[(1,5)], nn.edges[(2,3)], nn.edges[(2,4)], nn.edges[(2,5)])
+        self.play(hidden_edges.animate.set_color(RED), Wiggle(hidden_edges))
+        self.wait(1)
+        
+        # Show loss decreasing
+        new_loss_text = Text("Weights Updated\nLoss Decreases", color=GREEN, font_size=36, line_spacing=1).move_to(loss_text)
+        self.play(
+            FadeOut(arrow2),
+            ReplacementTransform(loss_text, new_loss_text),
+            nn.animate.set_color(GREEN) # Make the whole network green to show it's "trained"
+        )
+        self.wait(3)
+
+# Add this new class to your script
+class HighLevelOverview(Scene, NNMediaMixin):
+    def construct(self):
+        self.setup_svgs()
+        
+        # MODIFIED: Use the instance variables (self.complex_nn, etc.)
+        self.play(DrawBorderThenFill(self.complex_nn))
+        self.wait(1)
+
+        eight_text = Text("8", font="Virgil 3 YOFF", font_size=96, color=BLACK).next_to(self.complex_nn, LEFT, buff=0.5)
+        self.play(FadeIn(eight_text))
+        self.wait(1)
+
+        text = Text("This is\na number", font="Virgil 3 YOFF", font_size=24, color=BLACK).next_to(self.complex_nn, RIGHT, buff=0.5)
+        self.play(Write(text))
