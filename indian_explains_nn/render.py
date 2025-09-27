@@ -57,7 +57,7 @@ class NeuralNetworkVisualizer(QtWidgets.QMainWindow):
         
         # Create plotter
         self.plotter = BackgroundPlotter()
-        self.plotter.set_background([1/255, 1/255, 1/255])
+        self.plotter.set_background([0, 0, 0])  # Pure black background
         layout.addWidget(self.plotter)
         
         # Control panel
@@ -241,19 +241,10 @@ class NeuralNetworkVisualizer(QtWidgets.QMainWindow):
                 show_scalar_bar=False
             )
         
-        # Add text labels for output neurons
-        # Add text labels for output neurons
-        output_labels = [str(i) for i in range(10)]
-        self.plotter.add_point_labels(
-            self.output_pos,
-            output_labels,
-            point_size=20,
-            font_size=36,
-            text_color='white',
-            font_family='arial',
-            show_points=False,
-            always_visible=True
-        )
+        # Add text label only for predicted digit
+        # Store as instance variable so we can update it
+        self.output_label_actor = None
+        self.update_output_label(0)  # Initialize with first frame
         
         # Set initial camera
         self.plotter.camera.position = (150, 50, 0)    # Camera to the side (positive X)
@@ -290,11 +281,37 @@ class NeuralNetworkVisualizer(QtWidgets.QMainWindow):
         
         self.neuron_cloud["activation"] = activations
         
+    def update_output_label(self, frame_idx):
+        """Update the output label to show only the predicted digit"""
+        if frame_idx >= len(self.activity['output']):
+            return
+        
+        # Get the predicted digit (highest activation)
+        act_output = self.activity['output'][frame_idx]
+        predicted_digit = np.argmax(act_output)
+        
+        # Remove previous label if it exists
+        if self.output_label_actor is not None:
+            self.plotter.remove_actor(self.output_label_actor)
+        
+        # Add label for predicted digit only
+        self.output_label_actor = self.plotter.add_point_labels(
+            self.output_pos[predicted_digit:predicted_digit+1],
+            [str(predicted_digit)],
+            point_size=20,
+            font_size=48,
+            text_color='white',
+            font_family='arial',
+            show_points=False,
+            always_visible=True
+        )
+        
     def on_frame_change(self, value):
         """Handle frame slider change"""
         self.current_frame = value
         self.frame_label.setText(f"Frame: {value}")
         self.update_activations(value)
+        self.update_output_label(value)  # Update the label
         self.plotter.render()
         
     def toggle_animation(self):
@@ -319,6 +336,7 @@ class NeuralNetworkVisualizer(QtWidgets.QMainWindow):
         # Update frame
         self.current_frame = (self.current_frame + 1) % self.frame_slider.maximum()
         self.frame_slider.setValue(self.current_frame)
+        self.update_output_label(self.current_frame)  # Update the label
         
         # Rotate camera if enabled
         if self.rotation_enabled:
