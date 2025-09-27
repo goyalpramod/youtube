@@ -5,8 +5,12 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "imageio>=2.37.0",
+    "imageio-ffmpeg>=0.6.0",
     "manim>=0.19.0",
     "notebook>=7.4.6",
+    "pyvista>=0.46.3",
     "torch>=2.8.0",
     "torchvision>=0.23.0",
+    "tqdm>=4.67.1",
 ]

@@ -175,3 +175,8 @@ assets/
 test.py 
 
 uv.lock
+venv_mayavi
+data/
+*.pth
+*.npz
+*.mp4
